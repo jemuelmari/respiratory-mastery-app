@@ -66,6 +66,26 @@
     .sidebar-header .logo { font-size: 2rem; }
     .sidebar-header h1 { font-size: 1.1rem; color: var(--white); }
     .sidebar-header small { display: block; font-size: 0.7rem; opacity: 0.8; font-weight: 400; }
+    .student-chip {
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .student-chip .name {
+      font-weight: 700; font-size: 0.9rem; color: var(--white);
+      margin-bottom: 0.2rem;
+    }
+    .student-chip .meta { opacity: 0.85; font-size: 0.75rem; }
+    .student-chip .edit-btn {
+      margin-top: 0.5rem; background: rgba(255,255,255,0.2);
+      border: none; color: var(--white); padding: 0.3rem 0.6rem;
+      border-radius: 6px; cursor: pointer; font-size: 0.72rem;
+      font-family: var(--font-head); font-weight: 600;
+    }
+    .student-chip .edit-btn:hover { background: rgba(255,255,255,0.3); }
     .nav-section { margin-bottom: 1.25rem; }
     .nav-section-title {
       font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
@@ -291,7 +311,6 @@
     .developer-card .dev-info {
       font-size: 0.85rem; color: var(--dark); line-height: 1.7;
     }
-    .developer-card .dev-info strong { color: var(--dark); }
     .loader {
       display: flex; align-items: center; justify-content: center;
       padding: 3rem; font-size: 1.2rem; color: var(--gray);
@@ -308,29 +327,183 @@
       padding: 0.85rem 1.25rem; border-radius: 8px;
       box-shadow: var(--shadow-lg); z-index: 999;
       transform: translateY(200%); transition: transform 0.3s;
-      max-width: 320px; font-size: 0.9rem;
+      max-width: 340px; font-size: 0.9rem;
     }
     .toast.show { transform: translateY(0); }
     .toast.success { background: var(--success); }
     .toast.error { background: var(--accent); }
-    .hidden { display: none !important; }
-    .text-center { text-align: center; }
-    .mt-1 { margin-top: 0.5rem; }
-    .mt-2 { margin-top: 1rem; }
-    .mb-1 { margin-bottom: 0.5rem; }
-    .mb-2 { margin-bottom: 1rem; }
-    .flex { display: flex; }
-    .gap-1 { gap: 0.5rem; }
-    .flex-wrap { flex-wrap: wrap; }
-    .sidebar::-webkit-scrollbar { width: 6px; }
-    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+    /* Registration screen */
+    .registration-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #0D7377, #1E88E5);
+    }
+    .registration-card {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 560px;
+      width: 100%;
+      padding: 2rem;
+    }
+    .registration-card .reg-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .registration-card .reg-logo {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    .registration-card h1 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .registration-card .reg-subtitle {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    .reg-form-group { margin-bottom: 1rem; }
+    .reg-form-group label {
+      display: block; font-weight: 600; margin-bottom: 0.35rem;
+      font-size: 0.85rem; font-family: var(--font-head);
+      color: var(--dark);
+    }
+    .reg-form-group input {
+      width: 100%; padding: 0.75rem 0.9rem;
+      border: 2px solid #CFD8DC; border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.95rem;
+      transition: border-color 0.2s; color: var(--dark);
+    }
+    .reg-form-group input:focus {
+      outline: none; border-color: var(--secondary);
+    }
+    .reg-form-group .hint {
+      font-size: 0.72rem; color: var(--gray); margin-top: 0.25rem;
+    }
+    .reg-form-group input.error { border-color: var(--accent); }
+    .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 480px) {
+      .reg-row { grid-template-columns: 1fr; }
+    }
+    .reg-actions { margin-top: 1.5rem; }
+    .reg-actions .btn {
+      width: 100%; justify-content: center; padding: 0.85rem;
+      font-size: 1rem;
+    }
+    .reg-error {
+      background: #FFEBEE; color: var(--accent);
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; margin-bottom: 1rem;
+      display: none;
+    }
+    .reg-error.show { display: block; }
+
+    /* Handoff modal */
+    .handoff-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center;
+      z-index: 2000; padding: 1rem;
+    }
+    .handoff-modal.show { display: flex; }
+    .handoff-content {
+      background: var(--white); border-radius: 12px;
+      max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto;
+      padding: 1.5rem;
+    }
+    .handoff-content .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid #E0E0E0;
+    }
+    .handoff-content .modal-close {
+      background: none; border: none; font-size: 1.5rem;
+      cursor: pointer; color: var(--gray); line-height: 1;
+    }
+    .handoff-code {
+      background: var(--light); padding: 1rem; border-radius: 8px;
+      font-family: 'Courier New', monospace; font-size: 0.7rem;
+      word-break: break-all; max-height: 200px; overflow-y: auto;
+      border: 2px dashed var(--primary); margin: 1rem 0;
+    }
+    .qr-container {
+      text-align: center; margin: 1rem 0;
+      padding: 1rem; background: var(--light);
+      border-radius: 8px;
+    }
+    .qr-container img {
+      max-width: 280px; width: 100%;
+      border-radius: 8px; background: var(--white); padding: 0.5rem;
+    }
+    .handoff-tip {
+      font-size: 0.85rem; color: var(--gray);
+      background: #E3F2FD; padding: 0.75rem 1rem;
+      border-radius: 8px; border-left: 4px solid var(--secondary);
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
 
-<button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+<!-- REGISTRATION SCREEN (shown on first launch) -->
+<div class="registration-screen" id="registrationScreen">
+  <div class="registration-card">
+    <div class="reg-header">
+      <div class="reg-logo">🫁</div>
+      <h1>Respiratory Assessment Mastery</h1>
+      <p class="reg-subtitle">NCM 101B Lab — Please register to begin</p>
+    </div>
 
-<div class="app-container">
+    <div class="reg-error" id="regError"></div>
+
+    <form id="registrationForm" onsubmit="submitRegistration(event)">
+      <div class="reg-row">
+        <div class="reg-form-group">
+          <label>First Name *</label>
+          <input type="text" id="reg_firstName" required placeholder="Juan" autocomplete="given-name" />
+        </div>
+        <div class="reg-form-group">
+          <label>Last Name *</label>
+          <input type="text" id="reg_lastName" required placeholder="Dela Cruz" autocomplete="family-name" />
+        </div>
+      </div>
+
+      <div class="reg-form-group">
+        <label>Student Number *</label>
+        <input type="text" id="reg_studentNo" required placeholder="2024-00123" autocomplete="off" />
+      </div>
+
+      <div class="reg-form-group">
+        <label>Section *</label>
+        <input type="text" id="reg_section" required placeholder="BSN 3-A" autocomplete="off" />
+      </div>
+
+      <div class="reg-form-group">
+        <label>TSU Email *</label>
+        <input type="email" id="reg_email" required placeholder="juan.delacruz@tsu.edu.ph" autocomplete="email" />
+        <div class="hint">Use your official TSU email address</div>
+      </div>
+
+      <div class="reg-actions">
+        <button type="submit" class="btn btn-primary">✅ Register & Start Learning</button>
+      </div>
+    </form>
+
+    <div style="text-align:center;margin-top:1.5rem;font-size:0.75rem;color:var(--gray);">
+      Developed by <strong style="color:var(--primary);">JEMUEL C. MARI, MAN, RN, LPT</strong><br>
+      Tarlac State University — College of Science — Nursing Department
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until registered) -->
+<div class="app-container" id="appContainer" style="display:none;">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <span class="logo">🫁</span>
@@ -338,6 +511,12 @@
         <h1>Respiratory Mastery</h1>
         <small>NCM 101B Lab</small>
       </div>
+    </div>
+
+    <div class="student-chip">
+      <div class="name" id="chipName">—</div>
+      <div class="meta" id="chipMeta">—</div>
+      <button class="edit-btn" onclick="openEditProfile()">✏️ Edit Profile</button>
     </div>
 
     <nav id="navMenu">
@@ -369,6 +548,10 @@
         <button class="nav-item" data-view="decision"><span class="icon">🌳</span> Decision Tree</button>
         <button class="nav-item" data-view="redflags"><span class="icon">🚨</span> Red Flags</button>
       </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Submit to Instructor</div>
+        <button class="nav-item" data-view="handoff"><span class="icon">📤</span> Send My Progress</button>
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -386,14 +569,31 @@
   </main>
 </div>
 
+<!-- HANDOFF MODAL -->
+<div class="handoff-modal" id="handoffModal">
+  <div class="handoff-content">
+    <div class="modal-header">
+      <h2>📤 Send Progress to Instructor</h2>
+      <button class="modal-close" onclick="closeHandoff()">×</button>
+    </div>
+    <div id="handoffBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============================================================
+   RESPIRATORY ASSESSMENT MASTERY APP — CORE LOGIC
+   Includes student registration with instructor handoff
+   ============================================================ */
+
 const APP = {
-  version: '1.0.0',
+  version: '1.1.0',
   storageKey: 'respMastery_v1',
   state: {
     currentView: 'home',
+    student: null,     // { firstName, lastName, studentNo, section, email, registeredAt }
     progress: {},
     badges: {},
     quizAttempts: {},
@@ -401,6 +601,7 @@ const APP = {
   },
 };
 
+/* ---------- PERSISTENCE ---------- */
 function loadState() {
   try {
     const saved = localStorage.getItem(APP.storageKey);
@@ -411,6 +612,8 @@ function saveState() {
   try { localStorage.setItem(APP.storageKey, JSON.stringify(APP.state)); }
   catch (e) { console.warn('State save failed', e); }
 }
+
+/* ---------- TOAST ---------- */
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -418,8 +621,136 @@ function toast(msg, type = '') {
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
 }
+
+/* ---------- REGISTRATION ---------- */
+function submitRegistration(event) {
+  event.preventDefault();
+  const errEl = document.getElementById('regError');
+  errEl.classList.remove('show');
+
+  const firstName = document.getElementById('reg_firstName').value.trim();
+  const lastName = document.getElementById('reg_lastName').value.trim();
+  const studentNo = document.getElementById('reg_studentNo').value.trim();
+  const section = document.getElementById('reg_section').value.trim();
+  const email = document.getElementById('reg_email').value.trim().toLowerCase();
+
+  // Validation
+  const errors = [];
+  if (!firstName) errors.push('First Name is required.');
+  if (!lastName) errors.push('Last Name is required.');
+  if (!studentNo) errors.push('Student Number is required.');
+  if (!section) errors.push('Section is required.');
+  if (!email) errors.push('TSU Email is required.');
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Please enter a valid email address.');
+
+  if (errors.length) {
+    errEl.innerHTML = errors.map(e => '• ' + e).join('<br>');
+    errEl.classList.add('show');
+    return;
+  }
+
+  APP.state.student = {
+    firstName,
+    lastName,
+    fullName: `${firstName} ${lastName}`,
+    studentNo,
+    section,
+    email,
+    registeredAt: new Date().toISOString(),
+    lastActive: new Date().toISOString(),
+  };
+  saveState();
+  showApp();
+  toast('✅ Welcome, ' + firstName + '!', 'success');
+}
+
+function openEditProfile() {
+  if (!APP.state.student) return;
+  const s = APP.state.student;
+  document.getElementById('reg_firstName').value = s.firstName || '';
+  document.getElementById('reg_lastName').value = s.lastName || '';
+  document.getElementById('reg_studentNo').value = s.studentNo || '';
+  document.getElementById('reg_section').value = s.section || '';
+  document.getElementById('reg_email').value = s.email || '';
+
+  // Change button text
+  const form = document.getElementById('registrationForm');
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = '💾 Save Changes';
+  btn.onclick = saveProfileEdit;
+
+  document.getElementById('registrationScreen').style.display = 'flex';
+  document.getElementById('appContainer').style.display = 'none';
+}
+
+function saveProfileEdit(event) {
+  event.preventDefault();
+  const errEl = document.getElementById('regError');
+  errEl.classList.remove('show');
+
+  const firstName = document.getElementById('reg_firstName').value.trim();
+  const lastName = document.getElementById('reg_lastName').value.trim();
+  const studentNo = document.getElementById('reg_studentNo').value.trim();
+  const section = document.getElementById('reg_section').value.trim();
+  const email = document.getElementById('reg_email').value.trim().toLowerCase();
+
+  const errors = [];
+  if (!firstName) errors.push('First Name is required.');
+  if (!lastName) errors.push('Last Name is required.');
+  if (!studentNo) errors.push('Student Number is required.');
+  if (!section) errors.push('Section is required.');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Valid email is required.');
+
+  if (errors.length) {
+    errEl.innerHTML = errors.map(e => '• ' + e).join('<br>');
+    errEl.classList.add('show');
+    return;
+  }
+
+  APP.state.student = {
+    ...APP.state.student,
+    firstName,
+    lastName,
+    fullName: `${firstName} ${lastName}`,
+    studentNo,
+    section,
+    email,
+    updatedAt: new Date().toISOString(),
+  };
+  saveState();
+  showApp();
+  toast('✅ Profile updated.', 'success');
+}
+
+function showApp() {
+  const reg = document.getElementById('registrationScreen');
+  const app = document.getElementById('appContainer');
+  reg.style.display = 'none';
+  app.style.display = 'flex';
+
+  // Reset form button
+  const form = document.getElementById('registrationForm');
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = '✅ Register & Start Learning';
+  btn.onclick = submitRegistration;
+  form.reset();
+
+  updateStudentChip();
+  navigate('home');
+}
+
+function updateStudentChip() {
+  const s = APP.state.student;
+  if (!s) return;
+  document.getElementById('chipName').textContent = s.fullName;
+  document.getElementById('chipMeta').innerHTML =
+    `${s.studentNo}<br>${s.section}<br>${s.email}`;
+}
+
+/* ---------- NAVIGATION ---------- */
 function navigate(view) {
   APP.state.currentView = view;
+  APP.state.student && (APP.state.student.lastActive = new Date().toISOString());
   saveState();
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.view === view);
@@ -448,11 +779,13 @@ function renderView(view) {
       case 'matrix': return renderMatrix(main);
       case 'decision': return renderDecision(main);
       case 'redflags': return renderRedFlags(main);
+      case 'handoff': return renderHandoff(main);
       default: return renderHome(main);
     }
   }, 100);
 }
 
+/* ---------- PROGRESS ---------- */
 function getProgressPercent() {
   const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
   const done = units.filter(u => APP.state.progress[u]?.completed).length;
@@ -476,14 +809,28 @@ function updateBadges() {
     respiratoryMaster: getProgressPercent() === 100,
   };
 }
+function averageScore() {
+  const all = Object.values(APP.state.quizAttempts).flat();
+  if (!all.length) return 0;
+  return Math.round(all.reduce((a,b)=>a+b,0)/all.length);
+}
+function totalAttempts() {
+  return Object.values(APP.state.quizAttempts).reduce((a,b)=>a+b.length,0);
+}
+function nextUnit() {
+  for (let i=1;i<=7;i++) if (!isUnitComplete('unit'+i)) return 'unit'+i;
+  return 'exam';
+}
 
+/* ---------- HOME ---------- */
 function renderHome(main) {
   const pct = getProgressPercent();
   const b = APP.state.badges;
+  const s = APP.state.student;
   main.innerHTML = `
     <div class="card">
-      <h1>🫁 Respiratory Assessment Mastery</h1>
-      <p style="color:var(--gray);margin-bottom:1rem;">NCM 101B Lab — Pattern Recognition for 3rd Year BS Nursing</p>
+      <h1>🫁 Welcome, ${escapeHtml(s.firstName)}!</h1>
+      <p style="color:var(--gray);margin-bottom:1rem;">NCM 101B Lab — Respiratory Assessment Mastery</p>
       <div class="callout callout-info">
         <strong>Expert nurses do not diagnose based on one abnormal finding.</strong> They correlate subjective symptoms, inspection, palpation, percussion, auscultation, and oxygenation status to identify the probable underlying condition.
       </div>
@@ -523,7 +870,7 @@ function renderHome(main) {
         <button class="btn btn-primary" onclick="navigate('${nextUnit()}')">📚 Continue Learning</button>
         <button class="btn btn-secondary" onclick="navigate('games')">🎮 Mastery Games</button>
         <button class="btn btn-accent" onclick="navigate('exam')">📝 Capstone Exam</button>
-        <button class="btn btn-outline" onclick="navigate('matrix')">📊 Quick Reference</button>
+        <button class="btn btn-outline" onclick="navigate('handoff')">📤 Send to Instructor</button>
       </div>
     </div>
 
@@ -546,19 +893,13 @@ function badgeHTML(icon, name, unlocked) {
     <span class="badge-name">${name}</span>
   </div>`;
 }
-function averageScore() {
-  const all = Object.values(APP.state.quizAttempts).flat();
-  if (!all.length) return 0;
-  return Math.round(all.reduce((a,b)=>a+b,0)/all.length);
-}
-function totalAttempts() {
-  return Object.values(APP.state.quizAttempts).reduce((a,b)=>a+b.length,0);
-}
-function nextUnit() {
-  for (let i=1;i<=7;i++) if (!isUnitComplete('unit'+i)) return 'unit'+i;
-  return 'exam';
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
+/* ---------- UNITS ---------- */
 function unitHeader(num, title, subtitle) {
   return `<div class="card">
     <h2>Unit ${num}: ${title}</h2>
@@ -1041,6 +1382,7 @@ function renderIntervention(i) {
   </div>`;
 }
 
+/* ---------- GAMES ---------- */
 function renderGames(main) {
   main.innerHTML = `
     <div class="card">
@@ -1288,6 +1630,7 @@ function endGame(area, name, score, total, gameKey) {
   `;
 }
 
+/* ---------- EXAM ---------- */
 function renderExam(main) {
   const allQ = [
     ...QUIZZES.unit1, ...QUIZZES.unit2, ...QUIZZES.unit3,
@@ -1315,10 +1658,12 @@ function shuffleArray(arr) {
   return a;
 }
 
+/* ---------- CERTIFICATE ---------- */
 function renderCertificate(main) {
   const pct = getProgressPercent();
   const avg = averageScore();
   const eligible = pct === 100 && avg >= 90;
+  const s = APP.state.student;
   main.innerHTML = `
     <div class="card">
       <h2>🏆 Certificate of Mastery</h2>
@@ -1326,7 +1671,8 @@ function renderCertificate(main) {
         ? `<div class="certificate">
             <h2>🏆 CERTIFICATE OF MASTERY 🏆</h2>
             <p>This certifies that</p>
-            <div class="name">[Your Name Here]</div>
+            <div class="name">${escapeHtml(s.fullName)}</div>
+            <p style="font-size:0.85rem;color:var(--gray);">${escapeHtml(s.studentNo)} — ${escapeHtml(s.section)}</p>
             <p>has demonstrated mastery of</p>
             <h3 style="color:var(--primary);">RESPIRATORY HEALTH ASSESSMENT</h3>
             <p>including Inspection, Palpation, Percussion, Auscultation, Pattern Recognition of 13 Respiratory Conditions, and Evidence-Based Nursing Interventions</p>
@@ -1344,6 +1690,7 @@ function renderCertificate(main) {
   `;
 }
 
+/* ---------- REFERENCE ---------- */
 function renderMatrix(main) {
   main.innerHTML = `
     <div class="card">
@@ -1381,6 +1728,161 @@ function renderRedFlags(main) {
   `;
 }
 
+/* ---------- HANDOFF (Send to Instructor) ---------- */
+function renderHandoff(main) {
+  const s = APP.state.student;
+  const pct = getProgressPercent();
+  const avg = averageScore();
+
+  main.innerHTML = `
+    <div class="card">
+      <h2>📤 Send My Progress to Instructor</h2>
+      <p>Use this to submit your complete record to your Clinical Instructor.</p>
+    </div>
+
+    <div class="card">
+      <h3>Your Profile</h3>
+      <table>
+        <tr><td><strong>Name</strong></td><td>${escapeHtml(s.fullName)}</td></tr>
+        <tr><td><strong>Student No.</strong></td><td>${escapeHtml(s.studentNo)}</td></tr>
+        <tr><td><strong>Section</strong></td><td>${escapeHtml(s.section)}</td></tr>
+        <tr><td><strong>TSU Email</strong></td><td>${escapeHtml(s.email)}</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Your Progress Summary</h3>
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-value">${pct}%</div>
+          <div class="stat-label">Completion</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${avg}%</div>
+          <div class="stat-label">Average Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${Object.keys(APP.state.progress).length}/7</div>
+          <div class="stat-label">Units Done</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1 mt-2">
+        <button class="btn btn-primary" onclick="showHandoffModal()">📋 Generate Send Code</button>
+        <button class="btn btn-outline" onclick="downloadMyData()">💾 Download JSON</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>How to Submit</h3>
+      <ol style="margin-left:1.5rem;line-height:1.8;">
+        <li>Click <strong>"Generate Send Code"</strong> above.</li>
+        <li>A code and QR will appear.</li>
+        <li>Choose ONE of these methods:
+          <ul style="margin-left:1.5rem;margin-top:0.5rem;">
+            <li><strong>If using the same computer</strong> as your instructor: Your instructor can click "Import Local Progress" on the Instructor Dashboard.</li>
+            <li><strong>If using your own device</strong>: Copy the code and send it to your instructor via email/Messenger. OR screenshot the QR code and send it.</li>
+            <li><strong>If downloading JSON</strong>: Send the file to your instructor.</li>
+          </ul>
+        </li>
+      </ol>
+      <div class="callout callout-info">
+        <strong>Why this step?</strong> This app runs entirely in your browser with no server, so your instructor cannot automatically see your data from another device. The code/QR/JSON lets you share your progress securely.
+      </div>
+    </div>
+  `;
+}
+
+function buildStudentRecord() {
+  const s = APP.state.student;
+  return {
+    schema: 'respiratory-mastery-v1',
+    exportedAt: new Date().toISOString(),
+    student: {
+      firstName: s.firstName,
+      lastName: s.lastName,
+      fullName: s.fullName,
+      studentNo: s.studentNo,
+      section: s.section,
+      email: s.email,
+      registeredAt: s.registeredAt,
+      lastActive: s.lastActive,
+    },
+    progress: APP.state.progress,
+    quizAttempts: APP.state.quizAttempts,
+    games: APP.state.games || {},
+    badges: APP.state.badges,
+    summary: {
+      completionPct: getProgressPercent(),
+      averageScore: averageScore(),
+      unitsCompleted: Object.keys(APP.state.progress).length,
+    },
+  };
+}
+
+function showHandoffModal() {
+  const record = buildStudentRecord();
+  const json = JSON.stringify(record, null, 2);
+  const base64 = btoa(unescape(encodeURIComponent(json)));
+  const shortCode = base64.slice(0, 1200); // trim for QR practicality
+
+  const body = document.getElementById('handoffBody');
+  body.innerHTML = `
+    <div class="handoff-tip">
+      📸 <strong>Send this code or QR to your instructor.</strong> They will paste it into the Instructor Dashboard's "Paste Student Data" feature.
+    </div>
+
+    <h3>Option 1: Copy Code</h3>
+    <textarea id="handoffTextarea" class="handoff-code" readonly style="width:100%;height:140px;font-family:monospace;font-size:0.7rem;">${escapeHtml(base64)}</textarea>
+    <button class="btn btn-primary btn-sm mt-1" onclick="copyHandoffCode()">📋 Copy Code</button>
+
+    <h3 style="margin-top:1.5rem;">Option 2: QR Code</h3>
+    <div class="qr-container">
+      <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(shortCode)}" alt="QR Code" />
+      <p style="font-size:0.8rem;color:var(--gray);margin-top:0.5rem;">Screenshot this QR and send it to your instructor</p>
+    </div>
+
+    <h3>Option 3: Download File</h3>
+    <button class="btn btn-outline btn-sm mt-1" onclick="downloadMyData()">💾 Download JSON File</button>
+
+    <div style="margin-top:1.5rem;text-align:right;">
+      <button class="btn btn-outline" onclick="closeHandoff()">Close</button>
+    </div>
+  `;
+  document.getElementById('handoffModal').classList.add('show');
+}
+
+function copyHandoffCode() {
+  const el = document.getElementById('handoffTextarea');
+  el.select();
+  el.setSelectionRange(0, 99999);
+  try {
+    document.execCommand('copy');
+    toast('✅ Code copied to clipboard!', 'success');
+  } catch (e) {
+    toast('Press Ctrl+C to copy', 'error');
+  }
+}
+
+function closeHandoff() {
+  document.getElementById('handoffModal').classList.remove('show');
+}
+
+function downloadMyData() {
+  const record = buildStudentRecord();
+  const json = JSON.stringify(record, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `respiratory-mastery-${record.student.studentNo || 'student'}-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅ File downloaded.', 'success');
+}
+
+/* ---------- INTERACTIONS ---------- */
 function toggleAccordion(btn) {
   const item = btn.parentElement;
   item.classList.toggle('open');
@@ -1461,6 +1963,7 @@ function retryQuiz(unitId) {
   document.getElementById('quizResult-' + unitId).innerHTML = '';
 }
 
+/* ---------- QUIZZES DATA (unchanged from previous version) ---------- */
 const QUIZZES = {
   unit1: [
     { q: 'What is the normal respiratory rate for an adult?', options: ['8–12 breaths/min','12–20 breaths/min','20–30 breaths/min','30–40 breaths/min'], answer: '12–20 breaths/min' },
@@ -1580,6 +2083,7 @@ const QUIZZES = {
   ],
 };
 
+/* ---------- DISEASES DATA ---------- */
 const DISEASES = [
   { name:'Pneumonia', patho:'Alveoli fill with inflammatory exudate.', symptoms:'Fever, Productive cough, Dyspnea, Pleuritic chest pain', pattern:[['Inspection','Tachypnea'],['Expansion','Slightly reduced'],['Fremitus','Increased'],['Percussion','Dull'],['Auscultation','Crackles']], signature:'↑ Increased Fremitus + Dull Percussion + Crackles' },
   { name:'Pleural Effusion', patho:'Fluid accumulates in the pleural space.', symptoms:'Dyspnea, Orthopnea, Chest heaviness', pattern:[['Inspection','Dyspnea'],['Expansion','Decreased'],['Fremitus','Decreased'],['Percussion','Dull'],['Auscultation','Diminished or Absent']], signature:'Decreased Fremitus + Dullness + Absent Breath Sounds' },
@@ -1596,6 +2100,7 @@ const DISEASES = [
   { name:'Acute Respiratory Failure', patho:'Inadequate gas exchange.', symptoms:'Severe hypoxemia, Cyanosis, Confusion, Altered LOC, Silent chest, Severe dyspnea', pattern:[['Late Findings','Severe hypoxemia, Cyanosis, Confusion, Altered LOC, Silent chest']], signature:'Severe hypoxemia + Cyanosis + Altered LOC + Silent chest', actions:['Assess airway.','Call for assistance.','Administer oxygen as ordered.','Monitor continuously.','Prepare emergency equipment.'] },
 ];
 
+/* ---------- INTERVENTIONS DATA ---------- */
 const INTERVENTIONS = [
   { title:'Tachypnea', finding:'RR >20 breaths/min, Rapid breathing', significance:'Compensatory response to hypoxia or distress.', interventions:['Assess oxygen saturation','Position High Fowler\'s','Encourage controlled breathing','Identify underlying cause'], monitor:'RR, SpO₂, Work of breathing', redflag:'RR >30, Increasing distress, Altered mental status' },
   { title:'Bradypnea', finding:'RR <12 breaths/min', significance:'Decreased ventilatory drive.', interventions:['Assess LOC','Monitor oxygenation','Stimulate patient if appropriate','Evaluate medication effects'], redflag:'RR <8, Unresponsiveness' },
@@ -1621,6 +2126,7 @@ const INTERVENTIONS = [
   { title:'Silent Chest', significance:'Minimal airflow.', interventions:['Activate rapid response','Prepare emergency equipment'], redflag:'Impending respiratory arrest.' },
 ];
 
+/* ---------- INIT ---------- */
 function init() {
   loadState();
   document.querySelectorAll('.nav-item').forEach(n => {
@@ -1629,7 +2135,14 @@ function init() {
   document.getElementById('menuToggle').addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
   });
-  navigate('home');
+
+  if (APP.state.student && APP.state.student.fullName) {
+    showApp();
+  } else {
+    document.getElementById('registrationScreen').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+  }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(e => console.warn('SW failed', e));
   }
