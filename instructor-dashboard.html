@@ -176,7 +176,7 @@
     .modal-overlay.show { display: flex; }
     .modal {
       background: var(--white); border-radius: var(--radius);
-      max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;
+      max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto;
       padding: 1.5rem; box-shadow: var(--shadow-lg);
     }
     .modal-header {
@@ -237,6 +237,40 @@
       color: var(--primary); margin-bottom: 0.5rem;
     }
     .developer-card .dev-info { font-size: 0.85rem; color: var(--dark); line-height: 1.7; }
+    .drop-zone {
+      border: 3px dashed var(--primary);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      background: #F5F7F8;
+      transition: all 0.2s;
+      cursor: pointer;
+      margin: 1rem 0;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      background: #E0F2F1;
+      border-color: var(--secondary);
+    }
+    .drop-zone .drop-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .drop-zone .drop-title {
+      font-family: var(--font-head); font-weight: 600;
+      font-size: 1rem; color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    .drop-zone .drop-hint { font-size: 0.85rem; color: var(--gray); }
+    .tabs {
+      display: flex; gap: 0.25rem; margin-bottom: 1rem;
+      border-bottom: 2px solid #E0E0E0; flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.65rem 1.15rem; border: none; background: none;
+      cursor: pointer; font-family: var(--font-head); font-weight: 600;
+      font-size: 0.88rem; color: var(--gray);
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--primary); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .hidden { display: none !important; }
     .text-center { text-align: center; }
     .text-right { text-align: right; }
@@ -250,6 +284,27 @@
     .gap-2 { gap: 1rem; }
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
+    code {
+      background: var(--light); padding: 0.15rem 0.4rem; border-radius: 4px;
+      font-family: 'Courier New', monospace; font-size: 0.85em;
+    }
+    .paste-area {
+      width: 100%; min-height: 180px; padding: 0.85rem;
+      border: 2px solid #CFD8DC; border-radius: 8px;
+      font-family: 'Courier New', monospace; font-size: 0.72rem;
+      resize: vertical;
+    }
+    .paste-area:focus { outline: none; border-color: var(--secondary); }
+    .preview-box {
+      background: #E8F5E9; border: 2px solid var(--success);
+      border-radius: 8px; padding: 1rem; margin-top: 1rem;
+    }
+    .preview-box .preview-title {
+      font-family: var(--font-head); font-weight: 700;
+      color: var(--success); margin-bottom: 0.5rem;
+    }
+    .preview-box table { background: transparent; }
+    .preview-box td { border: none; padding: 0.25rem 0.5rem; }
     @media print {
       .sidebar, .menu-toggle, .btn, .no-print { display: none !important; }
       .main-content { margin-left: 0; padding: 0; }
@@ -282,6 +337,7 @@
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Students</div>
+        <button class="nav-item" data-view="import"><span class="icon">📥</span> Import Data</button>
         <button class="nav-item" data-view="roster"><span class="icon">👥</span> Roster</button>
         <button class="nav-item" data-view="add"><span class="icon">➕</span> Add Student</button>
         <button class="nav-item" data-view="grades"><span class="icon">📝</span> Grade Entry</button>
@@ -335,6 +391,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============================================================
+   INSTRUCTOR DASHBOARD — CORE LOGIC
+   Version 2.0 — Includes Student Data Import
+   ============================================================ */
+
 const DB = {
   key: 'respMastery_instructor_v1',
   studentKeyPrefix: 'respMastery_v1',
@@ -351,6 +412,7 @@ const DB = {
   },
 };
 
+/* ---------- PERSISTENCE ---------- */
 function loadDB() {
   try {
     const saved = localStorage.getItem(DB.key);
@@ -392,6 +454,7 @@ function escapeHtml(s) {
   }[c]));
 }
 
+/* ---------- STUDENT MODEL ---------- */
 function ensureStudentProgress(s) {
   if (!s.progress) s.progress = {};
   if (!s.quizAttempts) s.quizAttempts = {};
@@ -405,7 +468,7 @@ function getStudentPercent(s) {
   return Math.round((done / units.length) * 100);
 }
 function getStudentAverage(s) {
-  const all = Object.values(s.quizAttempts || {}).flat();
+  const all = Object.values(s.quizAttempts || {}).flat().filter(x => typeof x === 'number');
   if (!all.length) return 0;
   return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
 }
@@ -453,6 +516,7 @@ function getAlertList() {
   return alerts;
 }
 
+/* ---------- NAVIGATION ---------- */
 function navigate(view) {
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.view === view);
@@ -469,6 +533,7 @@ function renderView(view) {
     switch (view) {
       case 'overview': return renderOverview(main);
       case 'alerts': return renderAlerts(main);
+      case 'import': return renderImport(main);
       case 'roster': return renderRoster(main);
       case 'add': return renderAddStudent(main);
       case 'grades': return renderGradeEntry(main);
@@ -483,6 +548,9 @@ function renderView(view) {
   }, 80);
 }
 
+/* ============================================================
+   OVERVIEW
+   ============================================================ */
 function renderOverview(main) {
   const students = DB.state.students;
   const total = students.length;
@@ -500,16 +568,19 @@ function renderOverview(main) {
           <p style="color:var(--gray);margin:0;">${escapeHtml(DB.state.settings.courseName)}</p>
         </div>
         <div class="flex gap-1">
-          <button class="btn btn-outline btn-sm" onclick="navigate('export')">📤 Export</button>
+          <button class="btn btn-outline btn-sm" onclick="navigate('import')">📥 Import Data</button>
           <button class="btn btn-primary btn-sm" onclick="navigate('add')">➕ Add Student</button>
         </div>
       </div>
     </div>
 
-    ${localProgress ? `
+    ${localProgress && localProgress.student && localProgress.student.fullName ? `
+    <div class="callout callout-info">
+      <strong>📥 Local student detected:</strong> ${escapeHtml(localProgress.student.fullName)} (${escapeHtml(localProgress.student.studentNo || 'no number')})
+      <button class="btn btn-sm btn-primary" style="margin-left:0.5rem;" onclick="importLocalProgress()">Import Now</button>
+    </div>` : localProgress ? `
     <div class="callout callout-info">
       <strong>ℹ️ Local student progress detected.</strong>
-      A student has been using the app on this device.
       <button class="btn btn-sm btn-primary" style="margin-left:0.5rem;" onclick="importLocalProgress()">Import Now</button>
     </div>` : ''}
 
@@ -552,8 +623,8 @@ function renderOverview(main) {
     <div class="card">
       <h2>Quick Actions</h2>
       <div class="flex flex-wrap gap-1">
-        <button class="btn btn-primary" onclick="navigate('roster')">👥 Manage Roster</button>
-        <button class="btn btn-secondary" onclick="navigate('grades')">📝 Enter Grades</button>
+        <button class="btn btn-primary" onclick="navigate('import')">📥 Import Student Data</button>
+        <button class="btn btn-secondary" onclick="navigate('roster')">👥 Manage Roster</button>
         <button class="btn btn-accent" onclick="navigate('alerts')">🚨 View Alerts</button>
         <button class="btn btn-outline" onclick="navigate('reports')">📄 Generate Report</button>
       </div>
@@ -617,6 +688,321 @@ function renderRecentActivity() {
   </table></div>`;
 }
 
+/* ============================================================
+   IMPORT DATA (NEW!)
+   ============================================================ */
+function renderImport(main) {
+  main.innerHTML = `
+    <div class="card">
+      <h1>📥 Import Student Data</h1>
+      <p style="color:var(--gray);">Receive student progress via 4 methods.</p>
+    </div>
+
+    <div class="tabs" id="importTabs">
+      <button class="tab active" data-tab="auto">🖥️ Auto (Same Device)</button>
+      <button class="tab" data-tab="paste">📋 Paste Code</button>
+      <button class="tab" data-tab="upload">📁 Upload JSON</button>
+      <button class="tab" data-tab="manual">✏️ Manual Entry</button>
+    </div>
+
+    <div id="importContent">
+      ${renderImportTab('auto')}
+    </div>
+  `;
+
+  document.querySelectorAll('#importTabs .tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#importTabs .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('importContent').innerHTML = renderImportTab(t.dataset.tab);
+      attachImportHandlers(t.dataset.tab);
+    });
+  });
+  attachImportHandlers('auto');
+}
+
+function renderImportTab(tab) {
+  if (tab === 'auto') {
+    const local = readLocalStudentProgress();
+    return `
+      <div class="card">
+        <h2>🖥️ Auto-Import (Same Device)</h2>
+        <p>Use this when a student completes the module <strong>on this exact computer/browser</strong>. The app reads their progress directly from the browser storage.</p>
+
+        ${local && local.student ? `
+          <div class="preview-box">
+            <div class="preview-title">✅ Local Student Found</div>
+            <table>
+              <tr><td><strong>Name:</strong></td><td>${escapeHtml(local.student.fullName || '—')}</td></tr>
+              <tr><td><strong>Student No:</strong></td><td>${escapeHtml(local.student.studentNo || '—')}</td></tr>
+              <tr><td><strong>Section:</strong></td><td>${escapeHtml(local.student.section || '—')}</td></tr>
+              <tr><td><strong>Email:</strong></td><td>${escapeHtml(local.student.email || '—')}</td></tr>
+              <tr><td><strong>Units Completed:</strong></td><td>${Object.keys(local.progress || {}).length}/7</td></tr>
+              <tr><td><strong>Average Score:</strong></td><td>${(() => {
+                const all = Object.values(local.quizAttempts || {}).flat();
+                if (!all.length) return 0;
+                return Math.round(all.reduce((a,b)=>a+b,0)/all.length);
+              })()}%</td></tr>
+            </table>
+            <button class="btn btn-primary mt-2" onclick="importLocalProgress()">📥 Import This Student</button>
+          </div>
+        ` : local ? `
+          <div class="preview-box">
+            <div class="preview-title">ℹ️ Local Progress Found (No Registration)</div>
+            <p style="font-size:0.85rem;">A student completed units on this device but did not register their name. You'll be prompted to enter their name.</p>
+            <button class="btn btn-primary mt-2" onclick="importLocalProgress()">📥 Import Now</button>
+          </div>
+        ` : `
+          <div class="callout callout-warning">
+            <strong>No local progress found.</strong> No student has used the app on this device/browser yet.
+          </div>
+        `}
+
+        <div class="callout callout-info mt-2">
+          <strong>💡 Tip:</strong> Refresh this page after each student finishes.
+        </div>
+
+        <button class="btn btn-outline mt-2" onclick="renderView('import')">🔄 Refresh</button>
+      </div>
+    `;
+  }
+
+  if (tab === 'paste') {
+    return `
+      <div class="card">
+        <h2>📋 Paste Student Code</h2>
+        <p>When a student uses their own device, they'll generate a <strong>Base64 code</strong>. Ask them to send it to you via Messenger/email. Paste it here.</p>
+
+        <div class="form-group">
+          <label>Paste the code here:</label>
+          <textarea id="pasteCode" class="paste-area" placeholder="Paste the long code the student sent you..."></textarea>
+        </div>
+
+        <div class="flex gap-1">
+          <button class="btn btn-primary" onclick="processPastedCode()">✅ Decode & Preview</button>
+          <button class="btn btn-outline" onclick="document.getElementById('pasteCode').value=''">Clear</button>
+        </div>
+
+        <div id="pastePreview"></div>
+      </div>
+    `;
+  }
+
+  if (tab === 'upload') {
+    return `
+      <div class="card">
+        <h2>📁 Upload JSON File</h2>
+        <p>If a student downloaded their data as a JSON file and sent it to you (via email/Drive), upload it here.</p>
+
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-icon">📁</div>
+          <div class="drop-title">Drop JSON file here</div>
+          <div class="drop-hint">or click to browse</div>
+          <input type="file" id="fileInput" accept=".json,application/json" style="display:none;" />
+        </div>
+
+        <div id="uploadPreview"></div>
+      </div>
+    `;
+  }
+
+  if (tab === 'manual') {
+    return `
+      <div class="card">
+        <h2>✏️ Manual Entry</h2>
+        <p>Add a student manually and enter their scores by hand.</p>
+        <button class="btn btn-primary" onclick="navigate('add')">➕ Add Student Manually</button>
+        <button class="btn btn-outline" onclick="navigate('grades')">📝 Bulk Grade Entry</button>
+      </div>
+    `;
+  }
+
+  return '';
+}
+
+function attachImportHandlers(tab) {
+  if (tab === 'upload') {
+    const dz = document.getElementById('dropZone');
+    const fi = document.getElementById('fileInput');
+    if (!dz || !fi) return;
+
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dz.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleJSONFile(e.dataTransfer.files[0]);
+    });
+    fi.addEventListener('change', (e) => {
+      if (e.target.files.length) handleJSONFile(e.target.files[0]);
+    });
+  }
+}
+
+function decodeStudentCode(code) {
+  try {
+    // Try base64 decode
+    const json = decodeURIComponent(escape(atob(code.trim())));
+    return JSON.parse(json);
+  } catch (e) {
+    // Try plain JSON
+    try {
+      return JSON.parse(code.trim());
+    } catch (e2) {
+      return null;
+    }
+  }
+}
+
+function processPastedCode() {
+  const code = document.getElementById('pasteCode').value.trim();
+  if (!code) return toast('Please paste the code first.', 'warning');
+
+  const data = decodeStudentCode(code);
+  if (!data) return toast('Invalid code. Please check and try again.', 'error');
+  if (!data.student) return toast('Missing student data.', 'error');
+
+  showImportPreview(data, 'pastePreview');
+}
+
+function handleJSONFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.student) throw new Error('Missing student data');
+      showImportPreview(data, 'uploadPreview');
+    } catch (err) {
+      toast('Invalid JSON file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function showImportPreview(data, containerId) {
+  const container = document.getElementById(containerId);
+  const s = data.student;
+  const pct = getPercentFromData(data);
+  const avg = getAvgFromData(data);
+
+  // Detect duplicate
+  const existing = DB.state.students.find(x =>
+    (s.studentNo && x.studentNo === s.studentNo) ||
+    (s.email && x.email === s.email)
+  );
+
+  container.innerHTML = `
+    <div class="preview-box">
+      <div class="preview-title">✅ Student Data Decoded Successfully</div>
+      <table>
+        <tr><td><strong>Name:</strong></td><td>${escapeHtml(s.fullName || (s.firstName + ' ' + s.lastName))}</td></tr>
+        <tr><td><strong>Student No:</strong></td><td>${escapeHtml(s.studentNo || '—')}</td></tr>
+        <tr><td><strong>Section:</strong></td><td>${escapeHtml(s.section || '—')}</td></tr>
+        <tr><td><strong>Email:</strong></td><td>${escapeHtml(s.email || '—')}</td></tr>
+        <tr><td><strong>Registered:</strong></td><td>${escapeHtml(s.registeredAt ? new Date(s.registeredAt).toLocaleString() : '—')}</td></tr>
+        <tr><td><strong>Last Active:</strong></td><td>${escapeHtml(s.lastActive ? new Date(s.lastActive).toLocaleString() : '—')}</td></tr>
+        <tr><td><strong>Units Completed:</strong></td><td>${pct}%</td></tr>
+        <tr><td><strong>Average Score:</strong></td><td>${avg}%</td></tr>
+      </table>
+
+      ${existing ? `
+        <div class="callout callout-warning mt-2">
+          ⚠️ <strong>This student already exists in your roster:</strong> ${escapeHtml(existing.name)}<br>
+          Do you want to <strong>update</strong> their record or <strong>create a new one</strong>?
+        </div>
+        <div class="flex gap-1 mt-2">
+          <button class="btn btn-primary" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "update", "${existing.id}")'>🔄 Update Existing</button>
+          <button class="btn btn-outline" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "new", null)'>➕ Create New</button>
+        </div>
+      ` : `
+        <button class="btn btn-primary mt-2" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "new", null)'>✅ Add to Roster</button>
+      `}
+    </div>
+  `;
+}
+
+function getPercentFromData(data) {
+  const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+  const done = units.filter(u => data.progress?.[u]?.completed).length;
+  return Math.round((done / units.length) * 100);
+}
+
+function getAvgFromData(data) {
+  const all = Object.values(data.quizAttempts || {}).flat().filter(x => typeof x === 'number');
+  if (!all.length) return 0;
+  return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
+}
+
+function confirmImport(dataStr, mode, existingId) {
+  const data = JSON.parse(dataStr);
+  const s = data.student;
+
+  const studentRecord = ensureStudentProgress({
+    id: mode === 'update' ? existingId : uid(),
+    name: s.fullName || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
+    firstName: s.firstName || '',
+    lastName: s.lastName || '',
+    studentNo: s.studentNo || '',
+    section: s.section || '',
+    email: s.email || '',
+    enrolled: todayISO(),
+    manual: false,
+    notes: `Imported ${mode === 'update' ? '(update)' : '(new)'} on ${new Date().toLocaleString()}.`,
+    progress: data.progress || {},
+    quizAttempts: data.quizAttempts || {},
+    games: data.games || {},
+    badges: data.badges || {},
+    lastActive: s.lastActive || new Date().toISOString(),
+  });
+
+  if (mode === 'update') {
+    const idx = DB.state.students.findIndex(x => x.id === existingId);
+    if (idx >= 0) DB.state.students[idx] = studentRecord;
+    logActivity(existingId, 'Updated via import', studentRecord.name);
+    toast('✅ Student record updated.', 'success');
+  } else {
+    DB.state.students.push(studentRecord);
+    logActivity(studentRecord.id, 'Imported (new)', studentRecord.name);
+    toast('✅ Student added to roster.', 'success');
+  }
+
+  saveDB();
+  updateAlertBadge();
+  navigate('roster');
+}
+
+function importLocalProgress() {
+  const raw = localStorage.getItem(DB.studentKeyPrefix);
+  if (!raw) return toast('No local student progress found.', 'warning');
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return toast('Could not parse local data.', 'error'); }
+
+  if (!data.student || !data.student.fullName) {
+    // Prompt for name if not registered
+    const name = prompt('This student did not register. Enter their name:');
+    if (!name) return;
+    data.student = { fullName: name, studentNo: '', section: '', email: '' };
+  }
+
+  // Check duplicate
+  const existing = DB.state.students.find(x =>
+    (data.student.studentNo && x.studentNo === data.student.studentNo) ||
+    (data.student.email && x.email === data.student.email)
+  );
+
+  if (existing) {
+    if (!confirm(`${data.student.fullName} already exists in the roster. Update their record?`)) return;
+    confirmImport(JSON.stringify(data), 'update', existing.id);
+  } else {
+    confirmImport(JSON.stringify(data), 'new', null);
+  }
+}
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
 function renderAlerts(main) {
   const alerts = getAlertList();
   main.innerHTML = `
@@ -663,6 +1049,9 @@ function updateAlertBadge() {
   }
 }
 
+/* ============================================================
+   ROSTER
+   ============================================================ */
 function renderRoster(main) {
   const students = DB.state.students;
   main.innerHTML = `
@@ -671,8 +1060,8 @@ function renderRoster(main) {
         <h1>👥 Student Roster</h1>
         <div class="flex gap-1">
           <button class="btn btn-outline btn-sm" onclick="navigate('add')">➕ Add</button>
+          <button class="btn btn-outline btn-sm" onclick="navigate('import')">📥 Import</button>
           <button class="btn btn-outline btn-sm" onclick="navigate('export')">📤 Export CSV</button>
-          <button class="btn btn-primary btn-sm" onclick="importLocalProgress()">📥 Import Local Progress</button>
         </div>
       </div>
       <div class="search-box">
@@ -687,6 +1076,7 @@ function renderRoster(main) {
             <tr>
               <th>Student</th>
               <th>Section</th>
+              <th>Email</th>
               <th>Progress</th>
               <th>Avg Score</th>
               <th>Status</th>
@@ -695,7 +1085,7 @@ function renderRoster(main) {
             </tr>
           </thead>
           <tbody id="rosterBody">
-            ${students.length === 0 ? `<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:2rem;">No students yet. Click "Add" to begin.</td></tr>` : ''}
+            ${students.length === 0 ? `<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem;">No students yet. Click "Add" or "Import" to begin.</td></tr>` : ''}
             ${students.map(s => renderStudentRow(s)).join('')}
           </tbody>
         </table>
@@ -716,6 +1106,7 @@ function renderStudentRow(s) {
       <br><small style="color:var(--gray);">${escapeHtml(s.studentNo || s.id)}</small>
     </td>
     <td>${escapeHtml(s.section || '—')}</td>
+    <td><small>${escapeHtml(s.email || '—')}</small></td>
     <td>
       <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width:${pct}%"></div></div>
       <small>${pct}%</small>
@@ -736,11 +1127,14 @@ function filterRoster() {
   document.querySelectorAll('#rosterBody tr').forEach((tr, i) => {
     const s = DB.state.students[i];
     if (!s) return;
-    const match = (s.name + ' ' + (s.studentNo || '') + ' ' + (s.section || '')).toLowerCase().includes(q);
+    const match = (s.name + ' ' + (s.studentNo || '') + ' ' + (s.section || '') + ' ' + (s.email || '')).toLowerCase().includes(q);
     tr.style.display = match ? '' : 'none';
   });
 }
 
+/* ============================================================
+   ADD / EDIT STUDENT
+   ============================================================ */
 function renderAddStudent(main, editId = null) {
   const s = editId ? DB.state.students.find(x => x.id === editId) : null;
   main.innerHTML = `
@@ -770,7 +1164,7 @@ function renderAddStudent(main, editId = null) {
           </div>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" id="f_email" value="${escapeHtml(s?.email || '')}" placeholder="student@email.com" />
+            <input type="email" id="f_email" value="${escapeHtml(s?.email || '')}" placeholder="student@tsu.edu.ph" />
           </div>
         </div>
         <div class="form-row">
@@ -835,6 +1229,9 @@ function saveStudent(event, editId) {
   navigate('roster');
 }
 
+/* ============================================================
+   VIEW STUDENT
+   ============================================================ */
 function viewStudent(id) {
   const s = DB.state.students.find(x => x.id === id);
   if (!s) return toast('Student not found.', 'error');
@@ -941,6 +1338,9 @@ function deleteStudent(id) {
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
+/* ============================================================
+   BULK GRADE ENTRY
+   ============================================================ */
 function renderGradeEntry(main) {
   const students = DB.state.students;
   main.innerHTML = `
@@ -1007,6 +1407,9 @@ function saveBulkGrades() {
   renderView('roster');
 }
 
+/* ============================================================
+   ANALYTICS
+   ============================================================ */
 function renderAnalytics(main) {
   const students = DB.state.students;
   const total = students.length;
@@ -1102,6 +1505,9 @@ function renderSectionComparison(students) {
   </table></div>`;
 }
 
+/* ============================================================
+   UNIT BREAKDOWN
+   ============================================================ */
 function renderUnitBreakdown(main) {
   const units = [
     { key: 'unit1', name: 'Normal Baseline' },
@@ -1142,6 +1548,9 @@ function renderUnitBreakdown(main) {
   `;
 }
 
+/* ============================================================
+   REPORTS
+   ============================================================ */
 function renderReports(main) {
   main.innerHTML = `
     <div class="card">
@@ -1293,6 +1702,9 @@ function generateUnitReport() {
   `);
 }
 
+/* ============================================================
+   EXPORT
+   ============================================================ */
 function renderExport(main) {
   main.innerHTML = `
     <div class="card">
@@ -1315,10 +1727,10 @@ function renderExport(main) {
       </div>
       <div class="stat-card">
         <div style="font-size:2.5rem;">📥</div>
-        <h3>Import Backup</h3>
-        <p style="font-size:0.85rem;color:var(--gray);">Restore from JSON file</p>
+        <h3>Restore Backup</h3>
+        <p style="font-size:0.85rem;color:var(--gray);">Restore from JSON backup</p>
         <label class="btn btn-outline btn-sm mt-1" style="cursor:pointer;">
-          Upload JSON <input type="file" accept=".json" style="display:none;" onchange="importJSON(event)" />
+          Upload JSON <input type="file" accept=".json" style="display:none;" onchange="restoreBackup(event)" />
         </label>
       </div>
       <div class="stat-card">
@@ -1329,11 +1741,8 @@ function renderExport(main) {
       </div>
     </div>
 
-    <div class="card">
-      <h3>Import Local Student Progress</h3>
-      <p>If a student used the app on this device, their progress is stored in the browser. Click below to import it into the roster.</p>
-      <button class="btn btn-primary" onclick="importLocalProgress()">📥 Import Local Progress</button>
-      <div id="importResult" class="mt-2"></div>
+    <div class="callout callout-info">
+      <strong>💡 Tip:</strong> Export a JSON backup regularly. If you clear your browser data, everything will be lost!
     </div>
   `;
 }
@@ -1362,21 +1771,21 @@ function exportJSON() {
   toast('JSON backup exported.', 'success');
 }
 
-function importJSON(event) {
+function restoreBackup(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.students) throw new Error('Invalid file');
-      if (!confirm(`Import ${data.students.length} students? This will REPLACE your current roster.`)) return;
+      if (!data.students) throw new Error('Invalid backup file');
+      if (!confirm(`Restore ${data.students.length} students? This will REPLACE your current roster.`)) return;
       DB.state = { ...DB.state, ...data };
       saveDB();
-      toast('Data imported successfully.', 'success');
+      toast('Backup restored successfully.', 'success');
       renderView('roster');
     } catch (err) {
-      toast('Invalid JSON file.', 'error');
+      toast('Invalid backup file.', 'error');
     }
   };
   reader.readAsText(file);
@@ -1394,37 +1803,6 @@ function downloadFile(content, filename, mime) {
   URL.revokeObjectURL(url);
 }
 
-function importLocalProgress() {
-  const raw = localStorage.getItem(DB.studentKeyPrefix);
-  if (!raw) return toast('No local student progress found on this device.', 'warning');
-  let data;
-  try { data = JSON.parse(raw); } catch (e) { return toast('Could not parse local data.', 'error'); }
-
-  const name = prompt('Enter the student name for this local progress:');
-  if (!name) return;
-
-  const newStudent = ensureStudentProgress({
-    id: uid(),
-    name,
-    studentNo: '',
-    section: '',
-    email: '',
-    enrolled: todayISO(),
-    manual: false,
-    notes: 'Imported from local device progress.',
-    progress: data.progress || {},
-    quizAttempts: data.quizAttempts || {},
-    games: data.games || {},
-    badges: data.badges || {},
-    lastActive: new Date().toISOString(),
-  });
-  DB.state.students.push(newStudent);
-  logActivity(newStudent.id, 'Imported local progress', name);
-  saveDB();
-  toast('Local progress imported.', 'success');
-  navigate('roster');
-}
-
 function clearAllData() {
   if (!confirm('⚠️ This will DELETE all students and progress data. Are you sure?')) return;
   if (!confirm('This cannot be undone. Click OK to confirm.')) return;
@@ -1435,6 +1813,9 @@ function clearAllData() {
   navigate('overview');
 }
 
+/* ============================================================
+   SETTINGS
+   ============================================================ */
 function renderSettings(main) {
   const s = DB.state.settings;
   main.innerHTML = `
@@ -1507,34 +1888,46 @@ function saveSettings(event) {
   toast('Settings saved.', 'success');
 }
 
+/* ============================================================
+   HELP
+   ============================================================ */
 function renderHelp(main) {
   main.innerHTML = `
     <div class="card">
       <h1>❓ Help & Documentation</h1>
     </div>
-    <div class="card">
-      <h3>How the Instructor Dashboard Works</h3>
-      <p>This dashboard reads student progress from the <strong>same browser's localStorage</strong>. This means:</p>
-      <ul style="margin-left:1.5rem;">
-        <li>If a student uses the app on <strong>this device</strong>, their progress is automatically available via "Import Local Progress."</li>
-        <li>For students using <strong>other devices</strong>, use <strong>Manual Grade Entry</strong> or <strong>Bulk Grade Entry</strong>.</li>
-        <li>For a shared-lab setup (one device, many students), each student should log in, complete work, then the instructor imports their progress.</li>
-      </ul>
 
-      <h3>Mastery Thresholds</h3>
+    <div class="card">
+      <h3>How to Receive Student Data</h3>
+      <p>You have <strong>4 ways</strong> to receive student progress:</p>
       <div class="table-wrap"><table>
-        <thead><tr><th>Assessment</th><th>Threshold</th></tr></thead>
+        <thead><tr><th>Method</th><th>Best for</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td>Unit Quizzes (7)</td><td>90%</td></tr>
-          <tr><td>Sound ID Trainer</td><td>95%</td></tr>
-          <tr><td>Pattern Recognition Blitz</td><td>90%</td></tr>
-          <tr><td>Decision Tree Navigator</td><td>90%</td></tr>
-          <tr><td>Red Flag Simulator</td><td>100%</td></tr>
-          <tr><td>Matrix Challenge</td><td>100%</td></tr>
-          <tr><td>Capstone Exam (50 items)</td><td>90%</td></tr>
+          <tr>
+            <td><strong>🖥️ Auto (Same Device)</strong></td>
+            <td>Shared lab computers</td>
+            <td>Student completes on this computer → you click "Import"</td>
+          </tr>
+          <tr>
+            <td><strong>📋 Paste Code</strong></td>
+            <td>Students on own devices</td>
+            <td>Student sends you a code → paste in "Import Data" → "Paste Code"</td>
+          </tr>
+          <tr>
+            <td><strong>📁 Upload JSON</strong></td>
+            <td>Students on own devices</td>
+            <td>Student downloads JSON → sends to you → upload it</td>
+          </tr>
+          <tr>
+            <td><strong>✏️ Manual Entry</strong></td>
+            <td>Any scenario</td>
+            <td>Type in scores by hand in "Grade Entry"</td>
+          </tr>
         </tbody>
       </table></div>
+    </div>
 
+    <div class="card">
       <h3>Alert Types Explained</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Alert</th><th>Trigger</th></tr></thead>
@@ -1546,7 +1939,25 @@ function renderHelp(main) {
           <tr><td>Multiple Failures</td><td>3+ failed attempts on the same unit</td></tr>
         </tbody>
       </table></div>
+    </div>
 
+    <div class="card">
+      <h3>Workflow Recommendation</h3>
+      <ol style="margin-left:1.5rem;line-height:1.9;">
+        <li>Students open the <strong>Student App</strong> and register with name, student no, section, and TSU email.</li>
+        <li>Students complete the 7 units, games, and capstone exam.</li>
+        <li>Students click <strong>"Send My Progress"</strong> and either:
+          <ul style="margin-left:1.5rem;">
+            <li>Let you import directly if on the same computer</li>
+            <li>Send you a code/QR/JSON file</li>
+          </ul>
+        </li>
+        <li>You import via <strong>"📥 Import Data"</strong> tab.</li>
+        <li>Once all students are in, open the <strong>Gradebook</strong> to print the class record.</li>
+      </ol>
+    </div>
+
+    <div class="card">
       <h3>Developer</h3>
       <p><strong>JEMUEL C. MARI, MAN, RN, LPT</strong></p>
       <p>Clinical Instructor | Teacher II — Department of Education</p>
@@ -1555,6 +1966,9 @@ function renderHelp(main) {
   `;
 }
 
+/* ============================================================
+   ACTIVITY LOG
+   ============================================================ */
 function logActivity(studentId, action, detail) {
   DB.state.activityLog.push({
     ts: new Date().toISOString(),
@@ -1567,6 +1981,9 @@ function logActivity(studentId, action, detail) {
 function openStudentApp() { window.open('index.html', '_blank'); }
 function openGradebook() { window.open('gradebook.html', '_blank'); }
 
+/* ============================================================
+   INIT
+   ============================================================ */
 function init() {
   loadDB();
   document.querySelectorAll('.nav-item[data-view]').forEach(n => {
