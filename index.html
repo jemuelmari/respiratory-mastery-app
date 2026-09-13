@@ -346,7 +346,7 @@
       background: var(--white);
       border-radius: 16px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 560px;
+      max-width: 600px;
       width: 100%;
       padding: 2rem;
     }
@@ -373,19 +373,20 @@
       font-size: 0.85rem; font-family: var(--font-head);
       color: var(--dark);
     }
-    .reg-form-group input {
+    .reg-form-group input, .reg-form-group select {
       width: 100%; padding: 0.75rem 0.9rem;
       border: 2px solid #CFD8DC; border-radius: 8px;
       font-family: var(--font-body); font-size: 0.95rem;
       transition: border-color 0.2s; color: var(--dark);
+      background: var(--white);
     }
-    .reg-form-group input:focus {
+    .reg-form-group input:focus, .reg-form-group select:focus {
       outline: none; border-color: var(--secondary);
     }
     .reg-form-group .hint {
       font-size: 0.72rem; color: var(--gray); margin-top: 0.25rem;
     }
-    .reg-form-group input.error { border-color: var(--accent); }
+    .reg-form-group input.error, .reg-form-group select.error { border-color: var(--accent); }
     .reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     @media (max-width: 480px) {
       .reg-row { grid-template-columns: 1fr; }
@@ -472,14 +473,33 @@
         </div>
       </div>
 
-      <div class="reg-form-group">
-        <label>Student Number *</label>
-        <input type="text" id="reg_studentNo" required placeholder="2024-00123" autocomplete="off" />
+      <div class="reg-row">
+        <div class="reg-form-group">
+          <label>Student Number *</label>
+          <input type="text" id="reg_studentNo" required placeholder="2024-00123" autocomplete="off" />
+        </div>
+        <div class="reg-form-group">
+          <label>Section *</label>
+          <input type="text" id="reg_section" required placeholder="BSN 3-A" autocomplete="off" />
+        </div>
       </div>
 
       <div class="reg-form-group">
-        <label>Section *</label>
-        <input type="text" id="reg_section" required placeholder="BSN 3-A" autocomplete="off" />
+        <label>Group Number *</label>
+        <select id="reg_group" required>
+          <option value="">— Select your group —</option>
+          <option value="Group 1">Group 1</option>
+          <option value="Group 2">Group 2</option>
+          <option value="Group 3">Group 3</option>
+          <option value="Group 4">Group 4</option>
+          <option value="Group 5">Group 5</option>
+          <option value="Group 6">Group 6</option>
+          <option value="Group 7">Group 7</option>
+          <option value="Group 8">Group 8</option>
+          <option value="Group 9">Group 9</option>
+          <option value="Group 10">Group 10</option>
+        </select>
+        <div class="hint">Select the group you belong to in your clinical section</div>
       </div>
 
       <div class="reg-form-group">
@@ -585,15 +605,15 @@
 <script>
 /* ============================================================
    RESPIRATORY ASSESSMENT MASTERY APP — CORE LOGIC
-   Includes student registration with instructor handoff
+   Includes student registration with Group Number
    ============================================================ */
 
 const APP = {
-  version: '1.1.0',
+  version: '1.2.0',
   storageKey: 'respMastery_v1',
   state: {
     currentView: 'home',
-    student: null,     // { firstName, lastName, studentNo, section, email, registeredAt }
+    student: null,     // { firstName, lastName, studentNo, section, group, email, registeredAt }
     progress: {},
     badges: {},
     quizAttempts: {},
@@ -632,14 +652,15 @@ function submitRegistration(event) {
   const lastName = document.getElementById('reg_lastName').value.trim();
   const studentNo = document.getElementById('reg_studentNo').value.trim();
   const section = document.getElementById('reg_section').value.trim();
+  const group = document.getElementById('reg_group').value.trim();
   const email = document.getElementById('reg_email').value.trim().toLowerCase();
 
-  // Validation
   const errors = [];
   if (!firstName) errors.push('First Name is required.');
   if (!lastName) errors.push('Last Name is required.');
   if (!studentNo) errors.push('Student Number is required.');
   if (!section) errors.push('Section is required.');
+  if (!group) errors.push('Group Number is required.');
   if (!email) errors.push('TSU Email is required.');
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Please enter a valid email address.');
 
@@ -655,6 +676,7 @@ function submitRegistration(event) {
     fullName: `${firstName} ${lastName}`,
     studentNo,
     section,
+    group,
     email,
     registeredAt: new Date().toISOString(),
     lastActive: new Date().toISOString(),
@@ -671,9 +693,9 @@ function openEditProfile() {
   document.getElementById('reg_lastName').value = s.lastName || '';
   document.getElementById('reg_studentNo').value = s.studentNo || '';
   document.getElementById('reg_section').value = s.section || '';
+  document.getElementById('reg_group').value = s.group || '';
   document.getElementById('reg_email').value = s.email || '';
 
-  // Change button text
   const form = document.getElementById('registrationForm');
   const btn = form.querySelector('button[type="submit"]');
   btn.textContent = '💾 Save Changes';
@@ -692,6 +714,7 @@ function saveProfileEdit(event) {
   const lastName = document.getElementById('reg_lastName').value.trim();
   const studentNo = document.getElementById('reg_studentNo').value.trim();
   const section = document.getElementById('reg_section').value.trim();
+  const group = document.getElementById('reg_group').value.trim();
   const email = document.getElementById('reg_email').value.trim().toLowerCase();
 
   const errors = [];
@@ -699,6 +722,7 @@ function saveProfileEdit(event) {
   if (!lastName) errors.push('Last Name is required.');
   if (!studentNo) errors.push('Student Number is required.');
   if (!section) errors.push('Section is required.');
+  if (!group) errors.push('Group Number is required.');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Valid email is required.');
 
   if (errors.length) {
@@ -714,6 +738,7 @@ function saveProfileEdit(event) {
     fullName: `${firstName} ${lastName}`,
     studentNo,
     section,
+    group,
     email,
     updatedAt: new Date().toISOString(),
   };
@@ -728,7 +753,6 @@ function showApp() {
   reg.style.display = 'none';
   app.style.display = 'flex';
 
-  // Reset form button
   const form = document.getElementById('registrationForm');
   const btn = form.querySelector('button[type="submit"]');
   btn.textContent = '✅ Register & Start Learning';
@@ -744,7 +768,7 @@ function updateStudentChip() {
   if (!s) return;
   document.getElementById('chipName').textContent = s.fullName;
   document.getElementById('chipMeta').innerHTML =
-    `${s.studentNo}<br>${s.section}<br>${s.email}`;
+    `${s.studentNo} — ${s.section}<br>${s.group || '—'}<br>${s.email}`;
 }
 
 /* ---------- NAVIGATION ---------- */
@@ -862,6 +886,19 @@ function renderHome(main) {
         <div class="stat-value">${totalAttempts()}</div>
         <div class="stat-label">Total Quiz Attempts</div>
       </div>
+    </div>
+
+    <div class="card">
+      <h2>Your Profile</h2>
+      <div class="table-wrap"><table>
+        <tbody>
+          <tr><td><strong>Name</strong></td><td>${escapeHtml(s.fullName)}</td></tr>
+          <tr><td><strong>Student No.</strong></td><td>${escapeHtml(s.studentNo)}</td></tr>
+          <tr><td><strong>Section</strong></td><td>${escapeHtml(s.section)}</td></tr>
+          <tr><td><strong>Group Number</strong></td><td>${escapeHtml(s.group || '—')}</td></tr>
+          <tr><td><strong>TSU Email</strong></td><td>${escapeHtml(s.email)}</td></tr>
+        </tbody>
+      </table></div>
     </div>
 
     <div class="card">
@@ -1672,7 +1709,7 @@ function renderCertificate(main) {
             <h2>🏆 CERTIFICATE OF MASTERY 🏆</h2>
             <p>This certifies that</p>
             <div class="name">${escapeHtml(s.fullName)}</div>
-            <p style="font-size:0.85rem;color:var(--gray);">${escapeHtml(s.studentNo)} — ${escapeHtml(s.section)}</p>
+            <p style="font-size:0.85rem;color:var(--gray);">${escapeHtml(s.studentNo)} — ${escapeHtml(s.section)} — ${escapeHtml(s.group || '')}</p>
             <p>has demonstrated mastery of</p>
             <h3 style="color:var(--primary);">RESPIRATORY HEALTH ASSESSMENT</h3>
             <p>including Inspection, Palpation, Percussion, Auscultation, Pattern Recognition of 13 Respiratory Conditions, and Evidence-Based Nursing Interventions</p>
@@ -1728,7 +1765,7 @@ function renderRedFlags(main) {
   `;
 }
 
-/* ---------- HANDOFF (Send to Instructor) ---------- */
+/* ---------- HANDOFF ---------- */
 function renderHandoff(main) {
   const s = APP.state.student;
   const pct = getProgressPercent();
@@ -1746,6 +1783,7 @@ function renderHandoff(main) {
         <tr><td><strong>Name</strong></td><td>${escapeHtml(s.fullName)}</td></tr>
         <tr><td><strong>Student No.</strong></td><td>${escapeHtml(s.studentNo)}</td></tr>
         <tr><td><strong>Section</strong></td><td>${escapeHtml(s.section)}</td></tr>
+        <tr><td><strong>Group Number</strong></td><td>${escapeHtml(s.group || '—')}</td></tr>
         <tr><td><strong>TSU Email</strong></td><td>${escapeHtml(s.email)}</td></tr>
       </table>
     </div>
@@ -1803,6 +1841,7 @@ function buildStudentRecord() {
       fullName: s.fullName,
       studentNo: s.studentNo,
       section: s.section,
+      group: s.group,
       email: s.email,
       registeredAt: s.registeredAt,
       lastActive: s.lastActive,
@@ -1823,7 +1862,7 @@ function showHandoffModal() {
   const record = buildStudentRecord();
   const json = JSON.stringify(record, null, 2);
   const base64 = btoa(unescape(encodeURIComponent(json)));
-  const shortCode = base64.slice(0, 1200); // trim for QR practicality
+  const shortCode = base64.slice(0, 1200);
 
   const body = document.getElementById('handoffBody');
   body.innerHTML = `
@@ -1963,7 +2002,7 @@ function retryQuiz(unitId) {
   document.getElementById('quizResult-' + unitId).innerHTML = '';
 }
 
-/* ---------- QUIZZES DATA (unchanged from previous version) ---------- */
+/* ---------- QUIZZES DATA ---------- */
 const QUIZZES = {
   unit1: [
     { q: 'What is the normal respiratory rate for an adult?', options: ['8–12 breaths/min','12–20 breaths/min','20–30 breaths/min','30–40 breaths/min'], answer: '12–20 breaths/min' },
