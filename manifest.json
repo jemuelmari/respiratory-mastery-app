@@ -1,0 +1,50 @@
+{
+  "name": "Respiratory Assessment Mastery",
+  "short_name": "RespMastery",
+  "description": "Respiratory Health Assessment Mastery App for 3rd Year BS Nursing Students — NCM 101B Lab. Developed by JEMUEL C. MARI, MAN, RN, LPT — Tarlac State University, College of Science, Nursing Department.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D7377",
+  "theme_color": "#0D7377",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "medical", "health"],
+  "author": {
+    "name": "JEMUEL C. MARI, MAN, RN, LPT",
+    "title": "Clinical Instructor | Teacher II — Department of Education",
+    "affiliation": "Tarlac State University — College of Science — Nursing Department"
+  },
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "description": "Go to your progress dashboard",
+      "url": "./index.html#home",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Mastery Games",
+      "short_name": "Games",
+      "description": "Play mastery games",
+      "url": "./index.html#games",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Capstone Exam",
+      "short_name": "Exam",
+      "description": "Take the capstone exam",
+      "url": "./index.html#exam",
+      "icons": [{ "src": "icon.svg", "sizes": "any" }]
+    }
+  ]
+}

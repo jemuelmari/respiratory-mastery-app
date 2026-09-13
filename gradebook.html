@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0D7377" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>📊 Class Record — Respiratory Mastery Gradebook</title>
+  <style>
+    :root {
+      --primary: #0D7377; --primary-dark: #095456; --secondary: #1E88E5;
+      --accent: #E53935; --success: #43A047; --warning: #FB8C00;
+      --dark: #263238; --light: #ECEFF1; --white: #FFFFFF; --gray: #607D8B;
+      --border: #B0BEC5; --radius: 10px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --font-head: 'Montserrat', -apple-system, sans-serif;
+      --font-body: 'Open Sans', -apple-system, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-body); background: var(--light); color: var(--dark); line-height: 1.5; padding: 1.5rem; }
+    h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; line-height: 1.25; }
+    h1 { font-size: 1.6rem; color: var(--primary); }
+    h2 { font-size: 1.25rem; color: var(--primary); margin-bottom: 0.5rem; }
+    h3 { font-size: 1rem; color: var(--secondary); margin: 0.75rem 0 0.4rem; }
+    p { margin-bottom: 0.5rem; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .toolbar {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1rem 1.25rem; box-shadow: var(--shadow);
+      margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem;
+      justify-content: space-between; align-items: center;
+    }
+    .toolbar-left, .toolbar-right { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .toolbar h1 { font-size: 1.25rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1rem; border-radius: 8px; border: none;
+      cursor: pointer; font-family: var(--font-head); font-weight: 600;
+      font-size: 0.85rem; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--secondary); color: var(--white); }
+    .btn-accent { background: var(--accent); color: var(--white); }
+    .btn-success { background: var(--success); color: var(--white); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: var(--white); }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+    .info-banner {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1rem 1.25rem; box-shadow: var(--shadow);
+      margin-bottom: 1.5rem; border-left: 5px solid var(--primary);
+    }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem; margin-top: 0.5rem;
+    }
+    .info-grid div { font-size: 0.85rem; }
+    .info-grid strong { color: var(--primary); }
+    .sheet {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 1.5rem;
+      margin-bottom: 1.5rem; overflow-x: auto;
+    }
+    .sheet-header { text-align: center; margin-bottom: 1.25rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.85rem; }
+    .sheet-header h1 { font-size: 1.4rem; }
+    .sheet-header p { margin: 0.15rem 0; font-size: 0.9rem; color: var(--gray); }
+    table.gradebook { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    table.gradebook th, table.gradebook td {
+      border: 1px solid var(--border); padding: 0.4rem 0.35rem;
+      text-align: center; vertical-align: middle;
+    }
+    table.gradebook thead th {
+      background: var(--primary); color: var(--white);
+      font-family: var(--font-head); font-weight: 600;
+      font-size: 0.72rem; padding: 0.5rem 0.35rem;
+    }
+    table.gradebook thead th.sub { background: var(--secondary); font-size: 0.68rem; }
+    table.gradebook tbody td.name-cell {
+      text-align: left; font-weight: 600; white-space: nowrap;
+      min-width: 180px; padding-left: 0.6rem;
+    }
+    table.gradebook tbody td.no-cell {
+      text-align: left; padding-left: 0.6rem; min-width: 110px;
+      font-size: 0.72rem;
+    }
+    table.gradebook tbody tr:nth-child(even) { background: #F5F7F8; }
+    table.gradebook tbody tr:hover { background: #E0F2F1; }
+    table.gradebook td.num { text-align: center; font-variant-numeric: tabular-nums; }
+    table.gradebook td.final { font-weight: 700; font-size: 0.9rem; }
+    table.gradebook td.remarks { font-weight: 600; font-size: 0.75rem; }
+    td.score-pass { background: #E8F5E9; color: #1B5E20; }
+    td.score-warn { background: #FFF3E0; color: #E65100; }
+    td.score-fail { background: #FFEBEE; color: #B71C1C; }
+    td.score-empty { background: #FAFAFA; color: #B0BEC5; }
+    td.final-pass { background: #C8E6C9; color: #1B5E20; }
+    td.final-warn { background: #FFE0B2; color: #E65100; }
+    td.final-fail { background: #FFCDD2; color: #B71C1C; }
+    .remarks-pass { color: var(--success); }
+    .remarks-fail { color: var(--accent); }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 1rem;
+      font-size: 0.78rem; margin-top: 1rem;
+      padding-top: 0.75rem; border-top: 1px dashed var(--border);
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-swatch {
+      width: 14px; height: 14px; border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    .swatch-pass { background: #C8E6C9; }
+    .swatch-warn { background: #FFE0B2; }
+    .swatch-fail { background: #FFCDD2; }
+    .swatch-empty { background: #FAFAFA; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem; margin-top: 1rem;
+    }
+    .stat-box {
+      background: var(--light); border-radius: 8px;
+      padding: 0.75rem; text-align: center;
+    }
+    .stat-box .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--primary); font-family: var(--font-head); }
+    .stat-box .stat-label { font-size: 0.72rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-box.pass .stat-value { color: var(--success); }
+    .stat-box.fail .stat-value { color: var(--accent); }
+    .signature-block {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; margin-top: 2rem; padding-top: 1.5rem;
+      border-top: 2px solid var(--primary);
+    }
+    .signature-line {
+      border-top: 1px solid var(--dark); padding-top: 0.35rem;
+      text-align: center; font-size: 0.85rem; margin-top: 3rem;
+    }
+    .signature-line strong { display: block; font-family: var(--font-head); }
+    .signature-line small { color: var(--gray); font-size: 0.75rem; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--gray); }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .developer-footer {
+      text-align: center; margin-top: 2rem; padding: 1rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.8rem; color: var(--gray);
+    }
+    .developer-footer .dev-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .developer-footer .dev-name {
+      font-family: var(--font-head); font-weight: 700; font-size: 0.95rem;
+      color: var(--primary); margin: 0.3rem 0;
+    }
+    @media print {
+      @page { size: legal landscape; margin: 0.5cm; }
+      body { background: white; padding: 0; font-size: 9pt; }
+      .toolbar, .no-print, .info-banner { display: none !important; }
+      .sheet { box-shadow: none; border-radius: 0; padding: 0.5rem; margin: 0; page-break-inside: avoid; }
+      table.gradebook { font-size: 8pt; }
+      table.gradebook th, table.gradebook td { padding: 0.2rem 0.15rem; border-color: #999; }
+      table.gradebook thead th { background: #0D7377 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      table.gradebook thead th.sub { background: #1E88E5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      td.score-pass, td.final-pass { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      td.score-warn, td.final-warn { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      td.score-fail, td.final-fail { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    @media (max-width: 768px) {
+      body { padding: 0.75rem; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .signature-block { grid-template-columns: 1fr; }
+    }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 1rem;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius);
+      max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto;
+      padding: 1.5rem; box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E0E0E0;
+    }
+    .modal-close {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer;
+      color: var(--gray); line-height: 1;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block; font-weight: 600; margin-bottom: 0.3rem;
+      font-size: 0.85rem; font-family: var(--font-head);
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.55rem 0.75rem;
+      border: 2px solid var(--border); border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.9rem;
+    }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem; }
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--dark); color: var(--white);
+      padding: 0.85rem 1.25rem; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 999;
+      transform: translateY(200%); transition: transform 0.3s;
+      max-width: 340px; font-size: 0.9rem;
+    }
+    .toast.show { transform: translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--accent); }
+    .toast.warning { background: var(--warning); }
+    .flex { display: flex; }
+    .gap-1 { gap: 0.5rem; }
+    .flex-wrap { flex-wrap: wrap; }
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <div class="empty-state">
+    <div class="icon">📊</div>
+    <h2>Loading Gradebook...</h2>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Modal</h2>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GB = {
+  instructorKey: 'respMastery_instructor_v1',
+  studentKey: 'respMastery_v1',
+  state: {
+    students: [],
+    settings: {
+      courseName: 'NCM 101B Lab — Respiratory Assessment',
+      instructorName: 'JEMUEL C. MARI, MAN, RN, LPT',
+      schoolYear: '2025–2026',
+      semester: '1st Semester',
+      passingScore: 75,
+      masteryThreshold: 90,
+      unitsCompletedWeight: 20,
+      unitQuizWeight: 40,
+      gamesWeight: 20,
+      capstoneWeight: 20,
+    },
+  },
+};
+
+const UNIT_KEYS = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+const UNIT_NAMES = {
+  unit1: 'U1 Normal Baseline', unit2: 'U2 Inspection', unit3: 'U3 Palpation',
+  unit4: 'U4 Percussion', unit5: 'U5 Auscultation', unit6: 'U6 Disease Patterns',
+  unit7: 'U7 Interventions',
+};
+const GAME_KEYS = ['blitz','tree','sound','redflag','matrix'];
+const GAME_NAMES = {
+  blitz: 'Pattern Blitz', tree: 'Decision Tree', sound: 'Sound ID',
+  redflag: 'Red Flag', matrix: 'Matrix',
+};
+const EXAM_KEY = 'exam';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(GB.instructorKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      GB.state.students = parsed.students || [];
+      GB.state.settings = { ...GB.state.settings, ...(parsed.settings || {}) };
+    }
+  } catch (e) { console.warn('Load failed', e); }
+
+  if (!GB.state.students.length) {
+    try {
+      const raw = localStorage.getItem(GB.studentKey);
+      if (raw) {
+        const data = JSON.parse(raw);
+        GB.state.students = [{
+          id: 'local-1',
+          name: 'Current Student (local)',
+          studentNo: '',
+          section: '',
+          progress: data.progress || {},
+          quizAttempts: data.quizAttempts || {},
+          games: data.games || {},
+          lastActive: new Date().toISOString(),
+        }];
+      }
+    } catch (e) { /* ignore */ }
+  }
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+function todayLong() {
+  return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function getUnitAttemptBest(s, unit) {
+  const attempts = s.quizAttempts?.[unit];
+  if (!attempts || !attempts.length) return null;
+  return Math.max(...attempts);
+}
+function getGameBest(s, game) {
+  const attempts = s.games?.[game];
+  if (!attempts || !attempts.length) return null;
+  return Math.max(...attempts);
+}
+function getExamScore(s) {
+  const attempts = s.quizAttempts?.[EXAM_KEY];
+  if (!attempts || !attempts.length) return null;
+  return Math.max(...attempts);
+}
+function getUnitsCompleted(s) {
+  return UNIT_KEYS.filter(u => s.progress?.[u]?.completed).length;
+}
+function getUnitAverage(s) {
+  const scores = UNIT_KEYS.map(u => getUnitAttemptBest(s, u)).filter(x => x !== null);
+  if (!scores.length) return null;
+  return Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+}
+function getGameAverage(s) {
+  const scores = GAME_KEYS.map(g => getGameBest(s, g)).filter(x => x !== null);
+  if (!scores.length) return null;
+  return Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+}
+function getCompletionPercent(s) {
+  return Math.round((getUnitsCompleted(s) / UNIT_KEYS.length) * 100);
+}
+
+function computeWeightedFinal(s, settings) {
+  const unitAvg = getUnitAverage(s);
+  const gameAvg = getGameAverage(s);
+  const exam = getExamScore(s);
+  const completion = getCompletionPercent(s);
+  if (unitAvg === null && gameAvg === null && exam === null && completion === 0) return null;
+  const w = settings;
+  let total = 0, weightSum = 0;
+  if (completion !== null) { total += completion * (w.unitsCompletedWeight / 100); weightSum += w.unitsCompletedWeight; }
+  if (unitAvg !== null) { total += unitAvg * (w.unitQuizWeight / 100); weightSum += w.unitQuizWeight; }
+  if (gameAvg !== null) { total += gameAvg * (w.gamesWeight / 100); weightSum += w.gamesWeight; }
+  if (exam !== null) { total += exam * (w.capstoneWeight / 100); weightSum += w.capstoneWeight; }
+  if (weightSum === 0) return null;
+  return Math.round((total / weightSum) * 100);
+}
+
+const TRANSMUTATION = [
+  { min: 97, max: 100, grade: 1.00 },
+  { min: 94, max: 96, grade: 1.25 },
+  { min: 91, max: 93, grade: 1.50 },
+  { min: 88, max: 90, grade: 1.75 },
+  { min: 85, max: 87, grade: 2.00 },
+  { min: 82, max: 84, grade: 2.25 },
+  { min: 79, max: 81, grade: 2.50 },
+  { min: 76, max: 78, grade: 2.75 },
+  { min: 75, max: 75, grade: 3.00 },
+  { min: 0, max: 74, grade: 5.00 },
+];
+function transmute(rawPercent) {
+  if (rawPercent === null || rawPercent === undefined) return null;
+  const row = TRANSMUTATION.find(r => rawPercent >= r.min && rawPercent <= r.max);
+  return row ? row.grade : 5.00;
+}
+function formatGrade(g) {
+  if (g === null || g === undefined) return '—';
+  return g.toFixed(2);
+}
+function getRemarks(g) {
+  if (g === null || g === undefined) return '—';
+  if (g === 1.00) return 'Excellent';
+  if (g <= 1.50) return 'Very Good';
+  if (g <= 2.00) return 'Good';
+  if (g <= 2.50) return 'Satisfactory';
+  if (g <= 3.00) return 'Passed';
+  return 'Failed';
+}
+function getRemarksClass(g) {
+  if (g === null || g === undefined) return '';
+  return g <= 3.00 ? 'remarks-pass' : 'remarks-fail';
+}
+function scoreClass(val, passThreshold = 90) {
+  if (val === null || val === undefined) return 'score-empty';
+  if (val >= passThreshold) return 'score-pass';
+  if (val >= 75) return 'score-warn';
+  return 'score-fail';
+}
+function finalGradeClass(g) {
+  if (g === null || g === undefined) return '';
+  if (g <= 2.00) return 'final-pass';
+  if (g <= 3.00) return 'final-warn';
+  return 'final-fail';
+}
+function cell(val) {
+  if (val === null || val === undefined) return '<span style="color:#B0BEC5;">—</span>';
+  return val;
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const students = GB.state.students;
+
+  if (!students.length) {
+    app.innerHTML = `
+      <div class="toolbar">
+        <div class="toolbar-left"><h1>📊 Class Record — Gradebook</h1></div>
+        <div class="toolbar-right">
+          <button class="btn btn-outline btn-sm" onclick="openStudentApp()">🫁 Student App</button>
+          <button class="btn btn-outline btn-sm" onclick="window.location.href='instructor-dashboard.html'">👨‍🏫 Dashboard</button>
+        </div>
+      </div>
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <h2>No students in the gradebook yet</h2>
+        <p>Open the Instructor Dashboard to add students, then return here to see the class record.</p>
+        <button class="btn btn-primary mt-2" onclick="window.location.href='instructor-dashboard.html'">Go to Instructor Dashboard</button>
+      </div>
+      <div class="developer-footer">
+        <div class="dev-label">Developed by</div>
+        <div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>
+        <div>Clinical Instructor | Teacher II — Department of Education</div>
+        <div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>
+      </div>
+    `;
+    return;
+  }
+
+  app.innerHTML = `
+    ${renderToolbar()}
+    ${renderInfoBanner()}
+    <div class="sheet" id="sheet">
+      ${renderSheetHeader()}
+      ${renderTable()}
+      ${renderLegend()}
+      ${renderClassStats()}
+      ${renderSignatureBlock()}
+    </div>
+    <div class="no-print" style="text-align:center;color:var(--gray);font-size:0.8rem;margin-top:1rem;">
+      💡 Tip: Use <strong>Print</strong> or <strong>Export CSV</strong> to save this class record.
+    </div>
+  `;
+}
+
+function renderToolbar() {
+  return `
+    <div class="toolbar no-print">
+      <div class="toolbar-left"><h1>📊 Class Record — Gradebook</h1></div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline btn-sm" onclick="openStudentApp()">🫁 Student App</button>
+        <button class="btn btn-outline btn-sm" onclick="window.location.href='instructor-dashboard.html'">👨‍🏫 Dashboard</button>
+        <button class="btn btn-outline btn-sm" onclick="openWeightsModal()">⚖️ Weights</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📤 Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+    <div class="no-print" style="text-align:right;font-size:0.72rem;color:var(--gray);margin-bottom:0.75rem;">
+      Developed by <strong style="color:var(--primary);">JEMUEL C. MARI, MAN, RN, LPT</strong> — Tarlac State University
+    </div>
+  `;
+}
+
+function renderInfoBanner() {
+  const s = GB.state.settings;
+  return `
+    <div class="info-banner no-print">
+      <div class="info-grid">
+        <div><strong>Course:</strong> ${escapeHtml(s.courseName)}</div>
+        <div><strong>Instructor:</strong> ${escapeHtml(s.instructorName)}</div>
+        <div><strong>School Year:</strong> ${escapeHtml(s.schoolYear)}</div>
+        <div><strong>Semester:</strong> ${escapeHtml(s.semester)}</div>
+        <div><strong>Total Students:</strong> ${GB.state.students.length}</div>
+        <div><strong>Generated:</strong> ${todayLong()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSheetHeader() {
+  const s = GB.state.settings;
+  return `
+    <div class="sheet-header">
+      <h1>${escapeHtml(s.courseName)}</h1>
+      <p><strong>CLASS RECORD — RESPIRATORY ASSESSMENT MASTERY</strong></p>
+      <p>School Year ${escapeHtml(s.schoolYear)} &nbsp;|&nbsp; ${escapeHtml(s.semester)} &nbsp;|&nbsp; Instructor: ${escapeHtml(s.instructorName)}</p>
+      <p style="font-size:0.78rem;color:var(--gray);">Generated ${todayLong()}</p>
+    </div>
+  `;
+}
+
+function renderTable() {
+  const students = GB.state.students;
+  return `
+    <table class="gradebook">
+      <thead>
+        <tr>
+          <th rowspan="2" style="min-width:180px;">STUDENT NAME</th>
+          <th rowspan="2" style="min-width:110px;">STUDENT NO.</th>
+          <th rowspan="2" style="min-width:80px;">SECTION</th>
+          <th colspan="${UNIT_KEYS.length}">UNIT QUIZ SCORES (Best Attempt)</th>
+          <th rowspan="2" style="min-width:60px;">UNIT AVG</th>
+          <th colspan="${GAME_KEYS.length}">MASTERY GAMES (Best Attempt)</th>
+          <th rowspan="2" style="min-width:60px;">GAMES AVG</th>
+          <th rowspan="2" style="min-width:60px;">CAPSTONE<br>EXAM</th>
+          <th rowspan="2" style="min-width:70px;">UNITS<br>COMPLETED</th>
+          <th rowspan="2" style="min-width:70px;">WEIGHTED<br>RAW %</th>
+          <th rowspan="2" style="min-width:70px;">FINAL<br>GRADE</th>
+          <th rowspan="2" style="min-width:100px;">REMARKS</th>
+        </tr>
+        <tr>
+          ${UNIT_KEYS.map(u => `<th class="sub" style="min-width:52px;">${escapeHtml(UNIT_NAMES[u].split(' ')[0])}</th>`).join('')}
+          ${GAME_KEYS.map(g => `<th class="sub" style="min-width:52px;">${escapeHtml(GAME_NAMES[g])}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${students.map((s, idx) => renderStudentRow(s, idx)).join('')}
+        ${renderClassAverageRow()}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderStudentRow(s, idx) {
+  const w = GB.state.settings;
+  const unitScores = UNIT_KEYS.map(u => getUnitAttemptBest(s, u));
+  const gameScores = GAME_KEYS.map(g => getGameBest(s, g));
+  const unitAvg = getUnitAverage(s);
+  const gameAvg = getGameAverage(s);
+  const exam = getExamScore(s);
+  const completion = getCompletionPercent(s);
+  const rawFinal = computeWeightedFinal(s, w);
+  const transmuted = transmute(rawFinal);
+  const remarks = getRemarks(transmuted);
+
+  return `<tr>
+    <td class="name-cell">${escapeHtml(s.name)}</td>
+    <td class="no-cell">${escapeHtml(s.studentNo || '—')}</td>
+    <td class="no-cell" style="text-align:center;">${escapeHtml(s.section || '—')}</td>
+    ${unitScores.map(v => `<td class="num ${scoreClass(v, w.masteryThreshold)}">${cell(v)}</td>`).join('')}
+    <td class="num final ${scoreClass(unitAvg, w.masteryThreshold)}">${cell(unitAvg)}</td>
+    ${gameScores.map(v => `<td class="num ${scoreClass(v, 90)}">${cell(v)}</td>`).join('')}
+    <td class="num final ${scoreClass(gameAvg, 90)}">${cell(gameAvg)}</td>
+    <td class="num ${scoreClass(exam, w.masteryThreshold)}">${cell(exam)}</td>
+    <td class="num">${completion}%</td>
+    <td class="num final">${rawFinal !== null ? rawFinal : '—'}</td>
+    <td class="num final ${finalGradeClass(transmuted)}">${formatGrade(transmuted)}</td>
+    <td class="remarks ${getRemarksClass(transmuted)}">${remarks}</td>
+  </tr>`;
+}
+
+function renderClassAverageRow() {
+  const students = GB.state.students;
+  const w = GB.state.settings;
+  const n = students.length;
+  if (!n) return '';
+  const avg = (vals) => {
+    const nums = vals.filter(v => v !== null && v !== undefined);
+    if (!nums.length) return null;
+    return Math.round(nums.reduce((a,b)=>a+b,0) / nums.length);
+  };
+  const unitAvgs = UNIT_KEYS.map(u => avg(students.map(s => getUnitAttemptBest(s, u))));
+  const gameAvgs = GAME_KEYS.map(g => avg(students.map(s => getGameBest(s, g))));
+  const unitAvgOfAvgs = avg(unitAvgs);
+  const gameAvgOfAvgs = avg(gameAvgs);
+  const examAvg = avg(students.map(s => getExamScore(s)));
+  const completionAvg = avg(students.map(s => getCompletionPercent(s)));
+  const rawAvg = avg(students.map(s => computeWeightedFinal(s, w)));
+  const transmutedAvg = avg(students.map(s => transmute(computeWeightedFinal(s, w))));
+
+  return `<tr style="background:#E0F2F1;font-weight:700;border-top:2px solid var(--primary);">
+    <td class="name-cell" colspan="3" style="text-align:right;padding-right:0.75rem;">CLASS AVERAGE →</td>
+    ${unitAvgs.map(v => `<td class="num">${v ?? '—'}</td>`).join('')}
+    <td class="num final">${unitAvgOfAvgs ?? '—'}</td>
+    ${gameAvgs.map(v => `<td class="num">${v ?? '—'}</td>`).join('')}
+    <td class="num final">${gameAvgOfAvgs ?? '—'}</td>
+    <td class="num">${examAvg ?? '—'}</td>
+    <td class="num">${completionAvg ?? '—'}%</td>
+    <td class="num final">${rawAvg ?? '—'}</td>
+    <td class="num final">${transmutedAvg !== null ? formatGrade(transmutedAvg) : '—'}</td>
+    <td class="remarks"></td>
+  </tr>`;
+}
+
+function renderLegend() {
+  const w = GB.state.settings;
+  return `
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-pass"></span> ≥${w.masteryThreshold}% — Mastered</div>
+      <div class="legend-item"><span class="legend-swatch swatch-warn"></span> 75–${w.masteryThreshold - 1}% — Passing</div>
+      <div class="legend-item"><span class="legend-swatch swatch-fail"></span> &lt;75% — Failing</div>
+      <div class="legend-item"><span class="legend-swatch swatch-empty"></span> No data</div>
+      <div class="legend-item" style="margin-left:auto;"><strong>Transmutation:</strong> 97+ → 1.00 | 94 → 1.25 | 91 → 1.50 | 88 → 1.75 | 85 → 2.00 | 82 → 2.25 | 79 → 2.50 | 76 → 2.75 | 75 → 3.00 | &lt;75 → 5.00</div>
+    </div>
+  `;
+}
+
+function renderClassStats() {
+  const students = GB.state.students;
+  const w = GB.state.settings;
+  const n = students.length;
+  const finals = students.map(s => transmute(computeWeightedFinal(s, w))).filter(x => x !== null);
+  const passed = finals.filter(g => g <= 3.00).length;
+  const failed = finals.filter(g => g > 3.00).length;
+  const mastered = students.filter(s => {
+    const raw = computeWeightedFinal(s, w);
+    return raw !== null && raw >= w.masteryThreshold;
+  }).length;
+  const avgFinal = finals.length ? (finals.reduce((a,b)=>a+b,0)/finals.length) : null;
+  const highest = finals.length ? Math.min(...finals) : null;
+  const lowest = finals.length ? Math.max(...finals) : null;
+  const passRate = finals.length ? Math.round((passed / finals.length) * 100) : 0;
+
+  return `
+    <div class="stats-grid no-print">
+      <div class="stat-box"><div class="stat-value">${n}</div><div class="stat-label">Students</div></div>
+      <div class="stat-box pass"><div class="stat-value">${passed}</div><div class="stat-label">Passed</div></div>
+      <div class="stat-box fail"><div class="stat-value">${failed}</div><div class="stat-label">Failed</div></div>
+      <div class="stat-box"><div class="stat-value">${mastered}</div><div class="stat-label">Mastered</div></div>
+      <div class="stat-box"><div class="stat-value">${passRate}%</div><div class="stat-label">Pass Rate</div></div>
+      <div class="stat-box"><div class="stat-value">${avgFinal !== null ? formatGrade(avgFinal) : '—'}</div><div class="stat-label">Class Avg</div></div>
+      <div class="stat-box pass"><div class="stat-value">${highest !== null ? formatGrade(highest) : '—'}</div><div class="stat-label">Highest</div></div>
+      <div class="stat-box fail"><div class="stat-value">${lowest !== null ? formatGrade(lowest) : '—'}</div><div class="stat-label">Lowest</div></div>
+    </div>
+  `;
+}
+
+function renderSignatureBlock() {
+  const s = GB.state.settings;
+  return `
+    <div class="developer-footer">
+      <div class="dev-label">Class Record System Developed by</div>
+      <div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>
+      <div>Clinical Instructor | Teacher II — Department of Education</div>
+      <div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>
+      <div style="margin-top:0.5rem;font-size:0.72rem;">© ${new Date().getFullYear()} — All Rights Reserved</div>
+    </div>
+    <div class="signature-block">
+      <div>
+        <div class="signature-line">
+          <strong>${escapeHtml(s.instructorName)}</strong>
+          <small>Instructor</small>
+        </div>
+      </div>
+      <div>
+        <div class="signature-line">
+          <strong>_____________________________</strong>
+          <small>Program Chair / Dean</small>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function exportCSV() {
+  const students = GB.state.students;
+  const w = GB.state.settings;
+  if (!students.length) return toast('No data to export.', 'warning');
+  const headers = [
+    'Student Name','Student No.','Section',
+    ...UNIT_KEYS.map(u => UNIT_NAMES[u]),
+    'Unit Avg',
+    ...GAME_KEYS.map(g => GAME_NAMES[g]),
+    'Games Avg',
+    'Capstone Exam','Units Completed %','Weighted Raw %','Final Grade','Remarks'
+  ];
+  const rows = students.map(s => {
+    const unitScores = UNIT_KEYS.map(u => getUnitAttemptBest(s, u) ?? '');
+    const gameScores = GAME_KEYS.map(g => getGameBest(s, g) ?? '');
+    const unitAvg = getUnitAverage(s) ?? '';
+    const gameAvg = getGameAverage(s) ?? '';
+    const exam = getExamScore(s) ?? '';
+    const completion = getCompletionPercent(s);
+    const raw = computeWeightedFinal(s, w) ?? '';
+    const g = transmute(raw);
+    return [
+      s.name, s.studentNo || '', s.section || '',
+      ...unitScores, unitAvg, ...gameScores, gameAvg,
+      exam, completion + '%', raw, formatGrade(g), getRemarks(g)
+    ];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadFile(csv, `class-record-${new Date().toISOString().slice(0,10)}.csv`, 'text/csv');
+  toast('CSV exported successfully.', 'success');
+}
+
+function openWeightsModal() {
+  const w = GB.state.settings;
+  document.getElementById('modalTitle').textContent = '⚖️ Adjust Grade Weights';
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:1rem;">Set how much each component contributes to the final raw percentage. Weights should sum to 100%.</p>
+    <div class="form-row">
+      <div class="form-group"><label>Units Completed (%)</label><input type="number" id="w_completion" min="0" max="100" value="${w.unitsCompletedWeight}" /></div>
+      <div class="form-group"><label>Unit Quiz Average (%)</label><input type="number" id="w_unitavg" min="0" max="100" value="${w.unitQuizWeight}" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Mastery Games Average (%)</label><input type="number" id="w_games" min="0" max="100" value="${w.gamesWeight}" /></div>
+      <div class="form-group"><label>Capstone Exam (%)</label><input type="number" id="w_capstone" min="0" max="100" value="${w.capstoneWeight}" /></div>
+    </div>
+    <div id="weightSum" style="font-size:0.9rem;margin-bottom:1rem;font-weight:600;"></div>
+    <div class="flex gap-1">
+      <button class="btn btn-primary" onclick="saveWeights()">💾 Save Weights</button>
+      <button class="btn btn-outline" onclick="resetWeights()">↺ Reset Default</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('show');
+  updateWeightSum();
+  ['w_completion','w_unitavg','w_games','w_capstone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateWeightSum);
+  });
+}
+
+function updateWeightSum() {
+  const sum = ['w_completion','w_unitavg','w_games','w_capstone']
+    .map(id => parseInt(document.getElementById(id)?.value, 10) || 0)
+    .reduce((a,b)=>a+b,0);
+  const el = document.getElementById('weightSum');
+  if (!el) return;
+  const ok = sum === 100;
+  el.innerHTML = `Total: <span style="color:${ok ? 'var(--success)' : 'var(--accent)'};">${sum}%</span> ${ok ? '✅' : '— will be normalized'}`;
+}
+
+function saveWeights() {
+  GB.state.settings.unitsCompletedWeight = parseInt(document.getElementById('w_completion').value, 10) || 0;
+  GB.state.settings.unitQuizWeight = parseInt(document.getElementById('w_unitavg').value, 10) || 0;
+  GB.state.settings.gamesWeight = parseInt(document.getElementById('w_games').value, 10) || 0;
+  GB.state.settings.capstoneWeight = parseInt(document.getElementById('w_capstone').value, 10) || 0;
+  closeModal();
+  toast('Weights saved.', 'success');
+  render();
+}
+
+function resetWeights() {
+  document.getElementById('w_completion').value = 20;
+  document.getElementById('w_unitavg').value = 40;
+  document.getElementById('w_games').value = 20;
+  document.getElementById('w_capstone').value = 20;
+  updateWeightSum();
+}
+
+function openStudentApp() { window.open('index.html', '_blank'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function init() {
+  loadData();
+  render();
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
