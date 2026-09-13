@@ -79,13 +79,20 @@
       margin-bottom: 0.2rem;
     }
     .student-chip .meta { opacity: 0.85; font-size: 0.75rem; }
-    .student-chip .edit-btn {
-      margin-top: 0.5rem; background: rgba(255,255,255,0.2);
-      border: none; color: var(--white); padding: 0.3rem 0.6rem;
-      border-radius: 6px; cursor: pointer; font-size: 0.72rem;
-      font-family: var(--font-head); font-weight: 600;
+    .student-chip .chip-actions {
+      display: flex; gap: 0.35rem; margin-top: 0.6rem;
     }
-    .student-chip .edit-btn:hover { background: rgba(255,255,255,0.3); }
+    .student-chip .chip-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.2);
+      border: none; color: var(--white); padding: 0.35rem 0.5rem;
+      border-radius: 6px; cursor: pointer; font-size: 0.7rem;
+      font-family: var(--font-head); font-weight: 600;
+      transition: all 0.2s;
+    }
+    .student-chip .chip-btn:hover { background: rgba(255,255,255,0.3); }
+    .student-chip .chip-btn.danger { background: rgba(229, 57, 53, 0.7); }
+    .student-chip .chip-btn.danger:hover { background: rgba(229, 57, 53, 0.9); }
     .nav-section { margin-bottom: 1.25rem; }
     .nav-section-title {
       font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
@@ -103,6 +110,8 @@
     .nav-item.active { background: rgba(255,255,255,0.2); font-weight: 600; }
     .nav-item.completed::after { content: '✅'; margin-left: auto; font-size: 0.8rem; }
     .nav-item .icon { font-size: 1.1rem; width: 1.5rem; text-align: center; }
+    .nav-item.logout { color: #FFCDD2; }
+    .nav-item.logout:hover { background: rgba(229, 57, 53, 0.3); color: #FFFFFF; }
     .sidebar-footer {
       margin-top: auto;
       padding: 1rem 0.5rem;
@@ -166,6 +175,8 @@
       border: 2px solid var(--primary);
     }
     .btn-outline:hover { background: var(--primary); color: var(--white); }
+    .btn-danger { background: var(--accent); color: var(--white); }
+    .btn-danger:hover { background: #C62828; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
     .btn-block { width: 100%; justify-content: center; }
@@ -333,7 +344,7 @@
     .toast.success { background: var(--success); }
     .toast.error { background: var(--accent); }
 
-    /* Registration screen */
+    /* ---------- Auth Screen (Registration / Login) ---------- */
     .registration-screen {
       min-height: 100vh;
       display: flex;
@@ -349,10 +360,11 @@
       max-width: 600px;
       width: 100%;
       padding: 2rem;
+      position: relative;
     }
     .registration-card .reg-header {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
     .registration-card .reg-logo {
       font-size: 3rem;
@@ -367,6 +379,101 @@
       color: var(--gray);
       font-size: 0.9rem;
     }
+
+    /* Back button (top-left of card) */
+    .back-btn {
+      position: absolute; top: 1rem; left: 1rem;
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.5rem 0.9rem; border-radius: 8px;
+      border: 2px solid var(--primary); background: var(--white);
+      color: var(--primary); cursor: pointer;
+      font-family: var(--font-head); font-weight: 600;
+      font-size: 0.82rem; transition: all 0.2s;
+      z-index: 5;
+    }
+    .back-btn:hover {
+      background: var(--primary); color: var(--white);
+      transform: translateX(-2px);
+    }
+
+    /* Auth tabs (Register / Login) */
+    .auth-tabs {
+      display: flex; gap: 0.35rem; margin-bottom: 1.25rem;
+      background: var(--light); padding: 0.3rem;
+      border-radius: 10px;
+    }
+    .auth-tab {
+      flex: 1; padding: 0.7rem; border: none; background: transparent;
+      border-radius: 8px; cursor: pointer;
+      font-family: var(--font-head); font-weight: 600;
+      font-size: 0.9rem; color: var(--gray);
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: var(--white); color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .auth-tab:hover:not(.active) { color: var(--dark); }
+
+    /* Saved students list (Login view) */
+    .saved-students {
+      margin-top: 1rem;
+    }
+    .saved-list {
+      display: flex; flex-direction: column; gap: 0.6rem;
+      max-height: 340px; overflow-y: auto;
+      padding: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    .saved-card {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.85rem 1rem; border: 2px solid #CFD8DC;
+      border-radius: 10px; cursor: pointer;
+      background: var(--white); transition: all 0.2s;
+      text-align: left; width: 100%;
+      font-family: var(--font-body);
+    }
+    .saved-card:hover {
+      border-color: var(--primary); background: #E0F2F1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .saved-card .avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--white); display: flex; align-items: center;
+      justify-content: center; font-family: var(--font-head);
+      font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .saved-card .saved-info { flex: 1; min-width: 0; }
+    .saved-card .saved-name {
+      font-family: var(--font-head); font-weight: 700;
+      font-size: 0.95rem; color: var(--dark);
+      margin-bottom: 0.15rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .saved-card .saved-meta {
+      font-size: 0.78rem; color: var(--gray);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .saved-card .saved-progress {
+      font-family: var(--font-head); font-weight: 700;
+      color: var(--primary); font-size: 0.9rem;
+      flex-shrink: 0; text-align: right;
+    }
+    .saved-card .saved-progress small {
+      display: block; font-size: 0.65rem;
+      color: var(--gray); font-weight: 400;
+    }
+    .empty-saved {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--gray); font-size: 0.9rem;
+      background: var(--light); border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .empty-saved .icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+
+    /* Form group */
     .reg-form-group { margin-bottom: 1rem; }
     .reg-form-group label {
       display: block; font-weight: 600; margin-bottom: 0.35rem;
@@ -391,7 +498,7 @@
     @media (max-width: 480px) {
       .reg-row { grid-template-columns: 1fr; }
     }
-    .reg-actions { margin-top: 1.5rem; }
+    .reg-actions { margin-top: 1.25rem; }
     .reg-actions .btn {
       width: 100%; justify-content: center; padding: 0.85rem;
       font-size: 1rem;
@@ -446,21 +553,95 @@
       border-radius: 8px; border-left: 4px solid var(--secondary);
       margin-bottom: 1rem;
     }
+
+    /* Logout modal */
+    .logout-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center;
+      z-index: 2100; padding: 1rem;
+    }
+    .logout-modal.show { display: flex; }
+    .logout-content {
+      background: var(--white); border-radius: 16px;
+      max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto;
+      padding: 2rem; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logout-content .logout-icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+    .logout-content h2 { color: var(--accent); font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .logout-content p { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .logout-content .student-info {
+      background: var(--light); padding: 0.85rem 1rem;
+      border-radius: 8px; margin-bottom: 1.5rem;
+      font-size: 0.85rem; text-align: left;
+    }
+    .logout-content .student-info strong {
+      font-family: var(--font-head); color: var(--dark);
+      display: block; font-size: 1rem; margin-bottom: 0.25rem;
+    }
+    .logout-content .student-info small {
+      color: var(--gray); display: block; line-height: 1.6;
+    }
+    .logout-options {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .logout-option {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 1rem 1.15rem; border: 2px solid #CFD8DC;
+      border-radius: 10px; cursor: pointer; text-align: left;
+      background: var(--white); transition: all 0.2s;
+      font-family: var(--font-body);
+    }
+    .logout-option:hover { border-color: var(--primary); background: #E0F2F1; }
+    .logout-option.option-danger:hover { border-color: var(--accent); background: #FFEBEE; }
+    .logout-option .opt-icon { font-size: 1.75rem; flex-shrink: 0; }
+    .logout-option .opt-body { flex: 1; }
+    .logout-option .opt-title {
+      font-family: var(--font-head); font-weight: 700;
+      font-size: 0.95rem; color: var(--dark); margin-bottom: 0.2rem;
+    }
+    .logout-option .opt-desc { font-size: 0.78rem; color: var(--gray); line-height: 1.5; }
+    .logout-content .btn-cancel {
+      background: transparent; color: var(--gray);
+      border: none; padding: 0.6rem; font-family: var(--font-head);
+      font-weight: 600; cursor: pointer; font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .logout-content .btn-cancel:hover { color: var(--dark); }
   </style>
 </head>
 <body>
 
-<!-- REGISTRATION SCREEN (shown on first launch) -->
+<!-- ============================================================
+     AUTH SCREEN (Register / Login / Edit Profile)
+     ============================================================ -->
 <div class="registration-screen" id="registrationScreen">
   <div class="registration-card">
+    <!-- BACK BUTTON (only visible in edit mode) -->
+    <button class="back-btn hidden" id="backBtn" onclick="closeEditProfile()">
+      ← Back
+    </button>
+
     <div class="reg-header">
       <div class="reg-logo">🫁</div>
       <h1>Respiratory Assessment Mastery</h1>
-      <p class="reg-subtitle">NCM 101B Lab — Please register to begin</p>
+      <p class="reg-subtitle" id="regSubtitle">NCM 101B Lab — Please register to begin</p>
+    </div>
+
+    <!-- AUTH TABS (hidden in edit mode) -->
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" data-tab="register" onclick="switchAuthTab('register')">
+        📝 Register
+      </button>
+      <button class="auth-tab" data-tab="login" onclick="switchAuthTab('login')">
+        🔓 Login
+      </button>
     </div>
 
     <div class="reg-error" id="regError"></div>
 
+    <!-- ============ TAB 1: REGISTER FORM ============ -->
     <form id="registrationForm" onsubmit="submitRegistration(event)">
       <div class="reg-row">
         <div class="reg-form-group">
@@ -509,9 +690,20 @@
       </div>
 
       <div class="reg-actions">
-        <button type="submit" class="btn btn-primary">✅ Register & Start Learning</button>
+        <button type="submit" class="btn btn-primary" id="regSubmitBtn">✅ Register & Start Learning</button>
       </div>
     </form>
+
+    <!-- ============ TAB 2: LOGIN FORM ============ -->
+    <div id="loginForm" class="hidden">
+      <div class="saved-students" id="savedStudentsArea">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div style="text-align:center; margin-top:1rem; font-size:0.85rem; color:var(--gray);">
+        Don't see your name? Click <strong>Register</strong> above to create a new account.
+      </div>
+    </div>
 
     <div style="text-align:center;margin-top:1.5rem;font-size:0.75rem;color:var(--gray);">
       Developed by <strong style="color:var(--primary);">JEMUEL C. MARI, MAN, RN, LPT</strong><br>
@@ -520,7 +712,7 @@
   </div>
 </div>
 
-<!-- MAIN APP (hidden until registered) -->
+<!-- MAIN APP -->
 <div class="app-container" id="appContainer" style="display:none;">
   <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
 
@@ -536,15 +728,16 @@
     <div class="student-chip">
       <div class="name" id="chipName">—</div>
       <div class="meta" id="chipMeta">—</div>
-      <button class="edit-btn" onclick="openEditProfile()">✏️ Edit Profile</button>
+      <div class="chip-actions">
+        <button class="chip-btn" onclick="openEditProfile()">✏️ Edit</button>
+        <button class="chip-btn danger" onclick="openLogoutModal()">🚪 Logout</button>
+      </div>
     </div>
 
     <nav id="navMenu">
       <div class="nav-section">
         <div class="nav-section-title">Main</div>
-        <button class="nav-item active" data-view="home">
-          <span class="icon">🏠</span> Dashboard
-        </button>
+        <button class="nav-item active" data-view="home"><span class="icon">🏠</span> Dashboard</button>
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Learning Units</div>
@@ -571,6 +764,10 @@
       <div class="nav-section">
         <div class="nav-section-title">Submit to Instructor</div>
         <button class="nav-item" data-view="handoff"><span class="icon">📤</span> Send My Progress</button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Account</div>
+        <button class="nav-item logout" onclick="openLogoutModal()"><span class="icon">🚪</span> Logout</button>
       </div>
     </nav>
 
@@ -600,25 +797,54 @@
   </div>
 </div>
 
+<!-- LOGOUT MODAL -->
+<div class="logout-modal" id="logoutModal">
+  <div class="logout-content">
+    <div class="logout-icon">🚪</div>
+    <h2>Logout Confirmation</h2>
+    <p>Are you sure you want to logout? Choose an option below:</p>
+    <div class="student-info" id="logoutStudentInfo"><strong>—</strong><small>—</small></div>
+    <div class="logout-options">
+      <button class="logout-option" onclick="performLogout('keep')">
+        <span class="opt-icon">🔄</span>
+        <div class="opt-body">
+          <div class="opt-title">Logout — Keep My Data</div>
+          <div class="opt-desc">Your progress stays saved on this device. You can login again later to continue where you left off. The instructor can also still import your data.</div>
+        </div>
+      </button>
+      <button class="logout-option option-danger" onclick="performLogout('clear')">
+        <span class="opt-icon">🗑️</span>
+        <div class="opt-body">
+          <div class="opt-title">Logout — Clear All My Data</div>
+          <div class="opt-desc">⚠️ Your progress will be permanently deleted from this device. Only do this if you've already sent your data to your instructor.</div>
+        </div>
+      </button>
+    </div>
+    <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 /* ============================================================
-   RESPIRATORY ASSESSMENT MASTERY APP — CORE LOGIC
-   Includes student registration with Group Number
+   RESPIRATORY ASSESSMENT MASTERY APP
+   Version 1.4.0 — With Back Button + Login/Register Toggle
    ============================================================ */
 
 const APP = {
-  version: '1.2.0',
+  version: '1.4.0',
   storageKey: 'respMastery_v1',
+  savedSessionsKey: 'respMastery_savedSessions', // For multiple students on same device
   state: {
     currentView: 'home',
-    student: null,     // { firstName, lastName, studentNo, section, group, email, registeredAt }
+    student: null,
     progress: {},
     badges: {},
     quizAttempts: {},
     games: {},
   },
+  authMode: 'register', // 'register' | 'login' | 'edit'
 };
 
 /* ---------- PERSISTENCE ---------- */
@@ -632,6 +858,50 @@ function saveState() {
   try { localStorage.setItem(APP.storageKey, JSON.stringify(APP.state)); }
   catch (e) { console.warn('State save failed', e); }
 }
+function clearState() {
+  try { localStorage.removeItem(APP.storageKey); }
+  catch (e) { console.warn('State clear failed', e); }
+}
+
+/* ---------- SAVED SESSIONS (multi-student on same device) ---------- */
+function loadSavedSessions() {
+  try {
+    const raw = localStorage.getItem(APP.savedSessionsKey);
+    if (!raw) return [];
+    return JSON.parse(raw) || [];
+  } catch (e) { return []; }
+}
+function saveSavedSessions(sessions) {
+  try { localStorage.setItem(APP.savedSessionsKey, JSON.stringify(sessions)); }
+  catch (e) { console.warn('Saved sessions save failed', e); }
+}
+function registerSavedSession(studentRecord) {
+  // studentRecord is a full { student, progress, quizAttempts, games, badges }
+  const sessions = loadSavedSessions();
+  const key = studentRecord.student.studentNo || studentRecord.student.email;
+  const existingIdx = sessions.findIndex(s =>
+    (s.student.studentNo && s.student.studentNo === studentRecord.student.studentNo) ||
+    (s.student.email && s.student.email === studentRecord.student.email)
+  );
+  const record = {
+    ...studentRecord,
+    savedAt: new Date().toISOString(),
+    key,
+  };
+  if (existingIdx >= 0) {
+    sessions[existingIdx] = record;
+  } else {
+    sessions.push(record);
+  }
+  // Keep only the last 20 sessions
+  if (sessions.length > 20) sessions.splice(0, sessions.length - 20);
+  saveSavedSessions(sessions);
+}
+function removeSavedSession(key) {
+  const sessions = loadSavedSessions();
+  const filtered = sessions.filter(s => s.key !== key);
+  saveSavedSessions(filtered);
+}
 
 /* ---------- TOAST ---------- */
 function toast(msg, type = '') {
@@ -640,6 +910,24 @@ function toast(msg, type = '') {
   el.className = 'toast show ' + type;
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ---------- AUTH TAB SWITCHING ---------- */
+function switchAuthTab(tab) {
+  APP.authMode = tab;
+  document.querySelectorAll('.auth-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  document.getElementById('registrationForm').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('backBtn').classList.add('hidden');
+  document.getElementById('authTabs').classList.remove('hidden');
+  document.getElementById('regSubtitle').textContent = tab === 'register'
+    ? 'NCM 101B Lab — Please register to begin'
+    : 'Welcome back! Select your profile below';
+  document.getElementById('regError').classList.remove('show');
+
+  if (tab === 'login') renderSavedStudents();
 }
 
 /* ---------- REGISTRATION ---------- */
@@ -670,6 +958,20 @@ function submitRegistration(event) {
     return;
   }
 
+  // Check if this student already exists in saved sessions
+  const sessions = loadSavedSessions();
+  const existing = sessions.find(s =>
+    (s.student.studentNo && s.student.studentNo === studentNo) ||
+    (s.student.email && s.student.email === email)
+  );
+
+  if (existing) {
+    if (confirm(`A profile for "${existing.student.fullName}" already exists on this device.\n\nLogin to their account instead?`)) {
+      loadSession(existing);
+      return;
+    }
+  }
+
   APP.state.student = {
     firstName,
     lastName,
@@ -682,10 +984,112 @@ function submitRegistration(event) {
     lastActive: new Date().toISOString(),
   };
   saveState();
+
+  // Register a fresh saved session entry
+  registerSavedSession(buildStudentRecord());
+
   showApp();
   toast('✅ Welcome, ' + firstName + '!', 'success');
 }
 
+/* ---------- LOGIN (Load from saved sessions) ---------- */
+function renderSavedStudents() {
+  const area = document.getElementById('savedStudentsArea');
+  const sessions = loadSavedSessions();
+
+  if (!sessions.length) {
+    area.innerHTML = `
+      <div class="empty-saved">
+        <span class="icon">📭</span>
+        <strong>No saved profiles yet</strong>
+        <p style="margin-top:0.5rem;">Register first to create your profile.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Sort by most recent first
+  const sorted = [...sessions].sort((a,b) =>
+    new Date(b.savedAt || 0) - new Date(a.savedAt || 0)
+  );
+
+  area.innerHTML = `
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:0.5rem;">
+      Found <strong>${sorted.length}</strong> saved ${sorted.length === 1 ? 'profile' : 'profiles'} on this device:
+    </p>
+    <div class="saved-list">
+      ${sorted.map(s => {
+        const name = s.student.fullName || `${s.student.firstName || ''} ${s.student.lastName || ''}`.trim() || 'Unnamed';
+        const initials = (s.student.firstName?.[0] || '') + (s.student.lastName?.[0] || '');
+        const pct = calcProgressPct(s.progress);
+        const avg = calcAvg(s.quizAttempts);
+        const key = s.key || s.student.studentNo || s.student.email;
+        return `
+          <button class="saved-card" onclick='loadSessionByKey("${escapeJs(key)}")'>
+            <div class="avatar">${initials.toUpperCase() || '👤'}</div>
+            <div class="saved-info">
+              <div class="saved-name">${escapeHtml(name)}</div>
+              <div class="saved-meta">
+                ${escapeHtml(s.student.studentNo || '—')} • ${escapeHtml(s.student.section || '—')}
+                ${s.student.group ? ' • ' + escapeHtml(s.student.group) : ''}
+              </div>
+            </div>
+            <div class="saved-progress">
+              ${pct}%
+              <small>${avg}% avg</small>
+            </div>
+          </button>
+        `;
+      }).join('')}
+    </div>
+    <div class="callout callout-info" style="font-size:0.8rem;">
+      <strong>Tip:</strong> Login lets you continue where you left off. Your data is saved on this device.
+    </div>
+  `;
+}
+
+function loadSessionByKey(key) {
+  const sessions = loadSavedSessions();
+  const session = sessions.find(s => (s.key || s.student.studentNo || s.student.email) === key);
+  if (!session) return toast('Profile not found.', 'error');
+  loadSession(session);
+}
+
+function loadSession(session) {
+  APP.state = {
+    currentView: 'home',
+    student: session.student,
+    progress: session.progress || {},
+    quizAttempts: session.quizAttempts || {},
+    games: session.games || {},
+    badges: session.badges || {},
+  };
+  // Update lastActive
+  if (APP.state.student) {
+    APP.state.student.lastActive = new Date().toISOString();
+  }
+  saveState();
+  showApp();
+  toast('👋 Welcome back, ' + (session.student.firstName || 'Student') + '!', 'success');
+}
+
+function escapeJs(s) {
+  return String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+/* Helper: compute progress from a session's data */
+function calcProgressPct(progress) {
+  const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+  const done = units.filter(u => progress?.[u]?.completed).length;
+  return Math.round((done / units.length) * 100);
+}
+function calcAvg(quizAttempts) {
+  const all = Object.values(quizAttempts || {}).flat().filter(x => typeof x === 'number');
+  if (!all.length) return 0;
+  return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
+}
+
+/* ---------- EDIT PROFILE ---------- */
 function openEditProfile() {
   if (!APP.state.student) return;
   const s = APP.state.student;
@@ -697,12 +1101,31 @@ function openEditProfile() {
   document.getElementById('reg_email').value = s.email || '';
 
   const form = document.getElementById('registrationForm');
-  const btn = form.querySelector('button[type="submit"]');
+  const btn = document.getElementById('regSubmitBtn');
   btn.textContent = '💾 Save Changes';
-  btn.onclick = saveProfileEdit;
+  form.onsubmit = saveProfileEdit;
+
+  APP.authMode = 'edit';
+
+  // Show edit mode: hide tabs & login, show back button + form
+  document.getElementById('authTabs').classList.add('hidden');
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registrationForm').classList.remove('hidden');
+  document.getElementById('backBtn').classList.remove('hidden');
+  document.getElementById('regSubtitle').textContent = 'Edit your profile information';
+  document.getElementById('regError').classList.remove('show');
 
   document.getElementById('registrationScreen').style.display = 'flex';
   document.getElementById('appContainer').style.display = 'none';
+}
+
+function closeEditProfile() {
+  // Return to the app without saving changes
+  document.getElementById('registrationScreen').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'flex';
+  document.getElementById('regError').classList.remove('show');
+  APP.authMode = 'register';
+  toast('↩️ Returned to app. No changes saved.', '');
 }
 
 function saveProfileEdit(event) {
@@ -743,21 +1166,34 @@ function saveProfileEdit(event) {
     updatedAt: new Date().toISOString(),
   };
   saveState();
+
+  // Update the saved session entry
+  registerSavedSession(buildStudentRecord());
+
   showApp();
   toast('✅ Profile updated.', 'success');
 }
 
+/* ---------- SHOW APP ---------- */
 function showApp() {
   const reg = document.getElementById('registrationScreen');
   const app = document.getElementById('appContainer');
   reg.style.display = 'none';
   app.style.display = 'flex';
 
+  // Reset form state
   const form = document.getElementById('registrationForm');
-  const btn = form.querySelector('button[type="submit"]');
+  const btn = document.getElementById('regSubmitBtn');
   btn.textContent = '✅ Register & Start Learning';
-  btn.onclick = submitRegistration;
+  form.onsubmit = submitRegistration;
   form.reset();
+  document.getElementById('regError').classList.remove('show');
+  document.getElementById('backBtn').classList.add('hidden');
+  document.getElementById('authTabs').classList.remove('hidden');
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registrationForm').classList.remove('hidden');
+  switchAuthTab('register');
+  document.getElementById('regSubtitle').textContent = 'NCM 101B Lab — Please register to begin';
 
   updateStudentChip();
   navigate('home');
@@ -769,6 +1205,76 @@ function updateStudentChip() {
   document.getElementById('chipName').textContent = s.fullName;
   document.getElementById('chipMeta').innerHTML =
     `${s.studentNo} — ${s.section}<br>${s.group || '—'}<br>${s.email}`;
+}
+
+/* ---------- LOGOUT ---------- */
+function openLogoutModal() {
+  const s = APP.state.student;
+  if (!s) return;
+
+  document.getElementById('logoutStudentInfo').innerHTML = `
+    <strong>${escapeHtml(s.fullName)}</strong>
+    <small>
+      ${escapeHtml(s.studentNo)} — ${escapeHtml(s.section)}<br>
+      ${escapeHtml(s.group || '—')}<br>
+      ${escapeHtml(s.email)}<br>
+      <em style="color:var(--warning);">Progress: ${getProgressPercent()}% | Average: ${averageScore()}%</em>
+    </small>
+  `;
+  document.getElementById('logoutModal').classList.add('show');
+}
+
+function closeLogoutModal() {
+  document.getElementById('logoutModal').classList.remove('show');
+}
+
+function performLogout(mode) {
+  const s = APP.state.student;
+  const studentName = s ? s.fullName : 'Student';
+
+  if (mode === 'clear') {
+    if (!confirm(`⚠️ FINAL WARNING ⚠️\n\nThis will PERMANENTLY DELETE all data for ${studentName}.\n\nMake sure you have already sent your data to your instructor!\n\nContinue with deletion?`)) {
+      return;
+    }
+    // Remove from saved sessions
+    if (s) {
+      const key = s.studentNo || s.email;
+      removeSavedSession(key);
+    }
+    clearState();
+    APP.state = {
+      currentView: 'home',
+      student: null,
+      progress: {},
+      badges: {},
+      quizAttempts: {},
+      games: {},
+    };
+    closeLogoutModal();
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('registrationScreen').style.display = 'flex';
+
+    // Reset to register tab
+    switchAuthTab('register');
+    document.getElementById('registrationForm').reset();
+    document.getElementById('regError').classList.remove('show');
+
+    toast('🗑️ All data cleared. You have been logged out.', 'warning');
+
+  } else {
+    // mode === 'keep' — Save snapshot to saved sessions so they can login later
+    if (s) {
+      registerSavedSession(buildStudentRecord());
+    }
+    closeLogoutModal();
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('registrationScreen').style.display = 'flex';
+
+    // Switch to login tab so returning student can re-login
+    switchAuthTab('login');
+
+    toast('👋 Logged out. Your progress is saved.', 'success');
+  }
 }
 
 /* ---------- NAVIGATION ---------- */
@@ -822,6 +1328,8 @@ function completeUnit(id, score) {
   APP.state.quizAttempts[id].push(score);
   updateBadges();
   saveState();
+  // Auto-update saved session
+  if (APP.state.student) registerSavedSession(buildStudentRecord());
 }
 function updateBadges() {
   const p = APP.state.progress;
@@ -1478,6 +1986,7 @@ function recordGameScore(game, score, total) {
   if (!APP.state.games[game]) APP.state.games[game] = [];
   APP.state.games[game].push(pct);
   saveState();
+  if (APP.state.student) registerSavedSession(buildStudentRecord());
 }
 
 function gameBlitz(area) {
@@ -1993,6 +2502,7 @@ function submitQuiz(unitId) {
     if (!APP.state.quizAttempts.exam) APP.state.quizAttempts.exam = [];
     APP.state.quizAttempts.exam.push(pct);
     saveState();
+    if (APP.state.student) registerSavedSession(buildStudentRecord());
     toast('🏆 Capstone Exam passed!', 'success');
   }
 }
@@ -2174,12 +2684,28 @@ function init() {
   document.getElementById('menuToggle').addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open');
   });
+  document.getElementById('handoffModal').addEventListener('click', (e) => {
+    if (e.target.id === 'handoffModal') closeHandoff();
+  });
+  document.getElementById('logoutModal').addEventListener('click', (e) => {
+    if (e.target.id === 'logoutModal') closeLogoutModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeHandoff();
+      closeLogoutModal();
+    }
+  });
 
+  // Decide whether to show app or auth screen
   if (APP.state.student && APP.state.student.fullName) {
+    // A student is already logged in
     showApp();
   } else {
+    // Show auth screen — default to register tab
     document.getElementById('registrationScreen').style.display = 'flex';
     document.getElementById('appContainer').style.display = 'none';
+    switchAuthTab('register');
   }
 
   if ('serviceWorker' in navigator) {
