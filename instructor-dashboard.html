@@ -2251,16 +2251,16 @@ function generateAtRiskReport() {
 function generateMasteryReport() {
   const mastered = DB.state.students.filter(s => getStudentStatus(s).label === 'Mastered');
   const rows = mastered.map(s => `<tr>
-    <td ≥>${escapeHtml(s.name)}</td90>
-    <td>${escapeHtml(s.st%udentNo || '—') average}</td>
-    <td>${escapeHtml).
-(s.section || '—')}</td>
+    <td>${escapeHtml(s.name)}</td>
+    <td>${escapeHtml(s.studentNo || '—')}</td>
+    <td>${escapeHtml(s.section || '—')}</td>
     <td>${getStudentAverage(s)}%</td>
     <td>${fmtDate(s.lastActive)}</td>
   </tr>`).join('');
   showReport('Mastery Report', `
     <div class="callout callout-success">
-      <strong>${mastered.length}</strong> student(s) achieved mastery (100% progress +    </div>
+      <strong>${mastered.length}</strong> student(s) achieved mastery (100% progress + ≥90% average).
+    </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Avg</th><th>Completed</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--gray);">No students have achieved mastery yet.</td></tr>'}</tbody>
