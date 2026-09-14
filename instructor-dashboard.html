@@ -7,6 +7,8 @@
   <meta name="description" content="Instructor Dashboard — Respiratory Assessment Mastery. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <title>👨‍🏫 Instructor Dashboard — Respiratory Mastery</title>
+  <!-- jsQR library for QR decoding -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     :root {
       --primary: #0D7377; --primary-dark: #095456; --secondary: #1E88E5;
@@ -305,6 +307,103 @@
     }
     .preview-box table { background: transparent; }
     .preview-box td { border: none; padding: 0.25rem 0.5rem; }
+
+    /* ---------- QR Scanner Styles ---------- */
+    .qr-scanner-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 1rem auto;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 1;
+    }
+    #qrVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .qr-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .qr-frame {
+      width: 70%;
+      height: 70%;
+      max-width: 320px;
+      max-height: 320px;
+      border: 3px solid #FFFFFF;
+      border-radius: 16px;
+      position: relative;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,0.4);
+    }
+    .qr-frame::before,
+    .qr-frame::after {
+      content: '';
+      position: absolute;
+      width: 30px; height: 30px;
+      border-color: #43A047;
+      border-style: solid;
+    }
+    .qr-frame::before {
+      top: -3px; left: -3px;
+      border-width: 4px 0 0 4px;
+      border-radius: 16px 0 0 0;
+    }
+    .qr-frame::after {
+      bottom: -3px; right: -3px;
+      border-width: 0 4px 4px 0;
+      border-radius: 0 0 16px 0;
+    }
+    .qr-scan-line {
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #43A047, transparent);
+      animation: scanline 2s linear infinite;
+    }
+    @keyframes scanline {
+      0% { top: 10%; }
+      50% { top: 90%; }
+      100% { top: 10%; }
+    }
+    .qr-status {
+      text-align: center;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+      min-height: 40px;
+    }
+    .qr-status.active { color: var(--success); font-weight: 600; }
+    .qr-status.error { color: var(--accent); font-weight: 600; }
+    .qr-upload-preview {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      margin: 1rem auto;
+      display: block;
+      box-shadow: var(--shadow);
+    }
+    .qr-camera-select {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      border: 2px solid #CFD8DC;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      width: 100%;
+      max-width: 480px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     @media print {
       .sidebar, .menu-toggle, .btn, .no-print { display: none !important; }
       .main-content { margin-left: 0; padding: 0; }
@@ -393,7 +492,7 @@
 <script>
 /* ============================================================
    INSTRUCTOR DASHBOARD — CORE LOGIC
-   Version 2.0 — Includes Student Data Import
+   Version 2.1 — Includes QR Code Scanner + Upload
    ============================================================ */
 
 const DB = {
@@ -410,6 +509,19 @@ const DB = {
     },
     activityLog: [],
   },
+};
+
+/* ---------- QR SCANNER STATE ---------- */
+const QRScanner = {
+  stream: null,
+  videoEl: null,
+  canvasEl: null,
+  canvasCtx: null,
+  rafId: null,
+  active: false,
+  lastScanAt: 0,
+  cooldownMs: 1500, // Don't re-scan the same code too fast
+  onDecoded: null,
 };
 
 /* ---------- PERSISTENCE ---------- */
@@ -518,6 +630,8 @@ function getAlertList() {
 
 /* ---------- NAVIGATION ---------- */
 function navigate(view) {
+  // Stop QR scanner when leaving import view
+  if (view !== 'import') stopQRScanner();
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.view === view);
   });
@@ -689,39 +803,167 @@ function renderRecentActivity() {
 }
 
 /* ============================================================
-   IMPORT DATA (NEW!)
+   IMPORT DATA — 5 methods now!
    ============================================================ */
 function renderImport(main) {
   main.innerHTML = `
     <div class="card">
       <h1>📥 Import Student Data</h1>
-      <p style="color:var(--gray);">Receive student progress via 4 methods.</p>
+      <p style="color:var(--gray);">Receive student progress via 5 methods.</p>
     </div>
 
     <div class="tabs" id="importTabs">
-      <button class="tab active" data-tab="auto">🖥️ Auto (Same Device)</button>
+      <button class="tab active" data-tab="qr-camera">📷 QR Camera</button>
+      <button class="tab" data-tab="qr-upload">🖼️ QR Image</button>
       <button class="tab" data-tab="paste">📋 Paste Code</button>
       <button class="tab" data-tab="upload">📁 Upload JSON</button>
-      <button class="tab" data-tab="manual">✏️ Manual Entry</button>
+      <button class="tab" data-tab="auto">🖥️ Auto (Same Device)</button>
+      <button class="tab" data-tab="manual">✏️ Manual</button>
     </div>
 
     <div id="importContent">
-      ${renderImportTab('auto')}
+      ${renderImportTab('qr-camera')}
     </div>
   `;
 
   document.querySelectorAll('#importTabs .tab').forEach(t => {
     t.addEventListener('click', () => {
+      // Stop scanner when switching tabs
+      stopQRScanner();
       document.querySelectorAll('#importTabs .tab').forEach(x => x.classList.remove('active'));
       t.classList.add('active');
       document.getElementById('importContent').innerHTML = renderImportTab(t.dataset.tab);
       attachImportHandlers(t.dataset.tab);
     });
   });
-  attachImportHandlers('auto');
+  attachImportHandlers('qr-camera');
 }
 
 function renderImportTab(tab) {
+  /* ============ TAB: QR CAMERA ============ */
+  if (tab === 'qr-camera') {
+    return `
+      <div class="card">
+        <h2>📷 Scan Student QR Code (Camera)</h2>
+        <p>Point your camera at the student's QR code. It will auto-detect and decode.</p>
+
+        <div class="callout callout-info">
+          <strong>📱 Best for:</strong> Scanning students' phones in class. Works on any device with a camera (phone, tablet, laptop).
+          <br><strong>🔒 Privacy:</strong> All scanning happens on your device. Nothing is sent to any server.
+        </div>
+
+        <select class="qr-camera-select" id="qrCameraSelect" style="display:none;">
+          <option value="">Default camera</option>
+        </select>
+
+        <div class="qr-scanner-container" id="qrScannerContainer" style="display:none;">
+          <video id="qrVideo" playsinline muted></video>
+          <div class="qr-overlay">
+            <div class="qr-frame">
+              <div class="qr-scan-line"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-status" id="qrStatus">Click "Start Camera" to begin scanning.</div>
+
+        <div class="flex gap-1 mt-2" style="justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="qrStartBtn" onclick="startQRScanner()">📷 Start Camera</button>
+          <button class="btn btn-outline hidden" id="qrStopBtn" onclick="stopQRScanner()">⏹️ Stop Camera</button>
+          <button class="btn btn-outline" id="qrSwitchBtn" onclick="switchQRCamera()" style="display:none;">🔄 Switch Camera</button>
+        </div>
+
+        <div id="qrResult"></div>
+
+        <div class="callout callout-warning mt-2">
+          <strong>💡 Tips for best scanning:</strong>
+          <ul style="margin-left:1.5rem;margin-top:0.5rem;">
+            <li>Hold the QR code steady inside the frame</li>
+            <li>Ensure good lighting</li>
+            <li>Keep the QR flat (not angled)</li>
+            <li>Move closer if it doesn't detect within 5 seconds</li>
+          </ul>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ============ TAB: QR IMAGE UPLOAD ============ */
+  if (tab === 'qr-upload') {
+    return `
+      <div class="card">
+        <h2>🖼️ Upload QR Code Image</h2>
+        <p>If a student sent you a screenshot of their QR code, upload it here. We'll decode it automatically.</p>
+
+        <div class="callout callout-info">
+          <strong>💡 Best for:</strong> When a student sends you a screenshot of their QR via Messenger, email, or Google Classroom.
+        </div>
+
+        <div class="drop-zone" id="qrImageDropZone">
+          <div class="drop-icon">🖼️</div>
+          <div class="drop-title">Drop QR image here</div>
+          <div class="drop-hint">or click to browse — PNG, JPG, or WEBP</div>
+          <input type="file" id="qrImageInput" accept="image/*" style="display:none;" />
+        </div>
+
+        <div class="qr-status" id="qrImageStatus"></div>
+        <div id="qrImagePreview"></div>
+        <div id="qrImageResult"></div>
+
+        <div class="callout callout-warning mt-2">
+          <strong>⚠️ Note:</strong> For best results, the QR code should be:
+          <ul style="margin-left:1.5rem;margin-top:0.5rem;">
+            <li>Clear and not blurry</li>
+            <li>Not cropped (full QR visible)</li>
+            <li>High contrast (dark QR on light background)</li>
+          </ul>
+        </div>
+      </div>
+    `;
+  }
+
+  /* ============ TAB: PASTE CODE ============ */
+  if (tab === 'paste') {
+    return `
+      <div class="card">
+        <h2>📋 Paste Student Code</h2>
+        <p>When a student uses their own device, they'll generate a <strong>Base64 code</strong>. Ask them to send it to you via Messenger/email. Paste it here.</p>
+
+        <div class="form-group">
+          <label>Paste the code here:</label>
+          <textarea id="pasteCode" class="paste-area" placeholder="Paste the long code the student sent you..."></textarea>
+        </div>
+
+        <div class="flex gap-1">
+          <button class="btn btn-primary" onclick="processPastedCode()">✅ Decode & Preview</button>
+          <button class="btn btn-outline" onclick="document.getElementById('pasteCode').value=''">Clear</button>
+        </div>
+
+        <div id="pastePreview"></div>
+      </div>
+    `;
+  }
+
+  /* ============ TAB: UPLOAD JSON ============ */
+  if (tab === 'upload') {
+    return `
+      <div class="card">
+        <h2>📁 Upload JSON File</h2>
+        <p>If a student downloaded their data as a JSON file and sent it to you (via email/Drive), upload it here.</p>
+
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-icon">📁</div>
+          <div class="drop-title">Drop JSON file here</div>
+          <div class="drop-hint">or click to browse</div>
+          <input type="file" id="fileInput" accept=".json,application/json" style="display:none;" />
+        </div>
+
+        <div id="uploadPreview"></div>
+      </div>
+    `;
+  }
+
+  /* ============ TAB: AUTO (SAME DEVICE) ============ */
   if (tab === 'auto') {
     const local = readLocalStudentProgress();
     return `
@@ -736,13 +978,9 @@ function renderImportTab(tab) {
               <tr><td><strong>Name:</strong></td><td>${escapeHtml(local.student.fullName || '—')}</td></tr>
               <tr><td><strong>Student No:</strong></td><td>${escapeHtml(local.student.studentNo || '—')}</td></tr>
               <tr><td><strong>Section:</strong></td><td>${escapeHtml(local.student.section || '—')}</td></tr>
+              <tr><td><strong>Group:</strong></td><td>${escapeHtml(local.student.group || '—')}</td></tr>
               <tr><td><strong>Email:</strong></td><td>${escapeHtml(local.student.email || '—')}</td></tr>
               <tr><td><strong>Units Completed:</strong></td><td>${Object.keys(local.progress || {}).length}/7</td></tr>
-              <tr><td><strong>Average Score:</strong></td><td>${(() => {
-                const all = Object.values(local.quizAttempts || {}).flat();
-                if (!all.length) return 0;
-                return Math.round(all.reduce((a,b)=>a+b,0)/all.length);
-              })()}%</td></tr>
             </table>
             <button class="btn btn-primary mt-2" onclick="importLocalProgress()">📥 Import This Student</button>
           </div>
@@ -767,45 +1005,7 @@ function renderImportTab(tab) {
     `;
   }
 
-  if (tab === 'paste') {
-    return `
-      <div class="card">
-        <h2>📋 Paste Student Code</h2>
-        <p>When a student uses their own device, they'll generate a <strong>Base64 code</strong>. Ask them to send it to you via Messenger/email. Paste it here.</p>
-
-        <div class="form-group">
-          <label>Paste the code here:</label>
-          <textarea id="pasteCode" class="paste-area" placeholder="Paste the long code the student sent you..."></textarea>
-        </div>
-
-        <div class="flex gap-1">
-          <button class="btn btn-primary" onclick="processPastedCode()">✅ Decode & Preview</button>
-          <button class="btn btn-outline" onclick="document.getElementById('pasteCode').value=''">Clear</button>
-        </div>
-
-        <div id="pastePreview"></div>
-      </div>
-    `;
-  }
-
-  if (tab === 'upload') {
-    return `
-      <div class="card">
-        <h2>📁 Upload JSON File</h2>
-        <p>If a student downloaded their data as a JSON file and sent it to you (via email/Drive), upload it here.</p>
-
-        <div class="drop-zone" id="dropZone">
-          <div class="drop-icon">📁</div>
-          <div class="drop-title">Drop JSON file here</div>
-          <div class="drop-hint">or click to browse</div>
-          <input type="file" id="fileInput" accept=".json,application/json" style="display:none;" />
-        </div>
-
-        <div id="uploadPreview"></div>
-      </div>
-    `;
-  }
-
+  /* ============ TAB: MANUAL ============ */
   if (tab === 'manual') {
     return `
       <div class="card">
@@ -821,6 +1021,50 @@ function renderImportTab(tab) {
 }
 
 function attachImportHandlers(tab) {
+  /* ---------- QR CAMERA ---------- */
+  if (tab === 'qr-camera') {
+    // Enumerate cameras (best effort)
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      navigator.mediaDevices.enumerateDevices().then(devices => {
+        const cams = devices.filter(d => d.kind === 'videoinput');
+        if (cams.length > 1) {
+          const sel = document.getElementById('qrCameraSelect');
+          if (sel) {
+            sel.innerHTML = cams.map((c, i) =>
+              `<option value="${c.deviceId}">${c.label || 'Camera ' + (i+1)}</option>`
+            ).join('');
+            sel.style.display = 'block';
+            sel.addEventListener('change', () => {
+              if (QRScanner.active) {
+                stopQRScanner().then(() => startQRScanner());
+              }
+            });
+          }
+        }
+      }).catch(() => {});
+    }
+  }
+
+  /* ---------- QR IMAGE UPLOAD ---------- */
+  if (tab === 'qr-upload') {
+    const dz = document.getElementById('qrImageDropZone');
+    const fi = document.getElementById('qrImageInput');
+    if (!dz || !fi) return;
+
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dz.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleQRImage(e.dataTransfer.files[0]);
+    });
+    fi.addEventListener('change', (e) => {
+      if (e.target.files.length) handleQRImage(e.target.files[0]);
+    });
+  }
+
+  /* ---------- JSON UPLOAD ---------- */
   if (tab === 'upload') {
     const dz = document.getElementById('dropZone');
     const fi = document.getElementById('fileInput');
@@ -840,19 +1084,326 @@ function attachImportHandlers(tab) {
   }
 }
 
-function decodeStudentCode(code) {
+/* ============================================================
+   QR CAMERA SCANNER
+   ============================================================ */
+async function startQRScanner() {
+  const container = document.getElementById('qrScannerContainer');
+  const video = document.getElementById('qrVideo');
+  const startBtn = document.getElementById('qrStartBtn');
+  const stopBtn = document.getElementById('qrStopBtn');
+  const switchBtn = document.getElementById('qrSwitchBtn');
+  const statusEl = document.getElementById('qrStatus');
+  const resultEl = document.getElementById('qrResult');
+
+  if (!container || !video) return;
+
+  // Clear previous result
+  if (resultEl) resultEl.innerHTML = '';
+
   try {
-    // Try base64 decode
-    const json = decodeURIComponent(escape(atob(code.trim())));
-    return JSON.parse(json);
-  } catch (e) {
-    // Try plain JSON
-    try {
-      return JSON.parse(code.trim());
-    } catch (e2) {
-      return null;
+    // Check for HTTPS or localhost (camera requires secure context)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      throw new Error('Camera requires HTTPS. Make sure your GitHub Pages site uses HTTPS (it does by default).');
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Camera not supported in this browser. Try Chrome, Edge, or Safari.');
+    }
+
+    // Select camera (prefer back camera on mobile)
+    const camSelect = document.getElementById('qrCameraSelect');
+    const deviceId = camSelect?.value || undefined;
+
+    const constraints = {
+      video: deviceId
+        ? { deviceId: { exact: deviceId } }
+        : { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+    };
+
+    statusEl.className = 'qr-status active';
+    statusEl.textContent = '⏳ Requesting camera access...';
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    QRScanner.stream = stream;
+    QRScanner.videoEl = video;
+    QRScanner.active = true;
+
+    video.srcObject = stream;
+    await video.play();
+
+    container.style.display = 'block';
+    if (startBtn) startBtn.classList.add('hidden');
+    if (stopBtn) stopBtn.classList.remove('hidden');
+    if (switchBtn) switchBtn.style.display = 'inline-flex';
+
+    statusEl.className = 'qr-status active';
+    statusEl.textContent = '📷 Scanning... Point at a QR code';
+
+    // Set up canvas for decoding
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    QRScanner.canvasEl = canvas;
+    QRScanner.canvasCtx = ctx;
+
+    // Start scanning loop
+    scanFrame();
+
+  } catch (err) {
+    console.error('QR Scanner error:', err);
+    statusEl.className = 'qr-status error';
+    let msg = err.message || 'Could not start camera.';
+    if (err.name === 'NotAllowedError') {
+      msg = '❌ Camera permission denied. Please allow camera access and try again.';
+    } else if (err.name === 'NotFoundError') {
+      msg = '❌ No camera found on this device. Try the "QR Image" tab instead.';
+    } else if (err.name === 'NotReadableError') {
+      msg = '❌ Camera is in use by another app. Close it and try again.';
+    }
+    statusEl.textContent = msg;
+    toast(msg, 'error');
+  }
+}
+
+function scanFrame() {
+  if (!QRScanner.active) return;
+  const video = QRScanner.videoEl;
+  const canvas = QRScanner.canvasEl;
+  const ctx = QRScanner.canvasCtx;
+
+  if (!video || !canvas || !ctx) return;
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    QRScanner.rafId = requestAnimationFrame(scanFrame);
+    return;
+  }
+
+  // Adjust canvas to video size
+  if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
+
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+  if (window.jsQR) {
+    const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'dontInvert',
+    });
+
+    if (code && code.data) {
+      const now = Date.now();
+      if (now - QRScanner.lastScanAt > QRScanner.cooldownMs) {
+        QRScanner.lastScanAt = now;
+        handleQRDecoded(code.data, 'camera');
+      }
     }
   }
+
+  QRScanner.rafId = requestAnimationFrame(scanFrame);
+}
+
+function stopQRScanner() {
+  QRScanner.active = false;
+  if (QRScanner.rafId) {
+    cancelAnimationFrame(QRScanner.rafId);
+    QRScanner.rafId = null;
+  }
+  if (QRScanner.stream) {
+    QRScanner.stream.getTracks().forEach(t => t.stop());
+    QRScanner.stream = null;
+  }
+  const video = document.getElementById('qrVideo');
+  if (video) video.srcObject = null;
+  const container = document.getElementById('qrScannerContainer');
+  if (container) container.style.display = 'none';
+  const startBtn = document.getElementById('qrStartBtn');
+  const stopBtn = document.getElementById('qrStopBtn');
+  const switchBtn = document.getElementById('qrSwitchBtn');
+  const statusEl = document.getElementById('qrStatus');
+  if (startBtn) startBtn.classList.remove('hidden');
+  if (stopBtn) stopBtn.classList.add('hidden');
+  if (switchBtn) switchBtn.style.display = 'none';
+  if (statusEl) {
+    statusEl.className = 'qr-status';
+    statusEl.textContent = 'Click "Start Camera" to begin scanning.';
+  }
+  return Promise.resolve();
+}
+
+async function switchQRCamera() {
+  const sel = document.getElementById('qrCameraSelect');
+  if (!sel) return;
+  const cams = Array.from(sel.options);
+  if (cams.length < 2) return;
+  const currentIdx = sel.selectedIndex;
+  const nextIdx = (currentIdx + 1) % cams.length;
+  sel.selectedIndex = nextIdx;
+  await stopQRScanner();
+  await startQRScanner();
+}
+
+/* ============================================================
+   QR IMAGE UPLOAD HANDLER
+   ============================================================ */
+function handleQRImage(file) {
+  const statusEl = document.getElementById('qrImageStatus');
+  const previewEl = document.getElementById('qrImagePreview');
+  const resultEl = document.getElementById('qrImageResult');
+  if (!file) return;
+
+  statusEl.className = 'qr-status';
+  statusEl.textContent = '⏳ Reading image...';
+  previewEl.innerHTML = '';
+  resultEl.innerHTML = '';
+
+  if (!file.type.startsWith('image/')) {
+    statusEl.className = 'qr-status error';
+    statusEl.textContent = '❌ Please upload an image file (PNG, JPG, etc.)';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      // Show preview
+      previewEl.innerHTML = `<img src="${e.target.result}" class="qr-upload-preview" alt="Uploaded QR" />`;
+
+      // Decode
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      if (!window.jsQR) {
+        statusEl.className = 'qr-status error';
+        statusEl.textContent = '❌ QR library not loaded. Check your internet connection.';
+        return;
+      }
+
+      // Try decoding — first attempt with normal inversion
+      let code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'attemptBoth',
+      });
+
+      // If failed, try with scaled-up image (helps with small/blurry QRs)
+      if (!code) {
+        const scale = Math.min(2, 1500 / Math.max(canvas.width, canvas.height));
+        if (scale > 1) {
+          const scaled = document.createElement('canvas');
+          scaled.width = Math.round(canvas.width * scale);
+          scaled.height = Math.round(canvas.height * scale);
+          const sctx = scaled.getContext('2d', { willReadFrequently: true });
+          sctx.imageSmoothingEnabled = false;
+          sctx.drawImage(canvas, 0, 0, scaled.width, scaled.height);
+          const sdata = sctx.getImageData(0, 0, scaled.width, scaled.height);
+          code = window.jsQR(sdata.data, sdata.width, sdata.height, {
+            inversionAttempts: 'attemptBoth',
+          });
+        }
+      }
+
+      if (code && code.data) {
+        statusEl.className = 'qr-status active';
+        statusEl.textContent = '✅ QR decoded successfully!';
+        handleQRDecoded(code.data, 'image', resultEl);
+      } else {
+        statusEl.className = 'qr-status error';
+        statusEl.textContent = '❌ Could not read QR code. Try a clearer image or use the Camera tab.';
+      }
+    };
+    img.onerror = () => {
+      statusEl.className = 'qr-status error';
+      statusEl.textContent = '❌ Could not load image.';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============================================================
+   QR DECODE HANDLER (shared by camera + image)
+   ============================================================ */
+function handleQRDecoded(qrData, source, targetEl) {
+  // qrData is the string embedded in the QR
+  // It could be: a raw Base64 code, a JSON string, or a short URL like the qrserver output
+
+  // First, check if it's a qrserver URL (not the actual data)
+  if (typeof qrData === 'string' && qrData.startsWith('http')) {
+    // Some QR codes just encode a URL. Try to fetch its text content.
+    // But most likely this is not what we want.
+  }
+
+  // Try to decode as our student record
+  const data = decodeStudentCode(qrData);
+
+  if (!data || !data.student) {
+    // Show raw data so instructor can inspect
+    const html = `
+      <div class="callout callout-danger">
+        <strong>❌ Could not recognize this QR code.</strong><br>
+        The QR was decoded, but it doesn't look like a student record.
+        <details style="margin-top:0.5rem;">
+          <summary style="cursor:pointer;">Show raw data</summary>
+          <pre style="background:var(--light);padding:0.75rem;border-radius:6px;font-size:0.75rem;overflow:auto;max-height:200px;margin-top:0.5rem;">${escapeHtml(String(qrData).slice(0, 2000))}</pre>
+        </details>
+      </div>
+    `;
+    if (targetEl) targetEl.innerHTML = html;
+    else {
+      const el = document.getElementById('qrResult');
+      if (el) el.innerHTML = html;
+    }
+    toast('QR code not recognized as student data.', 'error');
+    return;
+  }
+
+  // Pause scanning (if from camera) so we don't re-scan
+  if (source === 'camera') {
+    // Brief pause
+    setTimeout(() => { /* scanner continues */ }, 100);
+  }
+
+  // Show preview
+  const targetId = targetEl ? null : 'qrResult';
+  const container = targetEl || document.getElementById(targetId);
+  if (container) {
+    showImportPreview(data, container.id, source === 'camera');
+  } else if (targetId) {
+    showImportPreview(data, targetId, source === 'camera');
+  }
+
+  toast('✅ QR code decoded successfully!', 'success');
+}
+
+/* ============================================================
+   CODE DECODING (shared)
+   ============================================================ */
+function decodeStudentCode(code) {
+  if (!code) return null;
+  const str = String(code).trim();
+
+  // Try base64 decode
+  try {
+    const json = decodeURIComponent(escape(atob(str)));
+    const parsed = JSON.parse(json);
+    if (parsed && parsed.student) return parsed;
+  } catch (e) { /* not base64 */ }
+
+  // Try plain JSON
+  try {
+    const parsed = JSON.parse(str);
+    if (parsed && parsed.student) return parsed;
+  } catch (e) { /* not JSON */ }
+
+  return null;
 }
 
 function processPastedCode() {
@@ -881,25 +1432,38 @@ function handleJSONFile(file) {
   reader.readAsText(file);
 }
 
-function showImportPreview(data, containerId) {
+/* ============================================================
+   IMPORT PREVIEW (shared by all methods)
+   ============================================================ */
+function showImportPreview(data, containerId, fromCamera) {
   const container = document.getElementById(containerId);
+  if (!container) return;
   const s = data.student;
   const pct = getPercentFromData(data);
   const avg = getAvgFromData(data);
 
-  // Detect duplicate
   const existing = DB.state.students.find(x =>
     (s.studentNo && x.studentNo === s.studentNo) ||
     (s.email && x.email === s.email)
   );
 
+  // If from camera, temporarily pause the scanline so it doesn't keep scanning
+  if (fromCamera) {
+    const statusEl = document.getElementById('qrStatus');
+    if (statusEl) {
+      statusEl.className = 'qr-status active';
+      statusEl.textContent = '✅ QR detected! Review the preview below.';
+    }
+  }
+
   container.innerHTML = `
     <div class="preview-box">
       <div class="preview-title">✅ Student Data Decoded Successfully</div>
       <table>
-        <tr><td><strong>Name:</strong></td><td>${escapeHtml(s.fullName || (s.firstName + ' ' + s.lastName))}</td></tr>
+        <tr><td><strong>Name:</strong></td><td>${escapeHtml(s.fullName || ((s.firstName || '') + ' ' + (s.lastName || '')).trim())}</td></tr>
         <tr><td><strong>Student No:</strong></td><td>${escapeHtml(s.studentNo || '—')}</td></tr>
         <tr><td><strong>Section:</strong></td><td>${escapeHtml(s.section || '—')}</td></tr>
+        <tr><td><strong>Group Number:</strong></td><td>${escapeHtml(s.group || '—')}</td></tr>
         <tr><td><strong>Email:</strong></td><td>${escapeHtml(s.email || '—')}</td></tr>
         <tr><td><strong>Registered:</strong></td><td>${escapeHtml(s.registeredAt ? new Date(s.registeredAt).toLocaleString() : '—')}</td></tr>
         <tr><td><strong>Last Active:</strong></td><td>${escapeHtml(s.lastActive ? new Date(s.lastActive).toLocaleString() : '—')}</td></tr>
@@ -910,17 +1474,34 @@ function showImportPreview(data, containerId) {
       ${existing ? `
         <div class="callout callout-warning mt-2">
           ⚠️ <strong>This student already exists in your roster:</strong> ${escapeHtml(existing.name)}<br>
-          Do you want to <strong>update</strong> their record or <strong>create a new one</strong>?
+          Update their record or create a new one?
         </div>
-        <div class="flex gap-1 mt-2">
+        <div class="flex gap-1 mt-2" style="flex-wrap:wrap;">
           <button class="btn btn-primary" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "update", "${existing.id}")'>🔄 Update Existing</button>
           <button class="btn btn-outline" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "new", null)'>➕ Create New</button>
         </div>
       ` : `
         <button class="btn btn-primary mt-2" onclick='confirmImport(${JSON.stringify(JSON.stringify(data))}, "new", null)'>✅ Add to Roster</button>
       `}
+
+      ${fromCamera ? `
+        <div class="flex gap-1 mt-2" style="flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="clearQRResult()">🔄 Scan Another</button>
+        </div>
+      ` : ''}
     </div>
   `;
+}
+
+function clearQRResult() {
+  const el = document.getElementById('qrResult');
+  if (el) el.innerHTML = '';
+  const statusEl = document.getElementById('qrStatus');
+  if (statusEl) {
+    statusEl.className = 'qr-status active';
+    statusEl.textContent = '📷 Scanning... Point at a QR code';
+  }
+  QRScanner.lastScanAt = 0;
 }
 
 function getPercentFromData(data) {
@@ -946,6 +1527,7 @@ function confirmImport(dataStr, mode, existingId) {
     lastName: s.lastName || '',
     studentNo: s.studentNo || '',
     section: s.section || '',
+    group: s.group || '',
     email: s.email || '',
     enrolled: todayISO(),
     manual: false,
@@ -970,6 +1552,8 @@ function confirmImport(dataStr, mode, existingId) {
 
   saveDB();
   updateAlertBadge();
+  // Stop the camera if it was active
+  stopQRScanner();
   navigate('roster');
 }
 
@@ -980,13 +1564,11 @@ function importLocalProgress() {
   try { data = JSON.parse(raw); } catch (e) { return toast('Could not parse local data.', 'error'); }
 
   if (!data.student || !data.student.fullName) {
-    // Prompt for name if not registered
     const name = prompt('This student did not register. Enter their name:');
     if (!name) return;
-    data.student = { fullName: name, studentNo: '', section: '', email: '' };
+    data.student = { fullName: name, studentNo: '', section: '', group: '', email: '' };
   }
 
-  // Check duplicate
   const existing = DB.state.students.find(x =>
     (data.student.studentNo && x.studentNo === data.student.studentNo) ||
     (data.student.email && x.email === data.student.email)
@@ -1076,6 +1658,7 @@ function renderRoster(main) {
             <tr>
               <th>Student</th>
               <th>Section</th>
+              <th>Group</th>
               <th>Email</th>
               <th>Progress</th>
               <th>Avg Score</th>
@@ -1085,7 +1668,7 @@ function renderRoster(main) {
             </tr>
           </thead>
           <tbody id="rosterBody">
-            ${students.length === 0 ? `<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:2rem;">No students yet. Click "Add" or "Import" to begin.</td></tr>` : ''}
+            ${students.length === 0 ? `<tr><td colspan="9" style="text-align:center;color:var(--gray);padding:2rem;">No students yet. Click "Add" or "Import" to begin.</td></tr>` : ''}
             ${students.map(s => renderStudentRow(s)).join('')}
           </tbody>
         </table>
@@ -1106,6 +1689,7 @@ function renderStudentRow(s) {
       <br><small style="color:var(--gray);">${escapeHtml(s.studentNo || s.id)}</small>
     </td>
     <td>${escapeHtml(s.section || '—')}</td>
+    <td>${escapeHtml(s.group || '—')}</td>
     <td><small>${escapeHtml(s.email || '—')}</small></td>
     <td>
       <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width:${pct}%"></div></div>
@@ -1127,7 +1711,7 @@ function filterRoster() {
   document.querySelectorAll('#rosterBody tr').forEach((tr, i) => {
     const s = DB.state.students[i];
     if (!s) return;
-    const match = (s.name + ' ' + (s.studentNo || '') + ' ' + (s.section || '') + ' ' + (s.email || '')).toLowerCase().includes(q);
+    const match = (s.name + ' ' + (s.studentNo || '') + ' ' + (s.section || '') + ' ' + (s.group || '') + ' ' + (s.email || '')).toLowerCase().includes(q);
     tr.style.display = match ? '' : 'none';
   });
 }
@@ -1163,22 +1747,26 @@ function renderAddStudent(main, editId = null) {
             <input type="text" id="f_section" value="${escapeHtml(s?.section || '')}" placeholder="BSN 3-A" />
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="f_email" value="${escapeHtml(s?.email || '')}" placeholder="student@tsu.edu.ph" />
+            <label>Group Number</label>
+            <input type="text" id="f_group" value="${escapeHtml(s?.group || '')}" placeholder="Group 1" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="f_email" value="${escapeHtml(s?.email || '')}" placeholder="student@tsu.edu.ph" />
+          </div>
+          <div class="form-group">
             <label>Date Enrolled</label>
             <input type="date" id="f_enrolled" value="${escapeHtml(s?.enrolled || todayISO())}" />
           </div>
-          <div class="form-group">
-            <label>Mode</label>
-            <select id="f_manual">
-              <option value="false" ${!s?.manual ? 'selected' : ''}>Auto (syncs with student app)</option>
-              <option value="true" ${s?.manual ? 'selected' : ''}>Manual (instructor enters grades)</option>
-            </select>
-          </div>
+        </div>
+        <div class="form-group">
+          <label>Mode</label>
+          <select id="f_manual">
+            <option value="false" ${!s?.manual ? 'selected' : ''}>Auto (syncs with student app)</option>
+            <option value="true" ${s?.manual ? 'selected' : ''}>Manual (instructor enters grades)</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Notes</label>
@@ -1199,6 +1787,7 @@ function saveStudent(event, editId) {
     name: document.getElementById('f_name').value.trim(),
     studentNo: document.getElementById('f_studentNo').value.trim(),
     section: document.getElementById('f_section').value.trim(),
+    group: document.getElementById('f_group').value.trim(),
     email: document.getElementById('f_email').value.trim(),
     enrolled: document.getElementById('f_enrolled').value,
     manual: document.getElementById('f_manual').value === 'true',
@@ -1255,6 +1844,7 @@ function viewStudent(id) {
 
     <p><strong>Student No:</strong> ${escapeHtml(s.studentNo || '—')}</p>
     <p><strong>Section:</strong> ${escapeHtml(s.section || '—')}</p>
+    <p><strong>Group Number:</strong> ${escapeHtml(s.group || '—')}</p>
     <p><strong>Email:</strong> ${escapeHtml(s.email || '—')}</p>
     <p><strong>Enrolled:</strong> ${fmtDate(s.enrolled)}</p>
     <p><strong>Last Active:</strong> ${fmtDate(s.lastActive)}</p>
@@ -1354,15 +1944,16 @@ function renderGradeEntry(main) {
 
     <div class="card">
       <div class="table-wrap"><table>
-        <thead><tr><th>Student</th><th>Section</th><th>Score (%)</th><th>Units Completed</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Student</th><th>Section</th><th>Group</th><th>Score (%)</th><th>Units Completed</th><th>Notes</th></tr></thead>
         <tbody>
-          ${students.length === 0 ? `<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:2rem;">No students yet.</td></tr>` : ''}
+          ${students.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem;">No students yet.</td></tr>` : ''}
           ${students.map(s => {
             const avg = getStudentAverage(s);
             const unitsDone = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'].filter(u => s.progress?.[u]?.completed).length;
             return `<tr>
               <td><strong>${escapeHtml(s.name)}</strong><br><small style="color:var(--gray);">${escapeHtml(s.studentNo || s.id)}</small></td>
               <td>${escapeHtml(s.section || '—')}</td>
+              <td>${escapeHtml(s.group || '—')}</td>
               <td><input type="number" min="0" max="100" value="${avg}" data-score="${s.id}" style="width:90px;padding:0.4rem;border:2px solid #CFD8DC;border-radius:6px;" /></td>
               <td><input type="number" min="0" max="7" value="${unitsDone}" data-units="${s.id}" style="width:70px;padding:0.4rem;border:2px solid #CFD8DC;border-radius:6px;" /></td>
               <td><input type="text" value="${escapeHtml(s.notes || '')}" data-notes="${s.id}" style="width:100%;min-width:160px;padding:0.4rem;border:2px solid #CFD8DC;border-radius:6px;" /></td>
@@ -1613,6 +2204,7 @@ function generateClassReport() {
       <td>${escapeHtml(s.name)}</td>
       <td>${escapeHtml(s.studentNo || '—')}</td>
       <td>${escapeHtml(s.section || '—')}</td>
+      <td>${escapeHtml(s.group || '—')}</td>
       <td>${pct}%</td>
       <td>${avg}%</td>
       <td>${status}</td>
@@ -1626,8 +2218,8 @@ function generateClassReport() {
       <strong>Total Students:</strong> ${students.length}
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Progress</th><th>Avg</th><th>Status</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--gray);">No students.</td></tr>'}</tbody>
+      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Group</th><th>Progress</th><th>Avg</th><th>Status</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--gray);">No students.</td></tr>'}</tbody>
     </table></div>
   `);
 }
@@ -1659,16 +2251,16 @@ function generateAtRiskReport() {
 function generateMasteryReport() {
   const mastered = DB.state.students.filter(s => getStudentStatus(s).label === 'Mastered');
   const rows = mastered.map(s => `<tr>
-    <td>${escapeHtml(s.name)}</td>
-    <td>${escapeHtml(s.studentNo || '—')}</td>
-    <td>${escapeHtml(s.section || '—')}</td>
+    <td ≥>${escapeHtml(s.name)}</td90>
+    <td>${escapeHtml(s.st%udentNo || '—') average}</td>
+    <td>${escapeHtml).
+(s.section || '—')}</td>
     <td>${getStudentAverage(s)}%</td>
     <td>${fmtDate(s.lastActive)}</td>
   </tr>`).join('');
   showReport('Mastery Report', `
     <div class="callout callout-success">
-      <strong>${mastered.length}</strong> student(s) achieved mastery (100% progress + ≥90% average).
-    </div>
+      <strong>${mastered.length}</strong> student(s) achieved mastery (100% progress +    </div>
     <div class="table-wrap"><table>
       <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Avg</th><th>Completed</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--gray);">No students have achieved mastery yet.</td></tr>'}</tbody>
@@ -1750,12 +2342,12 @@ function renderExport(main) {
 function exportCSV() {
   const students = DB.state.students;
   if (!students.length) return toast('No data to export.', 'warning');
-  const headers = ['Name','StudentNo','Section','Email','Enrolled','Progress%','AvgScore','Status','Unit1','Unit2','Unit3','Unit4','Unit5','Unit6','Unit7','Notes'];
+  const headers = ['Name','StudentNo','Section','Group','Email','Enrolled','Progress%','AvgScore','Status','Unit1','Unit2','Unit3','Unit4','Unit5','Unit6','Unit7','Notes'];
   const rows = students.map(s => {
     const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
     const unitScores = units.map(u => s.quizAttempts?.[u]?.length ? Math.max(...s.quizAttempts[u]) : '');
     return [
-      s.name, s.studentNo || '', s.section || '', s.email || '', s.enrolled || '',
+      s.name, s.studentNo || '', s.section || '', s.group || '', s.email || '', s.enrolled || '',
       getStudentPercent(s), getStudentAverage(s), getStudentStatus(s).label,
       ...unitScores, (s.notes || '').replace(/\n/g, ' ')
     ];
@@ -1899,32 +2491,64 @@ function renderHelp(main) {
 
     <div class="card">
       <h3>How to Receive Student Data</h3>
-      <p>You have <strong>4 ways</strong> to receive student progress:</p>
+      <p>You have <strong>6 ways</strong> to receive student progress:</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Method</th><th>Best for</th><th>How</th></tr></thead>
         <tbody>
           <tr>
-            <td><strong>🖥️ Auto (Same Device)</strong></td>
-            <td>Shared lab computers</td>
-            <td>Student completes on this computer → you click "Import"</td>
+            <td><strong>📷 QR Camera</strong></td>
+            <td>Scanning students' phones in class</td>
+            <td>Student shows QR → Point camera → Auto-detected</td>
+          </tr>
+          <tr>
+            <td><strong>🖼️ QR Image</strong></td>
+            <td>Screenshots sent via Messenger</td>
+            <td>Student sends screenshot → Upload image → Auto-decoded</td>
           </tr>
           <tr>
             <td><strong>📋 Paste Code</strong></td>
-            <td>Students on own devices</td>
-            <td>Student sends you a code → paste in "Import Data" → "Paste Code"</td>
+            <td>Copy-paste via chat</td>
+            <td>Student sends text code → Paste → Decoded</td>
           </tr>
           <tr>
             <td><strong>📁 Upload JSON</strong></td>
-            <td>Students on own devices</td>
-            <td>Student downloads JSON → sends to you → upload it</td>
+            <td>Files sent via email/Drive</td>
+            <td>Student downloads JSON → Send → Upload</td>
+          </tr>
+          <tr>
+            <td><strong>🖥️ Auto (Same Device)</strong></td>
+            <td>Shared lab computers</td>
+            <td>Student completes on this computer → Auto-imports</td>
           </tr>
           <tr>
             <td><strong>✏️ Manual Entry</strong></td>
             <td>Any scenario</td>
-            <td>Type in scores by hand in "Grade Entry"</td>
+            <td>Type in scores by hand</td>
           </tr>
         </tbody>
       </table></div>
+    </div>
+
+    <div class="card">
+      <h3>📷 QR Camera Tips</h3>
+      <ul style="margin-left:1.5rem;">
+        <li><strong>Grant camera permission</strong> when prompted by the browser.</li>
+        <li><strong>Hold steady</strong> — QR should fill the frame.</li>
+        <li><strong>Good lighting</strong> makes scanning faster.</li>
+        <li>On mobile, the <strong>back camera</strong> is used by default (better quality).</li>
+        <li>If it doesn't detect within 5 seconds, move closer or adjust angle.</li>
+        <li>Click <strong>"Switch Camera"</strong> to use a different camera on your device.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>🖼️ QR Image Upload Tips</h3>
+      <ul style="margin-left:1.5rem;">
+        <li>Best for screenshots sent via chat/email.</li>
+        <li>QR code must be <strong>clear, complete, and not cropped</strong>.</li>
+        <li>Black QR on white background works best.</li>
+        <li>The system automatically <strong>upscales blurry images</strong> for better detection.</li>
+      </ul>
     </div>
 
     <div class="card">
@@ -1939,22 +2563,6 @@ function renderHelp(main) {
           <tr><td>Multiple Failures</td><td>3+ failed attempts on the same unit</td></tr>
         </tbody>
       </table></div>
-    </div>
-
-    <div class="card">
-      <h3>Workflow Recommendation</h3>
-      <ol style="margin-left:1.5rem;line-height:1.9;">
-        <li>Students open the <strong>Student App</strong> and register with name, student no, section, and TSU email.</li>
-        <li>Students complete the 7 units, games, and capstone exam.</li>
-        <li>Students click <strong>"Send My Progress"</strong> and either:
-          <ul style="margin-left:1.5rem;">
-            <li>Let you import directly if on the same computer</li>
-            <li>Send you a code/QR/JSON file</li>
-          </ul>
-        </li>
-        <li>You import via <strong>"📥 Import Data"</strong> tab.</li>
-        <li>Once all students are in, open the <strong>Gradebook</strong> to print the class record.</li>
-      </ol>
     </div>
 
     <div class="card">
@@ -1999,6 +2607,9 @@ function init() {
   updateAlertBadge();
 }
 document.addEventListener('DOMContentLoaded', init);
+
+// Stop camera when leaving the page
+window.addEventListener('beforeunload', () => { stopQRScanner(); });
 </script>
 </body>
 </html>
