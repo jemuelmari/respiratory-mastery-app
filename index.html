@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0D7377" />
-  <meta name="description" content="Respiratory Assessment Mastery App v1.5 — NCM 101B Lab. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
+  <meta name="description" content="Respiratory Assessment Mastery App v1.6 — NCM 101B Lab. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <title>🫁 Respiratory Assessment Mastery</title>
+  <title>🫁 Respiratory Assessment Mastery v1.6</title>
   <style>
     :root {
       --primary: #0D7377; --primary-dark: #095456; --secondary: #1E88E5;
@@ -33,7 +33,6 @@
     h4 { font-size: 1.1rem; color: var(--dark); margin: 0.75rem 0 0.4rem; }
     p { margin-bottom: 0.75rem; }
     a { color: var(--secondary); text-decoration: none; }
-    a:hover { text-decoration: underline; }
     .app-container { display: flex; min-height: 100vh; }
     .sidebar {
       width: 280px; background: var(--primary); color: var(--white);
@@ -63,7 +62,6 @@
     }
     .student-chip .chip-btn:hover { background: rgba(255,255,255,0.3); }
     .student-chip .chip-btn.danger { background: rgba(229, 57, 53, 0.7); }
-    .student-chip .chip-btn.danger:hover { background: rgba(229, 57, 53, 0.9); }
     .nav-section { margin-bottom: 1.25rem; }
     .nav-section-title {
       font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
@@ -299,7 +297,7 @@
     .toast.error { background: var(--accent); }
     .toast.warning { background: var(--warning); }
 
-    /* Registration / Auth screen */
+    /* Auth screen */
     .registration-screen {
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
       padding: 1.5rem; background: linear-gradient(135deg, #0D7377, #1E88E5);
@@ -322,7 +320,7 @@
       font-family: var(--font-head); font-weight: 600;
       font-size: 0.82rem; transition: all 0.2s; z-index: 5;
     }
-    .back-btn:hover { background: var(--primary); color: var(--white); transform: translateX(-2px); }
+    .back-btn:hover { background: var(--primary); color: var(--white); }
     .auth-tabs {
       display: flex; gap: 0.35rem; margin-bottom: 1.25rem;
       background: var(--light); padding: 0.3rem; border-radius: 10px;
@@ -334,7 +332,6 @@
       font-size: 0.9rem; color: var(--gray); transition: all 0.2s;
     }
     .auth-tab.active { background: var(--white); color: var(--primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .auth-tab:hover:not(.active) { color: var(--dark); }
     .saved-students { margin-top: 1rem; }
     .saved-list {
       display: flex; flex-direction: column; gap: 0.6rem;
@@ -485,9 +482,8 @@
       padding: 0.6rem; font-family: var(--font-head); font-weight: 600;
       cursor: pointer; font-size: 0.9rem; margin-top: 0.5rem;
     }
-    .logout-content .btn-cancel:hover { color: var(--dark); }
 
-    /* Exam lock / unlock */
+    /* Exam lock */
     .exam-locked {
       text-align: center; padding: 2rem;
       background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
@@ -506,14 +502,11 @@
       font-size: 0.9rem;
     }
     .exam-check-item:last-child { border-bottom: none; }
-    .exam-check-item .label { display: flex; align-items: center; gap: 0.5rem; }
-    .exam-check-item .score {
-      font-family: var(--font-head); font-weight: 600;
-    }
+    .exam-check-item .score { font-family: var(--font-head); font-weight: 600; }
     .exam-check-item .score.pass { color: var(--success); }
     .exam-check-item .score.fail { color: var(--accent); }
 
-    /* Exam timer */
+    /* Exam header */
     .exam-header {
       position: sticky; top: 0; z-index: 50;
       background: linear-gradient(90deg, var(--primary), var(--primary-dark));
@@ -533,11 +526,9 @@
     .exam-timer.warning { background: var(--warning); color: var(--white); animation: pulse 1s infinite; }
     .exam-timer.danger { background: var(--accent); color: var(--white); animation: pulse 0.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-    .exam-progress-info {
-      font-size: 0.9rem; opacity: 0.9;
-    }
+    .exam-progress-info { font-size: 0.9rem; opacity: 0.9; }
 
-    /* Exam integrity banner */
+    /* Integrity banner */
     .integrity-banner {
       background: #FFF3E0; border: 2px solid var(--warning);
       padding: 0.75rem 1rem; border-radius: 8px;
@@ -546,7 +537,7 @@
     }
     .integrity-banner strong { font-family: var(--font-head); }
 
-    /* Exam result review */
+    /* Item review */
     .item-review-card {
       background: var(--white); border-radius: 12px;
       padding: 1.25rem; margin-bottom: 1rem;
@@ -571,14 +562,14 @@
       background: #E3F2FD; border-radius: 8px;
       font-size: 0.85rem; color: var(--dark);
     }
-    .item-review-card .bloom-tag {
+    .bloom-tag {
       display: inline-block; background: var(--secondary); color: var(--white);
       padding: 0.15rem 0.5rem; border-radius: 999px;
       font-size: 0.68rem; font-family: var(--font-head); font-weight: 600;
       margin-left: 0.5rem;
     }
 
-    /* Feedback form */
+    /* Feedback */
     .star-rating {
       display: flex; gap: 0.35rem; justify-content: center;
       margin: 0.75rem 0 1rem;
@@ -597,6 +588,29 @@
     }
     .feedback-textarea:focus { outline: none; border-color: var(--secondary); }
 
+    /* Retake code entry */
+    .retake-code-input {
+      width: 100%; padding: 1rem;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      font-size: 1.75rem; letter-spacing: 6px;
+      text-align: center; font-weight: 700;
+      border: 3px solid var(--primary); border-radius: 10px;
+      color: var(--primary); background: var(--white);
+      transition: all 0.2s;
+    }
+    .retake-code-input:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 4px rgba(30, 136, 229, 0.15);
+    }
+    .retake-badge {
+      display: inline-block; background: #F3E5F5; color: #6A1B9A;
+      padding: 0.25rem 0.75rem; border-radius: 999px;
+      font-size: 0.78rem; font-family: var(--font-head); font-weight: 700;
+      margin-left: 0.5rem;
+    }
+
     .hidden { display: none !important; }
     .text-center { text-align: center; }
     .mt-1 { margin-top: 0.5rem; }
@@ -610,9 +624,7 @@
 </head>
 <body>
 
-<!-- ============================================================
-     AUTH SCREEN
-     ============================================================ -->
+<!-- AUTH SCREEN -->
 <div class="registration-screen" id="registrationScreen">
   <div class="registration-card">
     <button class="back-btn hidden" id="backBtn" onclick="closeEditProfile()">← Back</button>
@@ -621,7 +633,7 @@
       <div class="reg-logo">🫁</div>
       <h1>Respiratory Assessment Mastery</h1>
       <p class="reg-subtitle" id="regSubtitle">NCM 101B Lab — Please register to begin</p>
-      <p style="font-size:0.72rem;color:var(--gray);margin-top:0.25rem;">Version <span id="regVersion">1.5</span></p>
+      <p style="font-size:0.72rem;color:var(--gray);margin-top:0.25rem;">Version <span id="regVersion">1.6</span></p>
     </div>
 
     <div class="auth-tabs" id="authTabs">
@@ -755,7 +767,7 @@
       <div>Teacher II — DepEd</div>
       <div>Tarlac State University</div>
       <div>College of Science — Nursing Dept.</div>
-      <div class="app-version">Version <span id="appVersion">1.5</span></div>
+      <div class="app-version">Version <span id="appVersion">1.6</span></div>
     </div>
   </aside>
 
@@ -839,13 +851,12 @@
 
 <script>
 /* ============================================================
-   RESPIRATORY ASSESSMENT MASTERY APP — CORE LOGIC
-   Version 1.5
+   RESPIRATORY ASSESSMENT MASTERY APP — v1.6
+   With Retake Code Entry
    ============================================================ */
 
 const APP = {
-  version: '1.5',
-  versionHistory: ['1.0','1.1','1.2','1.3','1.4','1.5'],
+  version: '1.6',
   storageKey: 'respMastery_v1',
   savedSessionsKey: 'respMastery_savedSessions',
   state: {
@@ -856,7 +867,11 @@ const APP = {
     quizAttempts: {},
     games: {},
     exam: null,
+    examHistory: [],
     feedback: [],
+    retakeAllowed: false,
+    retakeCode: null,
+    retakeUsed: false,
   },
   authMode: 'register',
   examSession: null,
@@ -875,11 +890,14 @@ function loadState() {
     const saved = localStorage.getItem(APP.storageKey);
     if (saved) APP.state = { ...APP.state, ...JSON.parse(saved) };
     if (!APP.state.feedback) APP.state.feedback = [];
+    if (!APP.state.examHistory) APP.state.examHistory = [];
+    if (APP.state.retakeAllowed === undefined) APP.state.retakeAllowed = false;
+    if (APP.state.retakeCode === undefined) APP.state.retakeCode = null;
+    if (APP.state.retakeUsed === undefined) APP.state.retakeUsed = false;
   } catch (e) { console.warn('State load failed', e); }
 }
 function saveState() {
-  try { localStorage.setItem(APP.storageKey, JSON.stringify(APP.state)); }
-  catch (e) { console.warn('State save failed', e); }
+  try { localStorage.setItem(APP.storageKey, JSON.stringify(APP.state)); } catch (e) {}
 }
 function clearState() {
   try { localStorage.removeItem(APP.storageKey); } catch (e) {}
@@ -905,7 +923,6 @@ function removeSavedSession(key) {
   saveSavedSessions(sessions);
 }
 
-/* ---------- TOAST ---------- */
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -914,7 +931,7 @@ function toast(msg, type = '') {
   el._t = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-/* ---------- AUTH TABS ---------- */
+/* ---------- AUTH ---------- */
 function switchAuthTab(tab) {
   APP.authMode = tab;
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -929,7 +946,6 @@ function switchAuthTab(tab) {
   if (tab === 'login') renderSavedStudents();
 }
 
-/* ---------- REGISTRATION ---------- */
 function submitRegistration(event) {
   event.preventDefault();
   const errEl = document.getElementById('regError');
@@ -977,13 +993,17 @@ function submitRegistration(event) {
   APP.state.games = {};
   APP.state.badges = {};
   APP.state.exam = null;
+  APP.state.examHistory = [];
+  APP.state.feedback = [];
+  APP.state.retakeAllowed = false;
+  APP.state.retakeCode = null;
+  APP.state.retakeUsed = false;
   saveState();
   registerSavedSession(buildStudentRecord());
   showApp();
   toast('✅ Welcome, ' + firstName + '!', 'success');
 }
 
-/* ---------- LOGIN ---------- */
 function renderSavedStudents() {
   const area = document.getElementById('savedStudentsArea');
   const sessions = loadSavedSessions();
@@ -1035,7 +1055,11 @@ function loadSession(session) {
     games: session.games || {},
     badges: session.badges || {},
     exam: session.exam || null,
+    examHistory: session.examHistory || [],
     feedback: session.feedback || [],
+    retakeAllowed: session.retakeAllowed || false,
+    retakeCode: session.retakeCode || null,
+    retakeUsed: session.retakeUsed || false,
   };
   if (APP.state.student) APP.state.student.lastActive = new Date().toISOString();
   saveState();
@@ -1054,7 +1078,6 @@ function calcAvg(quizAttempts) {
   return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
 }
 
-/* ---------- EDIT PROFILE ---------- */
 function openEditProfile() {
   if (!APP.state.student) return;
   const s = APP.state.student;
@@ -1114,7 +1137,6 @@ function saveProfileEdit(event) {
   toast('✅ Profile updated.', 'success');
 }
 
-/* ---------- SHOW APP ---------- */
 function showApp() {
   document.getElementById('registrationScreen').style.display = 'none';
   document.getElementById('appContainer').style.display = 'flex';
@@ -1162,7 +1184,7 @@ function performLogout(mode) {
     if (!confirm(`⚠️ FINAL WARNING ⚠️\n\nThis will PERMANENTLY DELETE all data for ${studentName}.\n\nMake sure you have already sent your data to your instructor!\n\nContinue?`)) return;
     if (s) removeSavedSession(s.studentNo || s.email);
     clearState();
-    APP.state = { currentView: 'home', student: null, progress: {}, badges: {}, quizAttempts: {}, games: {}, exam: null, feedback: [] };
+    APP.state = { currentView: 'home', student: null, progress: {}, badges: {}, quizAttempts: {}, games: {}, exam: null, examHistory: [], feedback: [], retakeAllowed: false, retakeCode: null, retakeUsed: false };
     closeLogoutModal();
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('registrationScreen').style.display = 'flex';
@@ -1216,19 +1238,13 @@ function renderView(view) {
     }
   }, 100);
 }
-
-/* ---------- SIDEBAR LOCKS ---------- */
 function updateSidebarLocks() {
   const examNav = document.getElementById('navExam');
   const certNav = document.getElementById('navCert');
-  const examUnlocked = isExamUnlocked();
+  const examUnlocked = isExamUnlocked() || (APP.state.exam?.submitted && APP.state.retakeAllowed && !APP.state.retakeUsed);
   const certUnlocked = isCertificateUnlocked();
-  if (examNav) {
-    examNav.classList.toggle('locked', !examUnlocked);
-  }
-  if (certNav) {
-    certNav.classList.toggle('locked', !certUnlocked);
-  }
+  if (examNav) examNav.classList.toggle('locked', !examUnlocked);
+  if (certNav) certNav.classList.toggle('locked', !certUnlocked);
 }
 
 /* ---------- PROGRESS ---------- */
@@ -1267,7 +1283,7 @@ function nextUnit() {
   return 'exam';
 }
 
-/* ---------- EXAM UNLOCK LOGIC ---------- */
+/* ---------- EXAM UNLOCK ---------- */
 const EXAM_REQUIREMENTS = {
   units: ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'],
   games: ['blitz','tree','sound','redflag','matrix'],
@@ -1284,16 +1300,13 @@ function getGameBestScore(gameKey) {
   return attempts.length ? Math.max(...attempts) : 0;
 }
 function isExamUnlocked() {
-  // All units completed with ≥90% each
   for (const u of EXAM_REQUIREMENTS.units) {
     if (!APP.state.progress?.[u]?.completed) return false;
     if (getUnitBestScore(u) < EXAM_REQUIREMENTS.minUnitScore) return false;
   }
-  // All games with ≥90% best
   for (const g of EXAM_REQUIREMENTS.games) {
     if (getGameBestScore(g) < EXAM_REQUIREMENTS.minGameScore) return false;
   }
-  // Overall average of units ≥90
   const unitScores = EXAM_REQUIREMENTS.units.map(u => getUnitBestScore(u));
   const avg = unitScores.reduce((a,b)=>a+b,0) / unitScores.length;
   if (avg < EXAM_REQUIREMENTS.minAvg) return false;
@@ -1304,30 +1317,15 @@ function getExamUnlockChecklist() {
   EXAM_REQUIREMENTS.units.forEach((u, i) => {
     const done = !!APP.state.progress?.[u]?.completed;
     const best = getUnitBestScore(u);
-    items.push({
-      type: 'unit',
-      label: `Unit ${i+1}: ${['Normal Baseline','Inspection','Palpation','Percussion','Auscultation','Disease Patterns','Interventions'][i]}`,
-      done,
-      score: best,
-      pass: done && best >= EXAM_REQUIREMENTS.minUnitScore,
-      required: EXAM_REQUIREMENTS.minUnitScore,
-    });
+    items.push({ type: 'unit', label: `Unit ${i+1}: ${['Normal Baseline','Inspection','Palpation','Percussion','Auscultation','Disease Patterns','Interventions'][i]}`, done, score: best, pass: done && best >= EXAM_REQUIREMENTS.minUnitScore, required: EXAM_REQUIREMENTS.minUnitScore });
   });
   EXAM_REQUIREMENTS.games.forEach((g, i) => {
     const best = getGameBestScore(g);
-    items.push({
-      type: 'game',
-      label: ['Pattern Blitz','Decision Tree','Sound ID','Red Flag','Matrix'][i] + ' (game)',
-      done: best > 0,
-      score: best,
-      pass: best >= EXAM_REQUIREMENTS.minGameScore,
-      required: EXAM_REQUIREMENTS.minGameScore,
-    });
+    items.push({ type: 'game', label: ['Pattern Blitz','Decision Tree','Sound ID','Red Flag','Matrix'][i] + ' (game)', done: best > 0, score: best, pass: best >= EXAM_REQUIREMENTS.minGameScore, required: EXAM_REQUIREMENTS.minGameScore });
   });
   return items;
 }
 function isCertificateUnlocked() {
-  if (!isExamUnlocked()) return false;
   if (!APP.state.exam?.submitted) return false;
   if (!APP.state.exam?.passed) return false;
   return true;
@@ -1341,15 +1339,24 @@ function renderHome(main) {
   const examUnlocked = isExamUnlocked();
   const examTaken = APP.state.exam?.submitted;
   const examPassed = APP.state.exam?.passed;
+  const retakePending = APP.state.retakeAllowed && !APP.state.retakeUsed;
 
   main.innerHTML = `
     <div class="card">
       <h1>🫁 Welcome, ${escapeHtml(s.firstName)}!</h1>
-      <p style="color:var(--gray);margin-bottom:1rem;">NCM 101B Lab — Respiratory Assessment Mastery</p>
+      <p style="color:var(--gray);margin-bottom:1rem;">NCM 101B Lab — Respiratory Assessment Mastery — Version ${APP.version}</p>
       <div class="callout callout-info">
         <strong>Expert nurses do not diagnose based on one abnormal finding.</strong> They correlate subjective symptoms, inspection, palpation, percussion, auscultation, and oxygenation status to identify the probable underlying condition.
       </div>
     </div>
+
+    ${retakePending ? `
+      <div class="card" style="background:#F3E5F5;border:2px solid #9C27B0;">
+        <h2 style="color:#6A1B9A;">🔓 Retake Available!</h2>
+        <p>Your instructor has granted you permission to retake the Capstone Exam.</p>
+        <button class="btn btn-primary" onclick="navigate('exam')">Go to Retake Entry</button>
+      </div>
+    ` : ''}
 
     <div class="card">
       <h2>Your Progress</h2>
@@ -1386,7 +1393,7 @@ function renderHome(main) {
           <strong>${examPassed ? '✅ Exam PASSED' : '❌ Exam NOT PASSED'}</strong><br>
           Score: <strong>${APP.state.exam.score}/${APP.state.exam.total}</strong> (${APP.state.exam.percentage}%)<br>
           Date taken: ${new Date(APP.state.exam.takenAt).toLocaleString()}<br>
-          ${examPassed ? 'Your certificate is now unlocked!' : 'This was your one attempt — please consult your instructor.'}
+          ${examPassed ? 'Your certificate is now unlocked!' : (retakePending ? '🔓 You may retake the exam — see the retake card above.' : 'This was your one attempt — contact your instructor if you have a valid reason for a retake.')}
         </div>
       ` : examUnlocked ? `
         <div class="callout callout-success">
@@ -1452,10 +1459,7 @@ function escapeHtml(s) {
 
 /* ---------- UNITS ---------- */
 function unitHeader(num, title, subtitle) {
-  return `<div class="card">
-    <h2>Unit ${num}: ${title}</h2>
-    <p style="color:var(--gray);font-style:italic;">${subtitle}</p>
-  </div>`;
+  return `<div class="card"><h2>Unit ${num}: ${title}</h2><p style="color:var(--gray);font-style:italic;">${subtitle}</p></div>`;
 }
 function quizHTML(unitId, questions) {
   return `<div class="card" id="quiz-${unitId}">
@@ -1484,7 +1488,7 @@ function flashcard(front, back) {
 }
 function toggleAccordion(btn) { btn.parentElement.classList.toggle('open'); }
 
-/* --- UNIT RENDERS (unchanged from v1.4) --- */
+/* --- UNITS RENDERS (same content as v1.5) --- */
 function renderUnit1(main) {
   main.innerHTML = `
     ${unitHeader(1, 'The Normal Respiratory Baseline', '"Master Normal Before Recognizing Abnormal"')}
@@ -1892,10 +1896,7 @@ function renderIntervention(i) {
 /* ---------- GAMES ---------- */
 function renderGames(main) {
   main.innerHTML = `
-    <div class="card">
-      <h2>🎮 Mastery Games</h2>
-      <p>Test your skills under pressure. Each game requires 90–100% to earn credit.</p>
-    </div>
+    <div class="card"><h2>🎮 Mastery Games</h2><p>Test your skills under pressure. Each game requires 90–100% to earn credit.</p></div>
     <div class="dashboard-grid">
       <div class="stat-card"><div style="font-size:2.5rem;">⚡</div><h3>Pattern Recognition Blitz</h3><p style="font-size:0.85rem;color:var(--gray);">60-second timed challenge</p><button class="btn btn-primary btn-sm mt-1" onclick="startGame('blitz')">Play</button></div>
       <div class="stat-card"><div style="font-size:2.5rem;">🌳</div><h3>Decision Tree Navigator</h3><p style="font-size:0.85rem;color:var(--gray);">Branching scenario simulation</p><button class="btn btn-primary btn-sm mt-1" onclick="startGame('tree')">Play</button></div>
@@ -2065,27 +2066,122 @@ function endGame(area, name, score, total, gameKey) {
 }
 
 /* ============================================================
-   CAPSTONE EXAM — v1.5 (30 items, randomized, cheat-proof)
+   CAPSTONE EXAM (30 items)
    ============================================================ */
-
-const EXAM_DURATION_SEC = 60 * 60; // 60 minutes
-const EXAM_PASSING_SCORE = 15;     // 15/30 (50%)
+const EXAM_DURATION_SEC = 60 * 60;
+const EXAM_PASSING_SCORE = 15;
 
 function renderExam(main) {
-  // If exam already taken (submitted) — show result
+  // If retake is available and not used → show retake code entry
+  if (APP.state.exam?.submitted && APP.state.retakeAllowed && !APP.state.retakeUsed) {
+    return renderRetakeCodeEntry(main);
+  }
+  // If exam already taken → show result
   if (APP.state.exam?.submitted) {
     return renderExamResult(main);
   }
-  // If exam currently in progress (from previous session) — resume
+  // If exam in progress
   if (APP.examSession && APP.examSession.inProgress) {
     return renderExamRunning(main);
   }
-  // If locked — show checklist
+  // If locked
   if (!isExamUnlocked()) {
     return renderExamLocked(main);
   }
-  // Otherwise — show start screen
+  // Start screen
   return renderExamStart(main);
+}
+
+function renderRetakeCodeEntry(main) {
+  main.innerHTML = `
+    <div class="card">
+      <div style="text-align:center;padding:1rem;">
+        <div style="font-size:3.5rem;">🔓</div>
+        <h2 style="color:#9C27B0;">Retake Available</h2>
+        <p>Your Clinical Instructor has granted you permission to retake the Capstone Exam.</p>
+        <span class="retake-badge">RETAK E PENDING</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="callout callout-warning">
+        <strong>⚠️ Important</strong>
+        <ul style="margin-left:1.5rem;margin-top:0.5rem;">
+          <li>You can retake the exam <strong>ONLY ONCE</strong> with this code</li>
+          <li>Your previous attempt will be <strong>archived automatically</strong></li>
+          <li>Once you use the code, it cannot be reused</li>
+          <li>The retake follows the same rules: 30 items, 60 minutes, passing 15/30</li>
+        </ul>
+      </div>
+
+      <h3>Enter Your Retake Code</h3>
+      <p style="color:var(--gray);font-size:0.9rem;">Your instructor gave you an 8-character code (letters and numbers).</p>
+
+      <div class="reg-form-group">
+        <input type="text" id="retakeCodeInput" class="retake-code-input" placeholder="XXXXXXXX" maxlength="8" autocomplete="off" autocapitalize="characters" />
+      </div>
+
+      <div id="retakeCodeMessage"></div>
+
+      <button class="btn btn-primary btn-block" onclick="submitRetakeCode()">🔓 Unlock Retake</button>
+      <button class="btn btn-outline btn-block mt-2" onclick="navigate('home')">← Cancel</button>
+    </div>
+
+    <div class="card">
+      <h3>Previous Exam Result</h3>
+      <div class="table-wrap"><table>
+        <tbody>
+          <tr><td><strong>Score</strong></td><td>${APP.state.exam.score}/${APP.state.exam.total} (${APP.state.exam.percentage}%)</td></tr>
+          <tr><td><strong>Result</strong></td><td>${APP.state.exam.passed ? '✅ PASSED' : '❌ NOT PASSED'}</td></tr>
+          <tr><td><strong>Date Taken</strong></td><td>${new Date(APP.state.exam.takenAt).toLocaleString()}</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  `;
+  // Auto-focus and auto-uppercase
+  setTimeout(() => {
+    const inp = document.getElementById('retakeCodeInput');
+    if (inp) {
+      inp.focus();
+      inp.addEventListener('input', () => { inp.value = inp.value.toUpperCase(); });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitRetakeCode(); });
+    }
+  }, 100);
+}
+
+function submitRetakeCode() {
+  const input = document.getElementById('retakeCodeInput');
+  const msgEl = document.getElementById('retakeCodeMessage');
+  const code = (input.value || '').trim().toUpperCase();
+
+  if (code.length !== 8) {
+    msgEl.innerHTML = '<div class="callout callout-danger">❌ Code must be exactly 8 characters.</div>';
+    return;
+  }
+
+  if (!APP.state.retakeCode) {
+    msgEl.innerHTML = '<div class="callout callout-danger">❌ No retake code assigned. Contact your instructor.</div>';
+    return;
+  }
+
+  if (code !== APP.state.retakeCode.toUpperCase()) {
+    msgEl.innerHTML = '<div class="callout callout-danger">❌ Invalid code. Please check with your instructor.</div>';
+    toast('Invalid retake code.', 'error');
+    return;
+  }
+
+  // Valid — archive previous exam, mark retake as used, unlock
+  APP.state.examHistory = APP.state.examHistory || [];
+  if (APP.state.exam) {
+    APP.state.examHistory.push({ ...APP.state.exam, archivedAt: new Date().toISOString() });
+  }
+  APP.state.exam = null;
+  APP.state.retakeUsed = true;
+  saveState();
+  if (APP.state.student) registerSavedSession(buildStudentRecord());
+
+  toast('✅ Retake unlocked! You may now take the exam.', 'success');
+  setTimeout(() => navigate('exam'), 500);
 }
 
 function renderExamLocked(main) {
@@ -2107,18 +2203,13 @@ function renderExamLocked(main) {
       <div class="exam-checklist">
         ${checklist.map(c => `
           <div class="exam-check-item">
-            <span class="label">
-              ${c.pass ? '✅' : (c.done ? '⚠️' : '⬜')}
-              ${escapeHtml(c.label)}
-            </span>
-            <span class="score ${c.pass ? 'pass' : 'fail'}">
-              ${c.done ? c.score + '%' : '—'} ${c.pass ? '✓' : `(need ≥${c.required}%)`}
-            </span>
+            <span class="label">${c.pass ? '✅' : (c.done ? '⚠️' : '⬜')} ${escapeHtml(c.label)}</span>
+            <span class="score ${c.pass ? 'pass' : 'fail'}">${c.done ? c.score + '%' : '—'} ${c.pass ? '✓' : `(need ≥${c.required}%)`}</span>
           </div>
         `).join('')}
       </div>
       <div class="callout callout-info">
-        <strong>💡 How to unlock:</strong> Retake the unit quizzes and games until each one reaches at least <strong>90%</strong>.
+        <strong>💡 How to unlock:</strong> Retake the unit quizzes and games until each reaches at least <strong>90%</strong>.
       </div>
       <button class="btn btn-primary mt-2" onclick="navigate('home')">← Back to Dashboard</button>
       <button class="btn btn-outline mt-2" onclick="navigate('games')">🎮 Go to Games</button>
@@ -2132,51 +2223,34 @@ function renderExamStart(main) {
       <h2>📝 Capstone Comprehensive Exam</h2>
       <div class="callout callout-success">
         <strong>🎉 You have unlocked the Capstone Exam!</strong>
-        All units and games mastered.
       </div>
       <div class="dashboard-grid" style="margin-top:1rem;">
-        <div class="stat-card">
-          <div class="stat-value">30</div>
-          <div class="stat-label">Total Items</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">60</div>
-          <div class="stat-label">Minutes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">15</div>
-          <div class="stat-label">Passing Score</div>
-        </div>
-        <div class="stat-card warning">
-          <div class="stat-value">1</div>
-          <div class="stat-label">Attempt Only</div>
-        </div>
+        <div class="stat-card"><div class="stat-value">30</div><div class="stat-label">Total Items</div></div>
+        <div class="stat-card"><div class="stat-value">60</div><div class="stat-label">Minutes</div></div>
+        <div class="stat-card"><div class="stat-value">15</div><div class="stat-label">Passing Score</div></div>
+        <div class="stat-card" style="background:#F3E5F5;"><div class="stat-value" style="color:#6A1B9A;">1</div><div class="stat-label">Attempt Only</div></div>
       </div>
     </div>
-
     <div class="card">
       <h3>📋 Exam Overview</h3>
       <ul style="margin-left:1.5rem;line-height:1.9;">
         <li><strong>Format:</strong> NLE-style multiple choice (4 options per item)</li>
-        <li><strong>Alignment:</strong> Revised Bloom's Taxonomy (Remember → Create)</li>
+        <li><strong>Alignment:</strong> Revised Bloom's Taxonomy</li>
         <li><strong>Coverage:</strong> All 7 units + Disease patterns + Nursing interventions</li>
         <li><strong>Randomization:</strong> Questions AND choices are shuffled per student</li>
         <li><strong>Security:</strong> Tab-switch, copy, right-click, and print attempts are logged</li>
         <li><strong>Result:</strong> Shown immediately after submission with full item review</li>
       </ul>
     </div>
-
     <div class="card">
       <h3>⚠️ BEFORE YOU BEGIN</h3>
       <div class="callout callout-danger">
         <strong>🔴 ONE ATTEMPT ONLY</strong>
-        <p style="margin-top:0.5rem;">
-          You may take this exam only <strong>once</strong>. After submission:
-        </p>
+        <p style="margin-top:0.5rem;">You may take this exam only <strong>once</strong>. After submission:</p>
         <ul style="margin-left:1.5rem;margin-top:0.5rem;">
           <li>The exam will be permanently locked</li>
           <li>Your score is final</li>
-          <li>If you fail, you cannot retake it</li>
+          <li>If you fail, you cannot retake it without instructor approval</li>
         </ul>
       </div>
       <div class="callout callout-warning">
@@ -2194,14 +2268,10 @@ function renderExamStart(main) {
   `;
 }
 
-function openExamConfirm() {
-  document.getElementById('examConfirmModal').classList.add('show');
-}
-function closeExamConfirm() {
-  document.getElementById('examConfirmModal').classList.remove('show');
-}
+function openExamConfirm() { document.getElementById('examConfirmModal').classList.add('show'); }
+function closeExamConfirm() { document.getElementById('examConfirmModal').classList.remove('show'); }
 
-/* ---------- EXAM RANDOMIZATION (Seeded) ---------- */
+/* ---------- RANDOMIZATION ---------- */
 function simpleHash(str) {
   let h = 5381;
   for (let i = 0; i < str.length; i++) {
@@ -2225,68 +2295,46 @@ function shuffleWithSeed(arr, rand) {
   }
   return a;
 }
-
 function buildRandomizedExam() {
   const s = APP.state.student;
   const salt = Math.random().toString(36).slice(2, 10);
   const seedStr = `${s.studentNo}|${s.email}|${Date.now()}|${salt}`;
   const seed = simpleHash(seedStr);
   const rand = seededRandom(seed);
-
-  // Shuffle question order
   const qOrder = shuffleWithSeed(EXAM_QUESTIONS.map((_, i) => i), rand);
-
-  // For each question, shuffle the options and track the correct index
   const exam = qOrder.map(qIdx => {
     const q = EXAM_QUESTIONS[qIdx];
-    const correctText = q.options[q.answerIndex];
-    // Shuffle options
     const opts = q.options.map((opt, i) => ({ text: opt, isCorrect: i === q.answerIndex }));
     const shuffled = shuffleWithSeed(opts, rand);
     const newAnswerIndex = shuffled.findIndex(o => o.isCorrect);
     return {
-      id: q.id,
-      bloom: q.bloom,
-      q: q.q,
+      id: q.id, bloom: q.bloom, q: q.q,
       options: shuffled.map(o => o.text),
       answerIndex: newAnswerIndex,
       answer: shuffled[newAnswerIndex].text,
       rationale: q.rationale,
     };
   });
-
   return { seed, seedStr, questions: exam };
 }
 
-/* ---------- EXAM SESSION ---------- */
 function beginExam() {
   closeExamConfirm();
   const exam = buildRandomizedExam();
   const examId = generateExamId();
   const now = Date.now();
-
   APP.examSession = {
-    examId,
-    seed: exam.seed,
-    seedStr: exam.seedStr,
-    questions: exam.questions,
+    examId, seed: exam.seed, seedStr: exam.seedStr, questions: exam.questions,
     answers: new Array(exam.questions.length).fill(null),
     startedAt: now,
     endsAt: now + EXAM_DURATION_SEC * 1000,
     inProgress: true,
-    integrity: {
-      focusLosses: [],
-      copyAttempts: 0,
-      rightClicks: 0,
-      printAttempts: 0,
-    },
+    integrity: { focusLosses: [], copyAttempts: 0, rightClicks: 0, printAttempts: 0 },
   };
-
   attachIntegrityListeners();
   navigate('exam');
   toast('📝 Exam started. Good luck!', 'success');
 }
-
 function generateExamId() {
   const chars = 'ABCDEF0123456789';
   let id = '';
@@ -2297,6 +2345,7 @@ function generateExamId() {
   return id;
 }
 
+/* ---------- INTEGRITY LISTENERS ---------- */
 function attachIntegrityListeners() {
   document.addEventListener('visibilitychange', onVisibilityChange, true);
   document.addEventListener('contextmenu', onContextMenu, true);
@@ -2341,7 +2390,6 @@ function onCopy(e) {
 function onKeyDown(e) {
   if (!APP.examSession || !APP.examSession.inProgress) return;
   const k = e.key.toLowerCase();
-  // Block Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+P, Ctrl+A, F12
   if ((e.ctrlKey || e.metaKey) && ['c','v','u','p','a','s'].includes(k)) {
     e.preventDefault();
     APP.examSession.integrity.copyAttempts++;
@@ -2367,16 +2415,11 @@ function onBeforePrint() {
   APP.examSession.integrity.printAttempts++;
 }
 
-/* ---------- EXAM RUNNING VIEW ---------- */
+/* ---------- EXAM RUNNING ---------- */
 let examTimerInterval = null;
-
 function renderExamRunning(main) {
-  if (!APP.examSession || !APP.examSession.inProgress) {
-    return renderExam(main);
-  }
-  const now = Date.now();
-  const remaining = Math.max(0, Math.floor((APP.examSession.endsAt - now) / 1000));
-
+  if (!APP.examSession || !APP.examSession.inProgress) return renderExam(main);
+  const remaining = Math.max(0, Math.floor((APP.examSession.endsAt - Date.now()) / 1000));
   main.innerHTML = `
     <div class="exam-header">
       <div>
@@ -2385,32 +2428,26 @@ function renderExamRunning(main) {
       </div>
       <div class="exam-timer" id="examTimer">${formatTime(remaining)}</div>
     </div>
-
     <div class="integrity-banner">
       <strong>🔒 Exam Integrity Active:</strong> Copy, right-click, tab-switch, and screenshot attempts are monitored.
     </div>
-
     <div class="card">
       <h2>📋 Answer all items</h2>
-      <p style="color:var(--gray);font-size:0.9rem;">Click the correct answer for each question. Your progress is auto-saved.</p>
+      <p style="color:var(--gray);font-size:0.9rem;">Click the correct answer for each question.</p>
     </div>
-
     <div id="examQuestions">
       ${APP.examSession.questions.map((q, i) => renderExamQuestion(q, i)).join('')}
     </div>
-
     <div class="card">
       <button class="btn btn-success btn-block" onclick="submitExam()">✅ Submit Exam (Final)</button>
       <div class="callout callout-warning mt-2">
-        <strong>⚠️ Important:</strong> Once you submit, your answers are final and cannot be changed. The exam cannot be retaken.
+        <strong>⚠️ Important:</strong> Once you submit, your answers are final.
       </div>
     </div>
   `;
-
   startExamTimer();
   updateAnsweredCount();
 }
-
 function renderExamQuestion(q, i) {
   const selected = APP.examSession.answers[i];
   const bloomColors = {
@@ -2419,16 +2456,14 @@ function renderExamQuestion(q, i) {
   };
   return `
     <div class="card" style="user-select:none;-webkit-user-select:none;">
-      <div class="item-num" style="font-family:var(--font-head);font-weight:700;color:var(--primary);font-size:0.85rem;margin-bottom:0.4rem;">
+      <div style="font-family:var(--font-head);font-weight:700;color:var(--primary);font-size:0.85rem;margin-bottom:0.4rem;">
         Question ${i+1} of ${APP.examSession.questions.length}
         <span class="bloom-tag" style="background:${bloomColors[q.bloom] || '#666'};">${q.bloom.toUpperCase()}</span>
       </div>
       <p class="q-text" style="font-weight:600;margin-bottom:0.75rem;">${escapeHtml(q.q)}</p>
       <div class="quiz-options">
         ${q.options.map((opt, j) => `
-          <button class="quiz-option ${selected === j ? 'selected' : ''}"
-                  onclick="selectExamAnswer(${i}, ${j})"
-                  data-q="${i}" data-o="${j}">
+          <button class="quiz-option ${selected === j ? 'selected' : ''}" onclick="selectExamAnswer(${i}, ${j})" data-q="${i}" data-o="${j}">
             ${String.fromCharCode(65 + j)}. ${escapeHtml(opt)}
           </button>
         `).join('')}
@@ -2436,30 +2471,23 @@ function renderExamQuestion(q, i) {
     </div>
   `;
 }
-
 function selectExamAnswer(qIdx, oIdx) {
   if (!APP.examSession || !APP.examSession.inProgress) return;
   APP.examSession.answers[qIdx] = oIdx;
-  // Update UI for this question
   document.querySelectorAll(`button[data-q="${qIdx}"]`).forEach(b => {
     b.classList.toggle('selected', parseInt(b.dataset.o) === oIdx);
   });
   updateAnsweredCount();
 }
-
 function updateAnsweredCount() {
   const el = document.getElementById('examAnswered');
-  if (el && APP.examSession) {
-    el.textContent = APP.examSession.answers.filter(a => a !== null).length;
-  }
+  if (el && APP.examSession) el.textContent = APP.examSession.answers.filter(a => a !== null).length;
 }
-
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
-
 function startExamTimer() {
   if (examTimerInterval) clearInterval(examTimerInterval);
   examTimerInterval = setInterval(() => {
@@ -2480,26 +2508,21 @@ function startExamTimer() {
     }
   }, 1000);
 }
-
 function submitExam(autoSubmit = false) {
   if (!APP.examSession || !APP.examSession.inProgress) return;
   const unanswered = APP.examSession.answers.filter(a => a === null).length;
   if (!autoSubmit && unanswered > 0) {
-    if (!confirm(`⚠️ You have ${unanswered} unanswered question(s).\n\nSubmit anyway?\n\nYour exam will be FINAL and cannot be retaken.`)) return;
+    if (!confirm(`⚠️ You have ${unanswered} unanswered question(s).\n\nSubmit anyway?`)) return;
   } else if (!autoSubmit) {
-    if (!confirm(`⚠️ FINAL SUBMISSION\n\nOnce you submit, your answers are locked.\nYou cannot retake this exam.\n\nSubmit now?`)) return;
+    if (!confirm(`⚠️ FINAL SUBMISSION\n\nOnce you submit, your answers are locked.\n\nSubmit now?`)) return;
   }
-
-  // Score the exam
   let correct = 0;
   const review = APP.examSession.questions.map((q, i) => {
     const userIdx = APP.examSession.answers[i];
     const isCorrect = userIdx !== null && userIdx === q.answerIndex;
     if (isCorrect) correct++;
     return {
-      q: q.q,
-      bloom: q.bloom,
-      options: q.options,
+      q: q.q, bloom: q.bloom, options: q.options,
       userAnswerIndex: userIdx,
       userAnswer: userIdx !== null ? q.options[userIdx] : null,
       correctAnswerIndex: q.answerIndex,
@@ -2508,21 +2531,14 @@ function submitExam(autoSubmit = false) {
       isCorrect,
     };
   });
-
   const total = APP.examSession.questions.length;
   const percentage = Math.round((correct / total) * 100);
   const passed = correct >= EXAM_PASSING_SCORE;
-
   const submittedAt = Date.now();
   const duration = Math.round((submittedAt - APP.examSession.startedAt) / 1000);
-
   APP.state.exam = {
     examId: APP.examSession.examId,
-    score: correct,
-    total,
-    percentage,
-    passed,
-    submitted: true,
+    score: correct, total, percentage, passed, submitted: true,
     takenAt: new Date(submittedAt).toISOString(),
     durationSec: duration,
     review,
@@ -2530,19 +2546,15 @@ function submitExam(autoSubmit = false) {
     passingScore: EXAM_PASSING_SCORE,
     bloomBreakdown: computeBloomBreakdown(review),
   };
-
   APP.examSession.inProgress = false;
   detachIntegrityListeners();
   if (examTimerInterval) clearInterval(examTimerInterval);
   APP.examSession = null;
-
   saveState();
   if (APP.state.student) registerSavedSession(buildStudentRecord());
-
   toast(passed ? '🏆 Exam PASSED!' : '📋 Exam submitted — did not pass', passed ? 'success' : 'warning');
   navigate('exam');
 }
-
 function computeBloomBreakdown(review) {
   const buckets = { remember: [0,0], understand: [0,0], apply: [0,0], analyze: [0,0], evaluate: [0,0], create: [0,0] };
   review.forEach(r => {
@@ -2553,12 +2565,13 @@ function computeBloomBreakdown(review) {
   return buckets;
 }
 
-/* ---------- EXAM RESULT VIEW ---------- */
+/* ---------- EXAM RESULT ---------- */
 function renderExamResult(main) {
   const exam = APP.state.exam;
   const passed = exam.passed;
   const items = exam.review || [];
   const breakdown = exam.bloomBreakdown || {};
+  const retakePending = APP.state.retakeAllowed && !APP.state.retakeUsed;
 
   main.innerHTML = `
     <div class="card" style="text-align:center;">
@@ -2570,8 +2583,11 @@ function renderExamResult(main) {
       <p style="color:var(--gray);">Passing: ${exam.passingScore}/${exam.total} (50%)</p>
       <p style="color:var(--gray);font-size:0.85rem;">Taken: ${new Date(exam.takenAt).toLocaleString()} | Duration: ${formatTime(exam.durationSec)}</p>
       <p style="color:var(--gray);font-size:0.85rem;">Exam ID: <strong>${exam.examId}</strong></p>
-      ${!passed ? '<div class="callout callout-danger mt-2"><strong>⚠️ This was your one attempt.</strong><br>Please consult your Clinical Instructor.</div>' : ''}
+      ${!passed && !retakePending ? '<div class="callout callout-danger mt-2"><strong>⚠️ This was your one attempt.</strong><br>Contact your Clinical Instructor if you have a valid reason for a retake.</div>' : ''}
+      ${retakePending ? '<div class="callout callout-warning mt-2"><strong>🔓 Retake granted!</strong><br>Your instructor has approved a retake. Go to Capstone Exam to enter your code.</div>' : ''}
     </div>
+
+    ${retakePending ? `<div class="card" style="background:#F3E5F5;border:2px solid #9C27B0;"><h3 style="color:#6A1B9A;">🔓 Retake Available</h3><p>Enter your code to unlock the exam again.</p><button class="btn btn-primary" onclick="navigate('exam')">Go to Retake Entry</button></div>` : ''}
 
     <div class="card">
       <h3>📊 Bloom's Taxonomy Breakdown</h3>
@@ -2606,8 +2622,8 @@ function renderExamResult(main) {
       <p style="color:var(--gray);font-size:0.9rem;">Your answer is highlighted. Correct answers are marked ✓.</p>
       ${items.map((item, i) => `
         <div class="item-review-card ${item.isCorrect ? 'correct' : 'incorrect'}">
-          <div class="item-num">
-            Question ${i+1} 
+          <div style="font-family:var(--font-head);font-weight:700;color:var(--primary);font-size:0.85rem;margin-bottom:0.5rem;">
+            Question ${i+1}
             <span class="bloom-tag" style="background:${bloomColor(item.bloom)};">${item.bloom.toUpperCase()}</span>
             ${item.isCorrect ? '<span style="color:var(--success);margin-left:0.5rem;">✅ Correct</span>' : '<span style="color:var(--accent);margin-left:0.5rem;">❌ Incorrect</span>'}
           </div>
@@ -2622,8 +2638,7 @@ function renderExamResult(main) {
               return `<div class="item-option ${cls}">
                 <strong>${String.fromCharCode(65 + j)}.</strong> ${escapeHtml(opt)}
                 ${isCorrect ? ' ✓' : ''}
-                ${isUser && !isCorrect ? ' ← your answer' : ''}
-                ${isUser && isCorrect ? ' ← your answer' : ''}
+                ${isUser ? ' ← your answer' : ''}
               </div>`;
             }).join('')}
           </div>
@@ -2642,50 +2657,38 @@ function renderExamResult(main) {
 function bloomColor(b) {
   return { remember: '#4CAF50', understand: '#8BC34A', apply: '#FFC107', analyze: '#FF9800', evaluate: '#F44336', create: '#9C27B0' }[b] || '#666';
 }
-function printExamReport() {
-  window.print();
-}
+function printExamReport() { window.print(); }
 
 /* ---------- CERTIFICATE ---------- */
 function renderCertificate(main) {
   const unlocked = isCertificateUnlocked();
   const s = APP.state.student;
   const exam = APP.state.exam;
-
   if (!unlocked) {
     main.innerHTML = `
       <div class="card">
         <div class="exam-locked">
           <div class="lock-icon">🔒</div>
           <h2>Certificate — LOCKED</h2>
-          <p>Complete all requirements to unlock your Certificate of Completion.</p>
+          <p>Complete the Capstone Exam with a passing score to unlock your Certificate of Completion.</p>
         </div>
       </div>
       <div class="card">
         <h3>Requirements:</h3>
         <div class="exam-checklist">
-          <div class="exam-check-item">
-            <span class="label">${isExamUnlocked() ? '✅' : '⬜'} All 7 units mastered (≥90% each)</span>
-          </div>
-          <div class="exam-check-item">
-            <span class="label">${EXAM_REQUIREMENTS.games.every(g => getGameBestScore(g) >= 90) ? '✅' : '⬜'} All 5 mastery games passed (≥90% each)</span>
-          </div>
-          <div class="exam-check-item">
-            <span class="label">${exam?.submitted ? '✅' : '⬜'} Capstone Exam taken</span>
-          </div>
-          <div class="exam-check-item">
-            <span class="label">${exam?.passed ? '✅' : '⬜'} Capstone Exam passed (≥15/30)</span>
-          </div>
+          <div class="exam-check-item"><span class="label">${isExamUnlocked() ? '✅' : '⬜'} All 7 units mastered (≥90% each)</span></div>
+          <div class="exam-check-item"><span class="label">${EXAM_REQUIREMENTS.games.every(g => getGameBestScore(g) >= 90) ? '✅' : '⬜'} All 5 mastery games passed (≥90% each)</span></div>
+          <div class="exam-check-item"><span class="label">${exam?.submitted ? '✅' : '⬜'} Capstone Exam taken</span></div>
+          <div class="exam-check-item"><span class="label">${exam?.passed ? '✅' : '⬜'} Capstone Exam passed (≥15/30)</span></div>
         </div>
         <button class="btn btn-primary mt-2" onclick="navigate('home')">← Back to Dashboard</button>
       </div>
     `;
     return;
   }
-
   main.innerHTML = `
     <div class="card">
-      <div class="certificate" id="certificate">
+      <div class="certificate">
         <h2>🏆 CERTIFICATE OF COMPLETION 🏆</h2>
         <p>This certifies that</p>
         <div class="name">${escapeHtml(s.fullName)}</div>
@@ -2710,7 +2713,7 @@ function renderCertificate(main) {
   `;
 }
 
-/* ---------- REFERENCE VIEWS ---------- */
+/* ---------- REFERENCE ---------- */
 function renderMatrix(main) {
   main.innerHTML = `<div class="card"><h2>📊 Master Differential Diagnosis Matrix</h2><div class="table-wrap">${matrixTable()}</div></div>`;
 }
@@ -2739,11 +2742,9 @@ function renderHandoff(main) {
   const s = APP.state.student;
   const pct = getProgressPercent();
   const avg = averageScore();
+  const retakePending = APP.state.retakeAllowed && !APP.state.retakeUsed;
   main.innerHTML = `
-    <div class="card">
-      <h2>📤 Send My Progress to Instructor</h2>
-      <p>Use this to submit your complete record to your Clinical Instructor.</p>
-    </div>
+    <div class="card"><h2>📤 Send My Progress to Instructor</h2><p>Use this to submit your complete record to your Clinical Instructor.</p></div>
     <div class="card">
       <h3>Your Profile</h3>
       <table>
@@ -2766,6 +2767,8 @@ function renderHandoff(main) {
           <strong>Capstone Exam:</strong> ${APP.state.exam.score}/${APP.state.exam.total} (${APP.state.exam.percentage}%) — ${APP.state.exam.passed ? 'PASSED' : 'NOT PASSED'}
         </div>
       ` : '<div class="callout callout-warning">Capstone Exam: not yet taken</div>'}
+      ${retakePending ? `<div class="callout callout-info"><strong>🔓 Retake granted</strong> — code assigned, not yet used.</div>` : ''}
+      ${APP.state.retakeUsed ? `<div class="callout callout-info"><strong>↻ Retake used</strong> — current score reflects the latest attempt.</div>` : ''}
       <div class="flex flex-wrap gap-1 mt-2">
         <button class="btn btn-primary" onclick="showHandoffModal()">📋 Generate Send Code</button>
         <button class="btn btn-outline" onclick="downloadMyData()">💾 Download JSON</button>
@@ -2778,16 +2781,14 @@ function renderHandoff(main) {
         <li>A code and QR will appear.</li>
         <li>Send to your instructor via chat, email, or by showing the QR.</li>
       </ol>
-      <div class="callout callout-info">
-        <strong>Why this step?</strong> This app runs entirely in your browser with no server. The code/QR/JSON lets you share your progress securely.
-      </div>
+      <div class="callout callout-info"><strong>Why this step?</strong> This app runs entirely in your browser with no server. The code/QR/JSON lets you share your progress securely.</div>
     </div>
   `;
 }
 function buildStudentRecord() {
   const s = APP.state.student;
   return {
-    schema: 'respiratory-mastery-v1.5',
+    schema: 'respiratory-mastery-v1.6',
     appVersion: APP.version,
     exportedAt: new Date().toISOString(),
     student: {
@@ -2800,7 +2801,11 @@ function buildStudentRecord() {
     games: APP.state.games || {},
     badges: APP.state.badges,
     exam: APP.state.exam || null,
+    examHistory: APP.state.examHistory || [],
     feedback: APP.state.feedback || [],
+    retakeAllowed: APP.state.retakeAllowed || false,
+    retakeCode: APP.state.retakeCode || null,
+    retakeUsed: APP.state.retakeUsed || false,
     summary: {
       completionPct: getProgressPercent(),
       averageScore: averageScore(),
@@ -2825,7 +2830,7 @@ function showHandoffModal() {
     <button class="btn btn-primary btn-sm mt-1" onclick="copyHandoffCode()">📋 Copy Code</button>
     <h3 style="margin-top:1.5rem;">Option 2: QR Code</h3>
     <div class="qr-container">
-      <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(shortCode)}" alt="QR Code" />
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(shortCode)}" alt="QR Code" />
       <p style="font-size:0.8rem;color:var(--gray);margin-top:0.5rem;">Screenshot this QR</p>
     </div>
     <h3>Option 3: Download File</h3>
@@ -2856,14 +2861,10 @@ function downloadMyData() {
 }
 
 /* ---------- FEEDBACK ---------- */
+let currentRating = 0;
 function renderFeedback(main) {
-  const s = APP.state.student;
   main.innerHTML = `
-    <div class="card">
-      <h2>💬 Send Feedback</h2>
-      <p>Help us improve this app! Your suggestions will be sent to the developer.</p>
-    </div>
-
+    <div class="card"><h2>💬 Send Feedback</h2><p>Help us improve this app! Your suggestions will be sent to the developer.</p></div>
     <div class="card">
       <h3>Rate the App</h3>
       <div class="star-rating" id="starRating">
@@ -2871,7 +2872,6 @@ function renderFeedback(main) {
       </div>
       <p style="text-align:center;color:var(--gray);font-size:0.85rem;" id="ratingText">Tap to rate</p>
     </div>
-
     <div class="card">
       <h3>Category</h3>
       <div class="reg-form-group">
@@ -2883,22 +2883,17 @@ function renderFeedback(main) {
           <option value="other">📝 Other</option>
         </select>
       </div>
-
       <h3>Your Message</h3>
       <div class="reg-form-group">
         <textarea id="feedbackMessage" class="feedback-textarea" placeholder="Share your thoughts, suggestions, or report an issue..."></textarea>
       </div>
-
       <div class="reg-form-group">
         <label style="display:flex;align-items:center;gap:0.5rem;font-weight:400;">
-          <input type="checkbox" id="feedbackAnonymous" style="width:auto;" />
-          Send anonymously
+          <input type="checkbox" id="feedbackAnonymous" style="width:auto;" /> Send anonymously
         </label>
       </div>
-
       <button class="btn btn-primary btn-block" onclick="submitFeedback()">📤 Submit Feedback</button>
     </div>
-
     <div class="card">
       <h3>📋 Previous Feedback</h3>
       ${(APP.state.feedback || []).length === 0 ? '<p style="color:var(--gray);">No feedback sent yet.</p>' :
@@ -2912,8 +2907,6 @@ function renderFeedback(main) {
     </div>
   `;
 }
-
-let currentRating = 0;
 function setRating(n) {
   currentRating = n;
   document.querySelectorAll('#starRating .star').forEach(s => {
@@ -2926,31 +2919,23 @@ function submitFeedback() {
   const msg = document.getElementById('feedbackMessage').value.trim();
   const cat = document.getElementById('feedbackCategory').value;
   const anon = document.getElementById('feedbackAnonymous').checked;
-
   if (!msg) return toast('Please enter your message.', 'warning');
   if (currentRating === 0) return toast('Please rate the app first.', 'warning');
-
   const s = APP.state.student;
   const feedback = {
     submittedAt: new Date().toISOString(),
-    rating: currentRating,
-    category: cat,
-    message: msg,
-    anonymous: anon,
+    rating: currentRating, category: cat, message: msg, anonymous: anon,
     student: anon ? 'Anonymous' : { name: s.fullName, studentNo: s.studentNo, section: s.section, group: s.group },
     appVersion: APP.version,
   };
-
   APP.state.feedback = APP.state.feedback || [];
   APP.state.feedback.push(feedback);
   saveState();
   if (APP.state.student) registerSavedSession(buildStudentRecord());
-
   document.getElementById('feedbackMessage').value = '';
   currentRating = 0;
   document.querySelectorAll('#starRating .star').forEach(s => s.classList.remove('active'));
   document.getElementById('ratingText').textContent = 'Tap to rate';
-
   toast('✅ Feedback submitted! Thank you.', 'success');
   setTimeout(() => renderView('feedback'), 400);
 }
@@ -3008,7 +2993,7 @@ function submitQuiz(unitId) {
 }
 function retryQuiz(unitId) { initQuiz(unitId); document.getElementById('quizResult-' + unitId).innerHTML = ''; }
 
-/* ---------- QUIZZES DATA (Units 1–7, same as v1.4) ---------- */
+/* ---------- QUIZZES DATA ---------- */
 const QUIZZES = {
   unit1: [
     { q: 'What is the normal respiratory rate for an adult?', options: ['8–12','12–20','20–30','30–40'], answer: '12–20' },
@@ -3171,52 +3156,38 @@ const INTERVENTIONS = [
   { title:'Silent Chest', significance:'Minimal airflow', interventions:['Activate rapid response','Prep equipment'], redflag:'Impending arrest' },
 ];
 
-/* ============================================================
-   CAPSTONE EXAM QUESTION BANK — 30 items, NLE format, Bloom's-aligned
-   Each: { id, bloom, q, options:[4], answerIndex, rationale }
-   ============================================================ */
+/* ---------- CAPSTONE EXAM BANK (30 items) ---------- */
 const EXAM_QUESTIONS = [
-  // ========== REMEMBER (5) ==========
   { id: 1, bloom: 'remember', q: 'A nurse is reviewing normal respiratory assessment findings. Which of the following is the expected respiratory rate for a healthy adult?', options: ['8–10 breaths per minute','12–20 breaths per minute','22–28 breaths per minute','30–35 breaths per minute'], answerIndex: 1, rationale: 'The normal adult respiratory rate is 12–20 breaths/min (Bickley, 2021; Jarvis, 2020).' },
   { id: 2, bloom: 'remember', q: 'Which anatomical landmark is used to identify the second intercostal space during anterior chest assessment?', options: ['Sternal notch (suprasternal notch)','Angle of Louis','Xiphoid process','Costal margin'], answerIndex: 1, rationale: 'The Angle of Louis (sternal angle) sits at the level of the 2nd rib, making it the key landmark for locating the 2nd intercostal space.' },
   { id: 3, bloom: 'remember', q: 'Which of the following is a normal percussion note over healthy lung tissue?', options: ['Dull','Tympany','Flat','Resonant'], answerIndex: 3, rationale: 'Healthy lung tissue produces a resonant percussion tone. Dullness indicates fluid/solid; tympany is gastric; flatness is over muscle/bone.' },
   { id: 4, bloom: 'remember', q: 'Which breath sound is normally heard over most of the peripheral lung fields?', options: ['Bronchial','Bronchovesicular','Vesicular','Tracheal'], answerIndex: 2, rationale: 'Vesicular breath sounds (soft, low-pitched) are the normal sounds heard over most peripheral lung fields.' },
   { id: 5, bloom: 'remember', q: 'A nurse is preparing to assess a patient. What is the correct sequence of the respiratory assessment (IPPA)?', options: ['Inspection, Palpation, Percussion, Auscultation','Auscultation, Percussion, Palpation, Inspection','Palpation, Inspection, Auscultation, Percussion','Percussion, Auscultation, Inspection, Palpation'], answerIndex: 0, rationale: 'The correct sequence is Inspection → Palpation → Percussion → Auscultation. Palpation and percussion are performed before auscultation to avoid altering breath sounds.' },
-
-  // ========== UNDERSTAND (5) ==========
   { id: 6, bloom: 'understand', q: 'A nurse notes that a patient has a respiratory rate of 26 breaths/min. How should this finding be classified?', options: ['Bradypnea','Eupnea','Tachypnea','Apnea'], answerIndex: 2, rationale: 'Tachypnea is defined as a respiratory rate greater than 20 breaths/min in adults.' },
   { id: 7, bloom: 'understand', q: 'Which of the following best explains why tactile fremitus is decreased in a patient with pleural effusion?', options: ['Consolidation transmits vibration more efficiently','Fluid in the pleural space blocks the transmission of vibrations','Increased lung density amplifies vibration','Airway narrowing redirects vibrations to the periphery'], answerIndex: 1, rationale: 'Fluid in the pleural space acts as a barrier, blocking transmission of vocal vibrations from the larynx to the chest wall. Thus, fremitus is decreased.' },
   { id: 8, bloom: 'understand', q: 'A nurse documents "dullness" over a patient\'s right lower lung field. Which of the following best describes the clinical significance of this finding?', options: ['Excess air in the pleural space','Fluid or solid tissue in place of air-filled lung','Normal finding over lung tissue','Air trapping within the alveoli'], answerIndex: 1, rationale: 'Dullness on percussion indicates increased density — fluid (effusion, hemothorax), consolidation (pneumonia), or solid mass. Air-filled lung normally produces resonance.' },
   { id: 9, bloom: 'understand', q: 'A patient exhibits Kussmaul respirations. Which underlying condition best explains this pattern?', options: ['Opioid overdose','Diabetic ketoacidosis','Brainstem injury','Heart failure'], answerIndex: 1, rationale: 'Kussmaul respirations (deep, rapid breathing) are a compensatory mechanism for metabolic acidosis, most commonly diabetic ketoacidosis (DKA).' },
   { id: 10, bloom: 'understand', q: 'Which of the following describes the correct interpretation of a "silent chest" in a patient with asthma?', options: ['A reassuring sign that the asthma is resolving','A normal finding during expiration','An ominous sign indicating impending respiratory failure','Evidence of upper airway obstruction only'], answerIndex: 2, rationale: 'Silent chest means airflow is so severely obstructed that breath sounds are nearly inaudible. This is a red flag indicating impending respiratory failure — a medical emergency.' },
-
-  // ========== APPLY (6) ==========
-  { id: 11, bloom: 'apply', q: 'A nurse is assessing a 45-year-old patient with fever, productive cough, and pleuritic chest pain. On assessment, the nurse notes increased tactile fremitus, dull percussion, and crackles over the right lower lobe. Which condition is most consistent with these findings?', options: ['Pneumothorax','Pulmonary embolism','Pneumonia','Asthma'], answerIndex: 2, rationale: 'The classic pattern of fever + productive cough + ↑ fremitus + dull percussion + crackles is the signature pattern of pneumonia. Consolidation increases fremitus and causes dullness.' },
-  { id: 12, bloom: 'apply', q: 'A nurse is assessing a post-operative patient on day 1 after abdominal surgery. The nurse notes diminished breath sounds at the right base, dull percussion, and tachypnea. Which complication is the patient most likely developing?', options: ['Pneumonia','Atelectasis','Pneumothorax','Pulmonary embolism'], answerIndex: 1, rationale: 'Post-operative patients are at high risk for atelectasis due to immobility, shallow breathing, and anesthesia. The signature pattern is post-op + dullness + diminished breath sounds.' },
-  { id: 13, bloom: 'apply', q: 'A nurse is assessing a patient with sudden-onset dyspnea and chest pain. On auscultation, breath sounds are absent on the right side; percussion reveals hyperresonance. Which condition should the nurse suspect?', options: ['Pleural effusion','Pneumothorax','Pneumonia','Pulmonary edema'], answerIndex: 1, rationale: 'Sudden dyspnea + absent breath sounds + hyperresonance = classic pneumothorax. Hyperresonance reflects excess air in the pleural space.' },
-  { id: 14, bloom: 'apply', q: 'A nurse is caring for a patient with heart failure who presents with severe dyspnea, orthopnea, and pink frothy sputum. On auscultation, bilateral crackles are heard at the bases. Which condition is the patient most likely experiencing?', options: ['Pneumonia','Pulmonary embolism','Pulmonary edema','Chronic bronchitis'], answerIndex: 2, rationale: 'The signature pattern of pulmonary edema is severe dyspnea + orthopnea + pink frothy sputum + bilateral crackles. This reflects fluid accumulation in the alveoli.' },
-  { id: 15, bloom: 'apply', q: 'A nurse is assessing a patient with a history of COPD. The patient has a barrel-shaped chest, pursed-lip breathing, and hyperresonant percussion notes with diminished breath sounds. Which condition is most consistent?', options: ['Asthma','Chronic bronchitis','Emphysema','Tuberculosis'], answerIndex: 2, rationale: 'Barrel chest + hyperresonance + diminished breath sounds + pursed-lip breathing is the signature pattern of emphysema (COPD).' },
+  { id: 11, bloom: 'apply', q: 'A nurse is assessing a 45-year-old patient with fever, productive cough, and pleuritic chest pain. On assessment, the nurse notes increased tactile fremitus, dull percussion, and crackles over the right lower lobe. Which condition is most consistent with these findings?', options: ['Pneumothorax','Pulmonary embolism','Pneumonia','Asthma'], answerIndex: 2, rationale: 'The classic pattern of fever + productive cough + ↑ fremitus + dull percussion + crackles is the signature pattern of pneumonia.' },
+  { id: 12, bloom: 'apply', q: 'A nurse is assessing a post-operative patient on day 1 after abdominal surgery. The nurse notes diminished breath sounds at the right base, dull percussion, and tachypnea. Which complication is the patient most likely developing?', options: ['Pneumonia','Atelectasis','Pneumothorax','Pulmonary embolism'], answerIndex: 1, rationale: 'Post-operative patients are at high risk for atelectasis due to immobility, shallow breathing, and anesthesia.' },
+  { id: 13, bloom: 'apply', q: 'A nurse is assessing a patient with sudden-onset dyspnea and chest pain. On auscultation, breath sounds are absent on the right side; percussion reveals hyperresonance. Which condition should the nurse suspect?', options: ['Pleural effusion','Pneumothorax','Pneumonia','Pulmonary edema'], answerIndex: 1, rationale: 'Sudden dyspnea + absent breath sounds + hyperresonance = classic pneumothorax.' },
+  { id: 14, bloom: 'apply', q: 'A nurse is caring for a patient with heart failure who presents with severe dyspnea, orthopnea, and pink frothy sputum. On auscultation, bilateral crackles are heard at the bases. Which condition is the patient most likely experiencing?', options: ['Pneumonia','Pulmonary embolism','Pulmonary edema','Chronic bronchitis'], answerIndex: 2, rationale: 'The signature pattern of pulmonary edema is severe dyspnea + orthopnea + pink frothy sputum + bilateral crackles.' },
+  { id: 15, bloom: 'apply', q: 'A nurse is assessing a patient with a history of COPD. The patient has a barrel-shaped chest, pursed-lip breathing, and hyperresonant percussion notes with diminished breath sounds. Which condition is most consistent?', options: ['Asthma','Chronic bronchitis','Emphysema','Tuberculosis'], answerIndex: 2, rationale: 'Barrel chest + hyperresonance + diminished breath sounds + pursed-lip breathing is the signature pattern of emphysema.' },
   { id: 16, bloom: 'apply', q: 'A nurse is preparing to perform tactile fremitus assessment on a patient. Which instruction should the nurse give to the patient?', options: ['"Please hold your breath while I place my hands on your chest."','"Please say \'99\' in a low, deep voice while I palpate your chest."','"Please cough forcefully three times."','"Please breathe deeply through your mouth."'], answerIndex: 1, rationale: 'Tactile fremitus is assessed by having the patient repeat "99" or "blue moon" while the nurse palpates the chest wall bilaterally.' },
-
-  // ========== ANALYZE (7) ==========
-  { id: 17, bloom: 'analyze', q: 'A nurse is differentiating between pleural effusion and pneumothorax. Which percussion finding best helps differentiate the two?', options: ['Pleural effusion produces hyperresonance; pneumothorax produces dullness','Pleural effusion produces dullness; pneumothorax produces hyperresonance','Both conditions produce dullness on percussion','Both conditions produce tympany on percussion'], answerIndex: 1, rationale: 'Fluid (effusion) causes dullness; air (pneumothorax) causes hyperresonance. This percussion finding is a key differentiator.' },
-  { id: 18, bloom: 'analyze', q: 'A nurse compares the respiratory patterns of three patients: Patient A — Regular, 14 breaths/min, effortless. Patient B — Alternating deep and shallow with periods of apnea. Patient C — Deep and rapid at 28 breaths/min. Which set correctly identifies each patient\'s pattern?', options: ['A = Kussmaul; B = Cheyne-Stokes; C = Biot\'s','A = Normal; B = Cheyne-Stokes; C = Kussmaul','A = Normal; B = Biot\'s; C = Cheyne-Stokes','A = Eupnea; B = Kussmaul; C = Apnea'], answerIndex: 1, rationale: 'Patient A is normal/eupnea; Patient B has Cheyne-Stokes (alternating deep/shallow with apnea); Patient C has Kussmaul (deep, rapid breathing, seen in metabolic acidosis).' },
-  { id: 19, bloom: 'analyze', q: 'A nurse is analyzing findings from two patients. Patient X: ↑ fremitus, dull percussion, crackles. Patient Y: ↓ fremitus, hyperresonant percussion, absent breath sounds. Which two conditions do these represent?', options: ['X = Pleural effusion; Y = Pneumonia','X = Pneumonia; Y = Pneumothorax','X = Pneumothorax; Y = Atelectasis','X = Emphysema; Y = Pneumonia'], answerIndex: 1, rationale: 'Patient X\'s pattern (↑ fremitus, dull, crackles) = pneumonia. Patient Y\'s pattern (↓ fremitus, hyperresonant, absent sounds) = pneumothorax.' },
+  { id: 17, bloom: 'analyze', q: 'A nurse is differentiating between pleural effusion and pneumothorax. Which percussion finding best helps differentiate the two?', options: ['Pleural effusion produces hyperresonance; pneumothorax produces dullness','Pleural effusion produces dullness; pneumothorax produces hyperresonance','Both conditions produce dullness on percussion','Both conditions produce tympany on percussion'], answerIndex: 1, rationale: 'Fluid (effusion) causes dullness; air (pneumothorax) causes hyperresonance.' },
+  { id: 18, bloom: 'analyze', q: 'A nurse compares the respiratory patterns of three patients: Patient A — Regular, 14 breaths/min, effortless. Patient B — Alternating deep and shallow with periods of apnea. Patient C — Deep and rapid at 28 breaths/min. Which set correctly identifies each patient\'s pattern?', options: ['A = Kussmaul; B = Cheyne-Stokes; C = Biot\'s','A = Normal; B = Cheyne-Stokes; C = Kussmaul','A = Normal; B = Biot\'s; C = Cheyne-Stokes','A = Eupnea; B = Kussmaul; C = Apnea'], answerIndex: 1, rationale: 'Patient A is normal/eupnea; Patient B has Cheyne-Stokes; Patient C has Kussmaul.' },
+  { id: 19, bloom: 'analyze', q: 'A nurse is analyzing findings from two patients. Patient X: ↑ fremitus, dull percussion, crackles. Patient Y: ↓ fremitus, hyperresonant percussion, absent breath sounds. Which two conditions do these represent?', options: ['X = Pleural effusion; Y = Pneumonia','X = Pneumonia; Y = Pneumothorax','X = Pneumothorax; Y = Atelectasis','X = Emphysema; Y = Pneumonia'], answerIndex: 1, rationale: 'Patient X\'s pattern = pneumonia. Patient Y\'s pattern = pneumothorax.' },
   { id: 20, bloom: 'analyze', q: 'A nurse is comparing crackles and rhonchi. Which statement correctly differentiates these two adventitious sounds?', options: ['Crackles are continuous; rhonchi are discontinuous','Crackles indicate fluid in alveoli; rhonchi indicate secretions in large airways','Crackles are always louder than rhonchi','Crackles clear with coughing; rhonchi do not'], answerIndex: 1, rationale: 'Crackles = discontinuous, fine popping, fluid in alveoli. Rhonchi = continuous, snoring, secretions in large airways, often clear with coughing.' },
   { id: 21, bloom: 'analyze', q: 'A nurse is assessing a patient with suspected tuberculosis. Which cluster of findings would the nurse expect to organize as most consistent with TB?', options: ['Acute fever, productive cough, and crackles','Chronic cough >2 weeks, hemoptysis, weight loss, night sweats','Sudden dyspnea, chest pain, and hyperresonance','Bilateral crackles, orthopnea, and pink frothy sputum'], answerIndex: 1, rationale: 'TB classically presents with chronic cough >2 weeks, hemoptysis, weight loss, and night sweats.' },
-  { id: 22, bloom: 'analyze', q: 'A nurse is analyzing two conditions — pneumonia and pulmonary edema. Both present with crackles. Which differentiating feature helps identify pulmonary edema specifically?', options: ['The presence of fever','The presence of productive cough','The presence of orthopnea and pink frothy sputum','The presence of pleuritic chest pain'], answerIndex: 2, rationale: 'Both conditions cause crackles. Pulmonary edema is differentiated by orthopnea + pink frothy sputum, while pneumonia typically presents with fever + pleuritic chest pain.' },
-  { id: 23, bloom: 'analyze', q: 'A nurse is analyzing a patient\'s respiratory findings to prioritize care. The patient presents with: RR 32, shallow; accessory muscle use; intercostal retractions; SpO₂ 88%; confusion. Which of the following best describes the clinical significance of this cluster?', options: ['Findings are within normal limits for a post-op patient','Early signs of respiratory compromise — monitor and reassess','Impending respiratory failure — immediate intervention required','Expected findings for a patient with asthma'], answerIndex: 2, rationale: 'The combination of tachypnea + accessory muscle use + retractions + hypoxemia (SpO₂ 88%) + altered LOC indicates impending respiratory failure. Immediate intervention is required.' },
-
-  // ========== EVALUATE (5) ==========
-  { id: 24, bloom: 'evaluate', q: 'A nurse is caring for four patients on a medical-surgical unit. Which patient should the nurse assess FIRST?', options: ['Patient with RR 16, SpO₂ 97%, speaking in complete sentences','Patient with RR 24, SpO₂ 93%, using accessory muscles','Patient with RR 12, SpO₂ 96%, sleeping comfortably','Patient with RR 20, SpO₂ 95%, asking for a blanket'], answerIndex: 1, rationale: 'Using ABC prioritization, the patient with tachypnea (24), low-normal SpO₂ (93%), and accessory muscle use is showing early respiratory compromise and should be assessed first.' },
-  { id: 25, bloom: 'evaluate', q: 'A nurse receives four patient reports during handover. Using the ABC framework, which patient should the nurse see FIRST?', options: ['Patient with an SpO₂ of 96% and RR of 18','Patient with stridor and nasal flaring','Patient with a BP of 140/90 and HR of 88','Patient with pleuritic chest pain rated 6/10'], answerIndex: 1, rationale: 'Stridor is an airway emergency — it indicates upper airway obstruction that can rapidly progress to complete blockage. Airway problems take priority (ABC).' },
+  { id: 22, bloom: 'analyze', q: 'A nurse is analyzing two conditions — pneumonia and pulmonary edema. Both present with crackles. Which differentiating feature helps identify pulmonary edema specifically?', options: ['The presence of fever','The presence of productive cough','The presence of orthopnea and pink frothy sputum','The presence of pleuritic chest pain'], answerIndex: 2, rationale: 'Pulmonary edema is differentiated by orthopnea + pink frothy sputum, while pneumonia typically presents with fever + pleuritic chest pain.' },
+  { id: 23, bloom: 'analyze', q: 'A nurse is analyzing a patient\'s respiratory findings to prioritize care. The patient presents with: RR 32, shallow; accessory muscle use; intercostal retractions; SpO₂ 88%; confusion. Which of the following best describes the clinical significance of this cluster?', options: ['Findings are within normal limits for a post-op patient','Early signs of respiratory compromise — monitor and reassess','Impending respiratory failure — immediate intervention required','Expected findings for a patient with asthma'], answerIndex: 2, rationale: 'The combination indicates impending respiratory failure. Immediate intervention is required.' },
+  { id: 24, bloom: 'evaluate', q: 'A nurse is caring for four patients on a medical-surgical unit. Which patient should the nurse assess FIRST?', options: ['Patient with RR 16, SpO₂ 97%, speaking in complete sentences','Patient with RR 24, SpO₂ 93%, using accessory muscles','Patient with RR 12, SpO₂ 96%, sleeping comfortably','Patient with RR 20, SpO₂ 95%, asking for a blanket'], answerIndex: 1, rationale: 'Using ABC prioritization, the patient with tachypnea (24), low-normal SpO₂ (93%), and accessory muscle use is showing early respiratory compromise.' },
+  { id: 25, bloom: 'evaluate', q: 'A nurse receives four patient reports during handover. Using the ABC framework, which patient should the nurse see FIRST?', options: ['Patient with an SpO₂ of 96% and RR of 18','Patient with stridor and nasal flaring','Patient with a BP of 140/90 and HR of 88','Patient with pleuritic chest pain rated 6/10'], answerIndex: 1, rationale: 'Stridor is an airway emergency — it indicates upper airway obstruction that can rapidly progress to complete blockage.' },
   { id: 26, bloom: 'evaluate', q: 'A patient is admitted with a suspected pneumothorax. Which percussion finding would the nurse evaluate as most concerning and requiring immediate escalation?', options: ['Dullness on percussion','Normal resonance','Hyperresonance with deviation of the trachea','Tympany over the gastric area'], answerIndex: 2, rationale: 'Tracheal deviation with hyperresonance suggests tension pneumothorax — a life-threatening emergency requiring needle decompression.' },
   { id: 27, bloom: 'evaluate', q: 'A nurse is evaluating four nursing interventions for a patient with pneumonia. Which intervention should the nurse prioritize?', options: ['Administer prescribed antipyretics','Position the patient in High Fowler\'s','Encourage oral fluids','Perform incentive spirometry every 2 hours'], answerIndex: 1, rationale: 'High Fowler\'s position maximizes lung expansion by decreasing pressure on the diaphragm — this directly improves oxygenation and ventilation, the priority (ABC — Breathing).' },
-  { id: 28, bloom: 'evaluate', q: 'A nurse is evaluating a patient\'s response to treatment for pulmonary edema. Which finding BEST indicates a positive response to therapy?', options: ['The patient\'s heart rate has decreased from 110 to 90','The patient\'s SpO₂ improved from 88% to 94% and crackles are reduced','The patient\'s blood pressure has normalized','The patient reports feeling less anxious'], answerIndex: 1, rationale: 'The best indicator of response to pulmonary edema treatment is improved oxygenation (SpO₂) + reduced crackles, which reflect decreased pulmonary congestion and improved gas exchange.' },
-
-  // ========== CREATE (2) ==========
-  { id: 29, bloom: 'create', q: 'A nurse is planning a respiratory assessment for a 68-year-old patient admitted 2 days ago for abdominal surgery. The patient is reluctant to move due to pain and has been breathing shallowly. Which of the following best represents a prioritized, evidence-based respiratory assessment plan for this patient?', options: ['Assess only when the patient complains of difficulty breathing','Perform a focused respiratory assessment every 4 hours, encourage deep breathing and early ambulation, and use incentive spirometry to prevent atelectasis','Assess breath sounds only at the start of shift; defer mobility to physical therapy','Focus on medication administration; reassess respiratory status only if vital signs are abnormal'], answerIndex: 1, rationale: 'Post-operative patients are at high risk for atelectasis. Best practice includes regular focused respiratory assessments, deep breathing exercises, incentive spirometry, and early ambulation — the cornerstone of postoperative pulmonary care.' },
-  { id: 30, bloom: 'create', q: 'A nurse is designing a respiratory emergency response plan for a patient who develops a silent chest during an acute asthma attack. Which of the following is the MOST appropriate sequence of nursing actions?', options: ['Document the finding, recheck in 15 minutes, and notify the physician during rounds','Activate rapid response → administer oxygen → prepare emergency airway equipment → monitor continuously','Administer prescribed bronchodilator → reassess breath sounds → notify provider if unchanged','Position the patient supine → obtain consent for intubation → contact respiratory therapy'], answerIndex: 1, rationale: 'Silent chest indicates impending respiratory arrest. The correct sequence is: 1) Activate rapid response; 2) Administer oxygen; 3) Prepare emergency airway equipment; 4) Monitor continuously. Option C delays critical escalation. Option D uses the wrong position.' },
+  { id: 28, bloom: 'evaluate', q: 'A nurse is evaluating a patient\'s response to treatment for pulmonary edema. Which finding BEST indicates a positive response to therapy?', options: ['The patient\'s heart rate has decreased from 110 to 90','The patient\'s SpO₂ improved from 88% to 94% and crackles are reduced','The patient\'s blood pressure has normalized','The patient reports feeling less anxious'], answerIndex: 1, rationale: 'The best indicator of response to pulmonary edema treatment is improved oxygenation (SpO₂) + reduced crackles.' },
+  { id: 29, bloom: 'create', q: 'A nurse is planning a respiratory assessment for a 68-year-old patient admitted 2 days ago for abdominal surgery. The patient is reluctant to move due to pain and has been breathing shallowly. Which of the following best represents a prioritized, evidence-based respiratory assessment plan for this patient?', options: ['Assess only when the patient complains of difficulty breathing','Perform a focused respiratory assessment every 4 hours, encourage deep breathing and early ambulation, and use incentive spirometry to prevent atelectasis','Assess breath sounds only at the start of shift; defer mobility to physical therapy','Focus on medication administration; reassess respiratory status only if vital signs are abnormal'], answerIndex: 1, rationale: 'Post-operative patients are at high risk for atelectasis. Best practice includes regular focused respiratory assessments, deep breathing exercises, incentive spirometry, and early ambulation.' },
+  { id: 30, bloom: 'create', q: 'A nurse is designing a respiratory emergency response plan for a patient who develops a silent chest during an acute asthma attack. Which of the following is the MOST appropriate sequence of nursing actions?', options: ['Document the finding, recheck in 15 minutes, and notify the physician during rounds','Activate rapid response → administer oxygen → prepare emergency airway equipment → monitor continuously','Administer prescribed bronchodilator → reassess breath sounds → notify provider if unchanged','Position the patient supine → obtain consent for intubation → contact respiratory therapy'], answerIndex: 1, rationale: 'Silent chest indicates impending respiratory arrest. The correct sequence is: activate rapid response → administer oxygen → prepare emergency airway equipment → monitor continuously.' },
 ];
 
 /* ---------- INIT ---------- */
@@ -3224,7 +3195,6 @@ function init() {
   loadState();
   document.querySelectorAll('.nav-item').forEach(n => {
     n.addEventListener('click', () => {
-      // Check if locked
       if (n.classList.contains('locked')) {
         if (n.dataset.view === 'exam') {
           toast('🔒 Capstone Exam is locked. Complete all requirements first.', 'warning');
@@ -3256,7 +3226,6 @@ function init() {
     }
   });
 
-  // Set version labels
   document.getElementById('appVersion').textContent = APP.version;
   document.getElementById('regVersion').textContent = APP.version;
 
