@@ -76,6 +76,7 @@
       font-size: 0.72rem; padding: 0.5rem 0.35rem;
     }
     table.gradebook thead th.sub { background: var(--secondary); font-size: 0.68rem; }
+    table.gradebook thead th.exam-header { background: #9C27B0; }
     table.gradebook tbody td.name-cell {
       text-align: left; font-weight: 600; white-space: nowrap;
       min-width: 180px; padding-left: 0.6rem;
@@ -96,6 +97,8 @@
     td.final-pass { background: #C8E6C9; color: #1B5E20; }
     td.final-warn { background: #FFE0B2; color: #E65100; }
     td.final-fail { background: #FFCDD2; color: #B71C1C; }
+    td.exam-pass { background: #C8E6C9; color: #1B5E20; font-weight: 700; }
+    td.exam-fail { background: #FFCDD2; color: #B71C1C; font-weight: 700; }
     .remarks-pass { color: var(--success); }
     .remarks-fail { color: var(--accent); }
     .legend {
@@ -112,6 +115,7 @@
     .swatch-warn { background: #FFE0B2; }
     .swatch-fail { background: #FFCDD2; }
     .swatch-empty { background: #FAFAFA; }
+    .swatch-exam { background: #E1BEE7; }
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 0.75rem; margin-top: 1rem;
@@ -158,9 +162,10 @@
       table.gradebook th, table.gradebook td { padding: 0.2rem 0.15rem; border-color: #999; }
       table.gradebook thead th { background: #0D7377 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       table.gradebook thead th.sub { background: #1E88E5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      td.score-pass, td.final-pass { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      table.gradebook thead th.exam-header { background: #9C27B0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      td.score-pass, td.final-pass, td.exam-pass { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       td.score-warn, td.final-warn { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      td.score-fail, td.final-fail { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      td.score-fail, td.final-fail, td.exam-fail { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
     @media (max-width: 768px) {
       body { padding: 0.75rem; }
@@ -182,10 +187,7 @@
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #E0E0E0;
     }
-    .modal-close {
-      background: none; border: none; font-size: 1.5rem; cursor: pointer;
-      color: var(--gray); line-height: 1;
-    }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); line-height: 1; }
     .form-group { margin-bottom: 1rem; }
     .form-group label {
       display: block; font-weight: 600; margin-bottom: 0.3rem;
@@ -240,6 +242,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ============================================================
+   GRADEBOOK — v1.5
+   Aligned with Student App v1.5 (Capstone Exam)
+   ============================================================ */
+
 const GB = {
   instructorKey: 'respMastery_instructor_v1',
   studentKey: 'respMastery_v1',
@@ -256,6 +263,7 @@ const GB = {
       unitQuizWeight: 40,
       gamesWeight: 20,
       capstoneWeight: 20,
+      examPassingScore: 15,
     },
   },
 };
@@ -282,7 +290,6 @@ function loadData() {
       GB.state.settings = { ...GB.state.settings, ...(parsed.settings || {}) };
     }
   } catch (e) { console.warn('Load failed', e); }
-
   if (!GB.state.students.length) {
     try {
       const raw = localStorage.getItem(GB.studentKey);
@@ -290,16 +297,18 @@ function loadData() {
         const data = JSON.parse(raw);
         GB.state.students = [{
           id: 'local-1',
-          name: 'Current Student (local)',
-          studentNo: '',
-          section: '',
+          name: data.student?.fullName || 'Current Student (local)',
+          studentNo: data.student?.studentNo || '',
+          section: data.student?.section || '',
+          group: data.student?.group || '',
           progress: data.progress || {},
           quizAttempts: data.quizAttempts || {},
           games: data.games || {},
+          exam: data.exam || null,
           lastActive: new Date().toISOString(),
         }];
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
   }
 }
 
@@ -324,8 +333,7 @@ function downloadFile(content, filename, mime) {
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function getUnitAttemptBest(s, unit) {
   const attempts = s.quizAttempts?.[unit];
@@ -338,6 +346,7 @@ function getGameBest(s, game) {
   return Math.max(...attempts);
 }
 function getExamScore(s) {
+  if (s.exam?.submitted) return s.exam.percentage;
   const attempts = s.quizAttempts?.[EXAM_KEY];
   if (!attempts || !attempts.length) return null;
   return Math.max(...attempts);
@@ -450,6 +459,7 @@ function render() {
         <div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>
         <div>Clinical Instructor | Teacher II — Department of Education</div>
         <div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>
+        <div style="margin-top:0.5rem;font-size:0.72rem;">Version 1.5</div>
       </div>
     `;
     return;
@@ -463,6 +473,7 @@ function render() {
       ${renderTable()}
       ${renderLegend()}
       ${renderClassStats()}
+      ${renderExamStats()}
       ${renderSignatureBlock()}
     </div>
     <div class="no-print" style="text-align:center;color:var(--gray);font-size:0.8rem;margin-top:1rem;">
@@ -474,7 +485,7 @@ function render() {
 function renderToolbar() {
   return `
     <div class="toolbar no-print">
-      <div class="toolbar-left"><h1>📊 Class Record — Gradebook</h1></div>
+      <div class="toolbar-left"><h1>📊 Class Record — Gradebook (v1.5)</h1></div>
       <div class="toolbar-right">
         <button class="btn btn-outline btn-sm" onclick="openStudentApp()">🫁 Student App</button>
         <button class="btn btn-outline btn-sm" onclick="window.location.href='instructor-dashboard.html'">👨‍🏫 Dashboard</button>
@@ -512,7 +523,7 @@ function renderSheetHeader() {
       <h1>${escapeHtml(s.courseName)}</h1>
       <p><strong>CLASS RECORD — RESPIRATORY ASSESSMENT MASTERY</strong></p>
       <p>School Year ${escapeHtml(s.schoolYear)} &nbsp;|&nbsp; ${escapeHtml(s.semester)} &nbsp;|&nbsp; Instructor: ${escapeHtml(s.instructorName)}</p>
-      <p style="font-size:0.78rem;color:var(--gray);">Generated ${todayLong()}</p>
+      <p style="font-size:0.78rem;color:var(--gray);">Generated ${todayLong()} &nbsp;|&nbsp; App Version 1.5</p>
     </div>
   `;
 }
@@ -525,12 +536,13 @@ function renderTable() {
         <tr>
           <th rowspan="2" style="min-width:180px;">STUDENT NAME</th>
           <th rowspan="2" style="min-width:110px;">STUDENT NO.</th>
-          <th rowspan="2" style="min-width:80px;">SECTION</th>
+          <th rowspan="2" style="min-width:70px;">SECTION</th>
+          <th rowspan="2" style="min-width:70px;">GROUP</th>
           <th colspan="${UNIT_KEYS.length}">UNIT QUIZ SCORES (Best Attempt)</th>
-          <th rowspan="2" style="min-width:60px;">UNIT AVG</th>
-          <th colspan="${GAME_KEYS.length}">MASTERY GAMES (Best Attempt)</th>
-          <th rowspan="2" style="min-width:60px;">GAMES AVG</th>
-          <th rowspan="2" style="min-width:60px;">CAPSTONE<br>EXAM</th>
+          <th rowspan="2" style="min-width:60px;">UNIT<br>AVG</th>
+          <th colspan="${GAME_KEYS.length}">MASTERY GAMES</th>
+          <th rowspan="2" style="min-width:60px;">GAMES<br>AVG</th>
+          <th colspan="2" class="exam-header">CAPSTONE EXAM</th>
           <th rowspan="2" style="min-width:70px;">UNITS<br>COMPLETED</th>
           <th rowspan="2" style="min-width:70px;">WEIGHTED<br>RAW %</th>
           <th rowspan="2" style="min-width:70px;">FINAL<br>GRADE</th>
@@ -539,6 +551,8 @@ function renderTable() {
         <tr>
           ${UNIT_KEYS.map(u => `<th class="sub" style="min-width:52px;">${escapeHtml(UNIT_NAMES[u].split(' ')[0])}</th>`).join('')}
           ${GAME_KEYS.map(g => `<th class="sub" style="min-width:52px;">${escapeHtml(GAME_NAMES[g])}</th>`).join('')}
+          <th class="sub exam-header" style="min-width:52px;">Score</th>
+          <th class="sub exam-header" style="min-width:70px;">Result</th>
         </tr>
       </thead>
       <tbody>
@@ -555,7 +569,8 @@ function renderStudentRow(s, idx) {
   const gameScores = GAME_KEYS.map(g => getGameBest(s, g));
   const unitAvg = getUnitAverage(s);
   const gameAvg = getGameAverage(s);
-  const exam = getExamScore(s);
+  const examPct = getExamScore(s);
+  const exam = s.exam;
   const completion = getCompletionPercent(s);
   const rawFinal = computeWeightedFinal(s, w);
   const transmuted = transmute(rawFinal);
@@ -565,11 +580,15 @@ function renderStudentRow(s, idx) {
     <td class="name-cell">${escapeHtml(s.name)}</td>
     <td class="no-cell">${escapeHtml(s.studentNo || '—')}</td>
     <td class="no-cell" style="text-align:center;">${escapeHtml(s.section || '—')}</td>
+    <td class="no-cell" style="text-align:center;">${escapeHtml(s.group || '—')}</td>
     ${unitScores.map(v => `<td class="num ${scoreClass(v, w.masteryThreshold)}">${cell(v)}</td>`).join('')}
     <td class="num final ${scoreClass(unitAvg, w.masteryThreshold)}">${cell(unitAvg)}</td>
     ${gameScores.map(v => `<td class="num ${scoreClass(v, 90)}">${cell(v)}</td>`).join('')}
     <td class="num final ${scoreClass(gameAvg, 90)}">${cell(gameAvg)}</td>
-    <td class="num ${scoreClass(exam, w.masteryThreshold)}">${cell(exam)}</td>
+    <td class="num ${scoreClass(examPct, 90)}">${examPct !== null ? (exam ? `${exam.score}/${exam.total}<br><small>${examPct}%</small>` : examPct + '%') : '—'}</td>
+    <td class="num ${exam ? (exam.passed ? 'exam-pass' : 'exam-fail') : 'score-empty'}">
+      ${exam?.submitted ? (exam.passed ? '✅ PASS' : '❌ FAIL') : 'Not taken'}
+    </td>
     <td class="num">${completion}%</td>
     <td class="num final">${rawFinal !== null ? rawFinal : '—'}</td>
     <td class="num final ${finalGradeClass(transmuted)}">${formatGrade(transmuted)}</td>
@@ -595,14 +614,17 @@ function renderClassAverageRow() {
   const completionAvg = avg(students.map(s => getCompletionPercent(s)));
   const rawAvg = avg(students.map(s => computeWeightedFinal(s, w)));
   const transmutedAvg = avg(students.map(s => transmute(computeWeightedFinal(s, w))));
+  const examPassCount = students.filter(s => s.exam?.passed).length;
+  const examTakenCount = students.filter(s => s.exam?.submitted).length;
 
   return `<tr style="background:#E0F2F1;font-weight:700;border-top:2px solid var(--primary);">
-    <td class="name-cell" colspan="3" style="text-align:right;padding-right:0.75rem;">CLASS AVERAGE →</td>
+    <td class="name-cell" colspan="4" style="text-align:right;padding-right:0.75rem;">CLASS AVERAGE →</td>
     ${unitAvgs.map(v => `<td class="num">${v ?? '—'}</td>`).join('')}
     <td class="num final">${unitAvgOfAvgs ?? '—'}</td>
     ${gameAvgs.map(v => `<td class="num">${v ?? '—'}</td>`).join('')}
     <td class="num final">${gameAvgOfAvgs ?? '—'}</td>
-    <td class="num">${examAvg ?? '—'}</td>
+    <td class="num">${examAvg !== null ? examAvg + '%' : '—'}<br><small>${examPassCount}/${examTakenCount} passed</small></td>
+    <td class="num">${examTakenCount ? Math.round((examPassCount/examTakenCount)*100) + '%' : '—'}</td>
     <td class="num">${completionAvg ?? '—'}%</td>
     <td class="num final">${rawAvg ?? '—'}</td>
     <td class="num final">${transmutedAvg !== null ? formatGrade(transmutedAvg) : '—'}</td>
@@ -618,6 +640,7 @@ function renderLegend() {
       <div class="legend-item"><span class="legend-swatch swatch-warn"></span> 75–${w.masteryThreshold - 1}% — Passing</div>
       <div class="legend-item"><span class="legend-swatch swatch-fail"></span> &lt;75% — Failing</div>
       <div class="legend-item"><span class="legend-swatch swatch-empty"></span> No data</div>
+      <div class="legend-item"><span class="legend-swatch swatch-exam"></span> Capstone Exam (15/30 passing = 50% = 3.0)</div>
       <div class="legend-item" style="margin-left:auto;"><strong>Transmutation:</strong> 97+ → 1.00 | 94 → 1.25 | 91 → 1.50 | 88 → 1.75 | 85 → 2.00 | 82 → 2.25 | 79 → 2.50 | 76 → 2.75 | 75 → 3.00 | &lt;75 → 5.00</div>
     </div>
   `;
@@ -653,6 +676,33 @@ function renderClassStats() {
   `;
 }
 
+function renderExamStats() {
+  const students = GB.state.students;
+  const takers = students.filter(s => s.exam?.submitted);
+  const passed = takers.filter(s => s.exam.passed).length;
+  const failed = takers.length - passed;
+  const passRate = takers.length ? Math.round((passed / takers.length) * 100) : 0;
+  const avgScore = takers.length
+    ? Math.round(takers.reduce((sum, s) => sum + s.exam.percentage, 0) / takers.length)
+    : 0;
+  const flagged = takers.filter(s => {
+    const i = s.exam.integrity || {};
+    const total = (i.focusLosses?.length || 0) + (i.copyAttempts || 0) + (i.rightClicks || 0) + (i.printAttempts || 0);
+    return total >= 3;
+  }).length;
+
+  return `
+    <div class="stats-grid no-print">
+      <div class="stat-box"><div class="stat-value">${takers.length}/${students.length}</div><div class="stat-label">Exams Taken</div></div>
+      <div class="stat-box pass"><div class="stat-value">${passed}</div><div class="stat-label">Exam Passed</div></div>
+      <div class="stat-box fail"><div class="stat-value">${failed}</div><div class="stat-label">Exam Failed</div></div>
+      <div class="stat-box"><div class="stat-value">${passRate}%</div><div class="stat-label">Exam Pass Rate</div></div>
+      <div class="stat-box"><div class="stat-value">${avgScore}%</div><div class="stat-label">Avg Exam Score</div></div>
+      <div class="stat-box ${flagged > 0 ? 'fail' : ''}"><div class="stat-value">${flagged}</div><div class="stat-label">Integrity Flagged</div></div>
+    </div>
+  `;
+}
+
 function renderSignatureBlock() {
   const s = GB.state.settings;
   return `
@@ -661,7 +711,7 @@ function renderSignatureBlock() {
       <div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>
       <div>Clinical Instructor | Teacher II — Department of Education</div>
       <div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>
-      <div style="margin-top:0.5rem;font-size:0.72rem;">© ${new Date().getFullYear()} — All Rights Reserved</div>
+      <div style="margin-top:0.5rem;font-size:0.72rem;">Version 1.5 — © ${new Date().getFullYear()} — All Rights Reserved</div>
     </div>
     <div class="signature-block">
       <div>
@@ -685,26 +735,34 @@ function exportCSV() {
   const w = GB.state.settings;
   if (!students.length) return toast('No data to export.', 'warning');
   const headers = [
-    'Student Name','Student No.','Section',
+    'Student Name','Student No.','Section','Group',
     ...UNIT_KEYS.map(u => UNIT_NAMES[u]),
     'Unit Avg',
     ...GAME_KEYS.map(g => GAME_NAMES[g]),
     'Games Avg',
-    'Capstone Exam','Units Completed %','Weighted Raw %','Final Grade','Remarks'
+    'ExamID','ExamScore','ExamTotal','ExamPercentage','ExamResult','ExamDate',
+    'Units Completed %','Weighted Raw %','Final Grade','Remarks',
+    'IntegrityFocusLoss','IntegrityCopy','IntegrityRightClick','IntegrityPrint','IntegrityTotal'
   ];
   const rows = students.map(s => {
     const unitScores = UNIT_KEYS.map(u => getUnitAttemptBest(s, u) ?? '');
     const gameScores = GAME_KEYS.map(g => getGameBest(s, g) ?? '');
     const unitAvg = getUnitAverage(s) ?? '';
     const gameAvg = getGameAverage(s) ?? '';
-    const exam = getExamScore(s) ?? '';
+    const exam = s.exam;
     const completion = getCompletionPercent(s);
     const raw = computeWeightedFinal(s, w) ?? '';
     const g = transmute(raw);
+    const i = exam?.integrity || {};
+    const intTotal = (i.focusLosses?.length || 0) + (i.copyAttempts || 0) + (i.rightClicks || 0) + (i.printAttempts || 0);
     return [
-      s.name, s.studentNo || '', s.section || '',
+      s.name, s.studentNo || '', s.section || '', s.group || '',
       ...unitScores, unitAvg, ...gameScores, gameAvg,
-      exam, completion + '%', raw, formatGrade(g), getRemarks(g)
+      exam?.examId || '', exam?.score || '', exam?.total || '', exam?.percentage || '',
+      exam?.submitted ? (exam.passed ? 'PASSED' : 'FAILED') : 'NOT TAKEN',
+      exam?.takenAt || '',
+      completion + '%', raw, formatGrade(g), getRemarks(g),
+      i.focusLosses?.length || 0, i.copyAttempts || 0, i.rightClicks || 0, i.printAttempts || 0, intTotal
     ];
   });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
