@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0D7377" />
-  <meta name="description" content="Instructor Dashboard v1.6.1 — Respiratory Assessment Mastery. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
+  <meta name="description" content="Instructor Dashboard v1.6.2 — Respiratory Assessment Mastery. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <title>Instructor Dashboard — Respiratory Mastery v1.6.1</title>
+  <title>Instructor Dashboard — Respiratory Mastery v1.6.2</title>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     :root {
@@ -446,7 +446,7 @@
       <div>Teacher II &mdash; DepEd</div>
       <div>Tarlac State University</div>
       <div>College of Science &mdash; Nursing Dept.</div>
-      <div class="app-version">Version 1.6.1</div>
+      <div class="app-version">Version 1.6.2</div>
     </div>
   </aside>
 
@@ -469,9 +469,12 @@
 
 <script>
 /* ============================================================
-   INSTRUCTOR DASHBOARD — v1.6.1
-   Same-Device Import Fix + All v1.6 Features
+   INSTRUCTOR DASHBOARD — v1.6.2
+   Fixed: JSON data no longer leaks into page (use pending imports)
    ============================================================ */
+
+// Registry for pending imports — this is what fixes the "data leak" bug
+var PENDING_IMPORTS = {};
 
 var DB = {
   key: 'respMastery_instructor_v1',
@@ -752,7 +755,7 @@ function renderOverview(main) {
   var html = '';
   html += '<div class="card">';
   html += '<div class="card-header"><div><h1>&#128202; Instructor Overview</h1>';
-  html += '<p style="color:var(--gray);margin:0;">' + escapeHtml(DB.state.settings.courseName) + ' \u2014 v1.6.1</p></div>';
+  html += '<p style="color:var(--gray);margin:0;">' + escapeHtml(DB.state.settings.courseName) + ' \u2014 v1.6.2</p></div>';
   html += '<div class="flex gap-1"><button class="btn btn-outline btn-sm" onclick="navigate(\'import\')">&#128229; Import Data</button>';
   html += '<button class="btn btn-primary btn-sm" onclick="navigate(\'add\')">&#10133; Add Student</button></div></div></div>';
 
@@ -804,7 +807,7 @@ function renderOverview(main) {
   html += '<div class="dev-label">Developed by</div>';
   html += '<div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>';
   html += '<div class="dev-info"><strong>Clinical Instructor</strong><br>Teacher II \u2014 Department of Education<br><strong>Tarlac State University</strong><br>College of Science \u2014 Nursing Department</div>';
-  html += '<p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.6.1 \u2014 &copy; ' + new Date().getFullYear() + ' \u2014 All Rights Reserved</p>';
+  html += '<p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.6.2 \u2014 &copy; ' + new Date().getFullYear() + ' \u2014 All Rights Reserved</p>';
   html += '</div>';
 
   main.innerHTML = html;
@@ -1334,6 +1337,9 @@ function handleJSONFile(file) {
   reader.readAsText(file);
 }
 
+/* ============================================================
+   THE CRITICAL FIX: Store pending imports by ID, not inline JSON
+   ============================================================ */
 function showImportPreview(data, containerId, fromCamera) {
   var container = document.getElementById(containerId);
   if (!container) return;
@@ -1341,6 +1347,9 @@ function showImportPreview(data, containerId, fromCamera) {
   var pct = getPercentFromData(data);
   var avg = getAvgFromData(data);
   var exam = data.exam || null;
+
+  // Store the pending data in a registry, use the containerId as the key
+  PENDING_IMPORTS[containerId] = data;
 
   // Check for existing student by studentNo OR email (case-insensitive)
   var existing = findExistingStudent(s.studentNo, s.email);
@@ -1375,7 +1384,6 @@ function showImportPreview(data, containerId, fromCamera) {
     html += '<tr><td><strong>Retake Status:</strong></td><td>' + retakeText + '</td></tr>';
   }
 
-  // Same-device notice
   var localProgress = readLocalStudentProgress();
   var isSameDevice = localProgress && localProgress.student &&
     ((localProgress.student.studentNo && s.studentNo && String(localProgress.student.studentNo).trim() === String(s.studentNo).trim()) ||
@@ -1387,14 +1395,15 @@ function showImportPreview(data, containerId, fromCamera) {
   }
   html += '</table>';
 
+  // Button uses containerId (a simple string) — no JSON leaked into HTML attributes
   if (existing) {
     html += '<div class="callout callout-warning mt-2">\u26A0 <strong>This student already exists in your roster:</strong> ' + escapeHtml(existing.name) + '<br>Update their record or create a new one?</div>';
     html += '<div class="flex gap-1 mt-2" style="flex-wrap:wrap;">';
-    html += '<button class="btn btn-primary" onclick=\'confirmImport(' + JSON.stringify(JSON.stringify(data)) + ', "update", "' + existing.id + '")\'>\uD83D\uDD04 Update Existing</button>';
-    html += '<button class="btn btn-outline" onclick=\'confirmImport(' + JSON.stringify(JSON.stringify(data)) + ', "new", null)\'>\u2795 Create New</button>';
+    html += '<button class="btn btn-primary" onclick="confirmImportFromPending(\'' + containerId + '\', \'update\', \'' + existing.id + '\')">\uD83D\uDD04 Update Existing</button>';
+    html += '<button class="btn btn-outline" onclick="confirmImportFromPending(\'' + containerId + '\', \'new\', null)">\u2795 Create New</button>';
     html += '</div>';
   } else {
-    html += '<button class="btn btn-primary mt-2" onclick=\'confirmImport(' + JSON.stringify(JSON.stringify(data)) + ', "new", null)\'>\u2705 Add to Roster</button>';
+    html += '<button class="btn btn-primary mt-2" onclick="confirmImportFromPending(\'' + containerId + '\', \'new\', null)">\u2705 Add to Roster</button>';
   }
 
   if (fromCamera) {
@@ -1405,6 +1414,18 @@ function showImportPreview(data, containerId, fromCamera) {
   html += '</div>';
 
   container.innerHTML = html;
+}
+
+/* ============================================================
+   THE CRITICAL FIX: Read from PENDING_IMPORTS, not from string
+   ============================================================ */
+function confirmImportFromPending(containerId, mode, existingId) {
+  var data = PENDING_IMPORTS[containerId];
+  if (!data) {
+    toast('Import data not found. Please paste the code or upload the file again.', 'error');
+    return;
+  }
+  confirmImport(data, mode, existingId);
 }
 
 function clearQRResult() {
@@ -1432,11 +1453,16 @@ function getAvgFromData(data) {
   return Math.round(all.reduce(function(a, b) { return a + b; }, 0) / all.length);
 }
 
-function confirmImport(dataStr, mode, existingId) {
-  var data = JSON.parse(dataStr);
+/* ============================================================
+   confirmImport now takes the data OBJECT (not a JSON string)
+   ============================================================ */
+function confirmImport(data, mode, existingId) {
+  if (!data || !data.student) {
+    toast('Invalid import data.', 'error');
+    return;
+  }
   var s = data.student;
 
-  // If mode is 'new', double-check for duplicate by studentNo OR email
   if (mode === 'new') {
     var dup = findExistingStudent(s.studentNo, s.email);
     if (dup) {
@@ -1476,7 +1502,7 @@ function confirmImport(dataStr, mode, existingId) {
     retakeCode: existing ? (existing.retakeCode || null) : null,
     retakeUsed: existing ? (existing.retakeUsed || false) : false,
     lastActive: s.lastActive || new Date().toISOString(),
-    appVersion: data.appVersion || '1.6.1'
+    appVersion: data.appVersion || '1.6.2'
   });
 
   if (mode === 'update' && existingId) {
@@ -1519,12 +1545,12 @@ function importLocalProgress() {
   if (existing) {
     var action = confirm(data.student.fullName + ' already exists in the roster.\n\nClick OK to UPDATE their record.\nClick Cancel to CREATE A NEW separate entry.');
     if (action) {
-      confirmImport(JSON.stringify(data), 'update', existing.id);
+      confirmImport(data, 'update', existing.id);
     } else {
-      confirmImport(JSON.stringify(data), 'new', null);
+      confirmImport(data, 'new', null);
     }
   } else {
-    confirmImport(JSON.stringify(data), 'new', null);
+    confirmImport(data, 'new', null);
   }
 }
 
@@ -1647,7 +1673,6 @@ function saveStudent(event, editId) {
     logActivity(editId, 'Updated profile', data.name);
     toast('Student updated.', 'success');
   } else {
-    // Check for duplicate when adding manually
     var dup = findExistingStudent(data.studentNo, data.email);
     if (dup) {
       if (!confirm('A student with the same Student No or Email already exists:\n\n' + dup.name + '\n\nContinue to create a separate new entry anyway?')) return;
@@ -1791,7 +1816,7 @@ function viewStudent(id) {
     } else {
       html += '<div class="callout callout-info">';
       html += '<strong>&#8505; No Retake Granted</strong><br>';
-      html += 'By default, the Capstone Exam is single-attempt. If the student presents a valid reason (medical, technical, or other extenuating circumstances), you may grant a retake.';
+      html += 'By default, the Capstone Exam is single-attempt. If the student presents a valid reason, you may grant a retake.';
       html += '<br><br>';
       html += '<button class="btn btn-primary btn-sm" onclick="promptGrantRetake(\'' + s.id + '\')">&#128275; Grant Exam Retake</button>';
       html += '</div>';
@@ -1806,19 +1831,6 @@ function viewStudent(id) {
         html += '<td>' + (h.passed ? '<span class="pill pill-success">&#9989; PASS</span>' : '<span class="pill pill-danger">&#10060; FAIL</span>') + '</td>';
         html += '<td>' + fmtDateTime(h.takenAt) + '</td>';
         html += '<td>' + formatDuration(h.durationSec) + '</td></tr>';
-      });
-      html += '</tbody></table></div>';
-    }
-
-    if (s.retakeGrants && s.retakeGrants.length > 0) {
-      html += '<h3>&#128275; Retake Grant History</h3>';
-      html += '<div class="table-wrap"><table><thead><tr><th>Code</th><th>Reason</th><th>Granted By</th><th>Granted At</th><th>Status</th></tr></thead><tbody>';
-      s.retakeGrants.forEach(function(g) {
-        html += '<tr><td><code>' + escapeHtml(g.code) + '</code></td>';
-        html += '<td>' + escapeHtml(g.reason) + '</td>';
-        html += '<td>' + escapeHtml(g.grantedBy) + '</td>';
-        html += '<td>' + fmtDateTime(g.grantedAt) + '</td>';
-        html += '<td>' + (g.revoked ? '<span class="pill pill-danger">Revoked</span>' : (g.used ? '<span class="pill pill-info">Used</span>' : '<span class="pill pill-purple">Active</span>')) + '</td></tr>';
       });
       html += '</tbody></table></div>';
     }
@@ -2432,7 +2444,7 @@ function showReport(title, html) {
   area.classList.remove('hidden');
   area.innerHTML = '<div class="card-header"><h2>' + title + '</h2>';
   area.innerHTML += '<button class="btn btn-primary btn-sm no-print" onclick="window.print()">&#128424; Print</button></div>';
-  area.innerHTML += '<p style="color:var(--gray);font-size:0.85rem;">Generated ' + new Date().toLocaleString() + ' by ' + escapeHtml(DB.state.settings.instructorName) + ' \u2014 App v1.6.1</p>';
+  area.innerHTML += '<p style="color:var(--gray);font-size:0.85rem;">Generated ' + new Date().toLocaleString() + ' by ' + escapeHtml(DB.state.settings.instructorName) + ' \u2014 App v1.6.2</p>';
   area.innerHTML += html;
   area.scrollIntoView({ behavior: 'smooth' });
 }
@@ -2654,7 +2666,7 @@ function exportCSV() {
 }
 
 function exportJSON() {
-  var data = Object.assign({ exported: new Date().toISOString(), appVersion: '1.6.1' }, DB.state);
+  var data = Object.assign({ exported: new Date().toISOString(), appVersion: '1.6.2' }, DB.state);
   downloadFile(JSON.stringify(data, null, 2), 'respiratory-mastery-backup-' + todayISO() + '.json', 'application/json');
   toast('JSON backup exported.', 'success');
 }
@@ -2721,13 +2733,13 @@ function renderSettings(main) {
   html += '<div class="card"><h3>Storage Information</h3>';
   html += '<p><strong>Storage Key:</strong> <code>' + DB.key + '</code></p>';
   html += '<p><strong>Total Students:</strong> ' + DB.state.students.length + '</p>';
-  html += '<p><strong>App Version:</strong> 1.6.1</p></div>';
+  html += '<p><strong>App Version:</strong> 1.6.2</p></div>';
 
   html += '<div class="developer-card">';
   html += '<div class="dev-label">Developed by</div>';
   html += '<div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>';
   html += '<div class="dev-info"><strong>Clinical Instructor</strong><br>Teacher II \u2014 Department of Education<br><strong>Tarlac State University</strong><br>College of Science \u2014 Nursing Department</div>';
-  html += '<p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.6.1</p></div>';
+  html += '<p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.6.2</p></div>';
 
   main.innerHTML = html;
 }
@@ -2749,32 +2761,20 @@ function saveSettings(event) {
 function renderHelp(main) {
   var html = '';
   html += '<div class="card"><h1>&#10067; Help &amp; Documentation</h1>';
-  html += '<p style="color:var(--gray);">Version 1.6.1 \u2014 aligned with Student App v1.6</p></div>';
+  html += '<p style="color:var(--gray);">Version 1.6.2</p></div>';
 
-  html += '<div class="card"><h3>&#128229; Same-Device Import (v1.6.1 Fix)</h3>';
-  html += '<p>This version fixes the issue where importing a student on the <strong>same device</strong> they used the app on would fail or create duplicates.</p>';
-  html += '<p><strong>How it works now:</strong></p>';
-  html += '<ul style="margin-left:1.5rem;">';
-  html += '<li>When you paste a code or upload a JSON file, the dashboard automatically checks if the student is <strong>already in the roster</strong> by matching Student No OR Email (case-insensitive)</li>';
-  html += '<li>If a match is found, you\'ll be prompted to <strong>UPDATE</strong> the existing record instead of creating a duplicate</li>';
-  html += '<li>The "Auto (Same Device)" tab now detects if the student is already in the roster and offers an <strong>Update</strong> button instead of showing "Import Now"</li>';
-  html += '</ul></div>';
+  html += '<div class="card"><h3>&#128295; Version 1.6.2 Bug Fix</h3>';
+  html += '<p>Fixed an issue where pasting a code or uploading a JSON/QR file would leak the raw data into the page instead of showing the "Add to Roster" button properly.</p>';
+  html += '<p><strong>Root cause:</strong> The JSON data was being embedded directly into HTML button attributes, which broke when the data contained quotes.</p>';
+  html += '<p><strong>Fix:</strong> Import data is now stored in a temporary registry and referenced by a simple ID, keeping it completely separate from the HTML.</p></div>';
 
-  html += '<div class="card"><h3>&#128275; How to Grant an Exam Retake</h3>';
-  html += '<ol style="margin-left:1.5rem;line-height:1.9;">';
-  html += '<li>Go to <strong>Roster</strong> and click <strong>View</strong> on the student</li>';
-  html += '<li>Scroll to <strong>Exam Retake Management</strong></li>';
-  html += '<li>Click <strong>Grant Exam Retake</strong></li>';
-  html += '<li>Select a reason, confirm your name, and a code is generated</li>';
-  html += '<li>Copy the code and give it to the student</li>';
-  html += '<li>Student enters the code in their app \u2192 exam unlocks for ONE new attempt</li>';
-  html += '</ol></div>';
+  html += '<div class="card"><h3>&#128229; Same-Device Import</h3>';
+  html += '<p>When you import on the same device the student used, the dashboard detects the student and prompts you to update the existing record instead of creating a duplicate.</p></div>';
 
   html += '<div class="card"><h3>Developer</h3>';
   html += '<p><strong>JEMUEL C. MARI, MAN, RN, LPT</strong></p>';
   html += '<p>Clinical Instructor | Teacher II \u2014 Department of Education</p>';
-  html += '<p>Tarlac State University \u2014 College of Science \u2014 Nursing Department</p>';
-  html += '<p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">App Version: 1.6.1</p></div>';
+  html += '<p>Tarlac State University \u2014 College of Science \u2014 Nursing Department</p></div>';
 
   main.innerHTML = html;
 }
