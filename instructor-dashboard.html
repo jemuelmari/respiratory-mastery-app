@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0D7377" />
-  <meta name="description" content="Instructor Dashboard — Respiratory Assessment Mastery. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
+  <meta name="description" content="Instructor Dashboard — Respiratory Assessment Mastery v1.5. Developed by JEMUEL C. MARI, MAN, RN, LPT." />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <title>👨‍🏫 Instructor Dashboard — Respiratory Mastery</title>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
@@ -68,6 +68,11 @@
       opacity: 0.7; margin-bottom: 0.3rem;
     }
     .sidebar-footer .dev-name { font-weight: 700; color: #FFFFFF; font-size: 0.78rem; }
+    .sidebar-footer .app-version {
+      margin-top: 0.5rem; padding-top: 0.5rem;
+      border-top: 1px dashed rgba(255,255,255,0.2);
+      font-size: 0.68rem; opacity: 0.8;
+    }
     .main-content { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1400px; }
     .menu-toggle {
       display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200;
@@ -173,7 +178,7 @@
     .modal-overlay.show { display: flex; }
     .modal {
       background: var(--white); border-radius: var(--radius);
-      max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto;
+      max-width: 780px; width: 100%; max-height: 90vh; overflow-y: auto;
       padding: 1.5rem; box-shadow: var(--shadow-lg);
     }
     .modal-header {
@@ -320,9 +325,7 @@
       animation: scanline 2s linear infinite;
     }
     @keyframes scanline {
-      0% { top: 10%; }
-      50% { top: 90%; }
-      100% { top: 10%; }
+      0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; }
     }
     .qr-status {
       text-align: center; padding: 0.75rem;
@@ -341,6 +344,35 @@
       font-family: var(--font-body); font-size: 0.85rem;
       width: 100%; max-width: 480px;
       display: block; margin-left: auto; margin-right: auto;
+    }
+    .integrity-flag {
+      display: inline-block;
+      background: #FFF3E0; color: #663C00;
+      padding: 0.15rem 0.5rem; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600; margin-left: 0.35rem;
+    }
+    .integrity-flag.ok {
+      background: #E8F5E9; color: #1B5E20;
+    }
+    .bloom-tag {
+      display: inline-block; background: var(--secondary); color: var(--white);
+      padding: 0.15rem 0.5rem; border-radius: 999px;
+      font-size: 0.68rem; font-family: var(--font-head); font-weight: 600;
+      margin-left: 0.35rem;
+    }
+    .feedback-card {
+      background: #FFF8E1; border-left: 4px solid var(--warning);
+      padding: 0.85rem 1rem; border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    .feedback-card .feedback-meta {
+      font-size: 0.78rem; color: var(--gray);
+    }
+    .feedback-card .feedback-body {
+      margin-top: 0.4rem; font-size: 0.9rem;
+    }
+    .feedback-card .feedback-rating {
+      font-size: 0.9rem; color: #FFC107;
     }
     @media print {
       .sidebar, .menu-toggle, .btn, .no-print { display: none !important; }
@@ -380,6 +412,11 @@
         <button class="nav-item" data-view="grades"><span class="icon">📝</span> Grade Entry</button>
       </div>
       <div class="nav-section">
+        <div class="nav-section-title">Exams</div>
+        <button class="nav-item" data-view="exams"><span class="icon">📝</span> Exam Results</button>
+        <button class="nav-item" data-view="feedback"><span class="icon">💬</span> Student Feedback</button>
+      </div>
+      <div class="nav-section">
         <div class="nav-section-title">Analytics</div>
         <button class="nav-item" data-view="analytics"><span class="icon">📈</span> Analytics</button>
         <button class="nav-item" data-view="units"><span class="icon">📚</span> Unit Breakdown</button>
@@ -407,6 +444,7 @@
       <div>Teacher II — DepEd</div>
       <div>Tarlac State University</div>
       <div>College of Science — Nursing Dept.</div>
+      <div class="app-version">Version 1.5 — Aligned with Student App v1.5</div>
     </div>
   </aside>
 
@@ -429,8 +467,8 @@
 
 <script>
 /* ============================================================
-   INSTRUCTOR DASHBOARD — CORE LOGIC
-   Version 2.2 — QR Camera + QR Image + All Import Methods
+   INSTRUCTOR DASHBOARD — v1.5
+   Aligned with Student App v1.5 (Capstone Exam + Feedback)
    ============================================================ */
 
 const DB = {
@@ -442,6 +480,7 @@ const DB = {
       passingScore: 90,
       atRiskThreshold: 75,
       inactiveDays: 7,
+      examPassingScore: 15,
       courseName: 'NCM 101B Lab — Respiratory Assessment',
       instructorName: 'JEMUEL C. MARI, MAN, RN, LPT',
     },
@@ -449,7 +488,6 @@ const DB = {
   },
 };
 
-/* ---------- QR SCANNER STATE ---------- */
 const QRScanner = {
   stream: null,
   videoEl: null,
@@ -473,8 +511,7 @@ function loadDB() {
   } catch (e) { console.warn('DB load failed', e); }
 }
 function saveDB() {
-  try { localStorage.setItem(DB.key, JSON.stringify(DB.state)); }
-  catch (e) { console.warn('DB save failed', e); }
+  try { localStorage.setItem(DB.key, JSON.stringify(DB.state)); } catch (e) {}
 }
 function readLocalStudentProgress() {
   try {
@@ -488,6 +525,16 @@ function todayISO() { return new Date().toISOString().slice(0, 10); }
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function formatDuration(sec) {
+  if (!sec && sec !== 0) return '—';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m} min ${s} sec`;
 }
 function daysBetween(a, b) { return Math.floor((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24)); }
 function toast(msg, type = '') {
@@ -509,6 +556,8 @@ function ensureStudentProgress(s) {
   if (!s.quizAttempts) s.quizAttempts = {};
   if (!s.games) s.games = {};
   if (!s.badges) s.badges = {};
+  if (s.exam === undefined) s.exam = null;
+  if (!s.feedback) s.feedback = [];
   return s;
 }
 function getStudentPercent(s) {
@@ -517,6 +566,13 @@ function getStudentPercent(s) {
   return Math.round((done / units.length) * 100);
 }
 function getStudentAverage(s) {
+  const unitScores = Object.values(s.quizAttempts || {}).flat().filter(x => typeof x === 'number');
+  const examScore = s.exam?.percentage;
+  const all = (examScore !== undefined && examScore !== null) ? [...unitScores, examScore] : unitScores;
+  if (!all.length) return 0;
+  return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
+}
+function getUnitAverageOnly(s) {
   const all = Object.values(s.quizAttempts || {}).flat().filter(x => typeof x === 'number');
   if (!all.length) return 0;
   return Math.round(all.reduce((a,b)=>a+b,0) / all.length);
@@ -524,7 +580,9 @@ function getStudentAverage(s) {
 function getStudentStatus(s) {
   const pct = getStudentPercent(s);
   const avg = getStudentAverage(s);
-  if (pct === 100 && avg >= DB.state.settings.passingScore) return { label: 'Mastered', cls: 'pill-success' };
+  const examPassed = s.exam?.passed === true;
+  if (pct === 100 && avg >= DB.state.settings.passingScore && examPassed) return { label: 'Mastered', cls: 'pill-success' };
+  if (pct === 100 && s.exam?.submitted && !examPassed) return { label: 'Exam Failed', cls: 'pill-danger' };
   if (pct >= 50) return { label: 'In Progress', cls: 'pill-info' };
   if (pct > 0) return { label: 'At Risk', cls: 'pill-warning' };
   return { label: 'Not Started', cls: 'pill-gray' };
@@ -535,8 +593,14 @@ function isAtRisk(s) {
   const last = s.lastActive;
   if (pct > 0 && pct < DB.state.settings.atRiskThreshold) return true;
   if (avg > 0 && avg < DB.state.settings.atRiskThreshold) return true;
+  if (s.exam?.submitted && !s.exam.passed) return true;
   if (last && daysBetween(last, new Date().toISOString()) > DB.state.settings.inactiveDays && pct < 100) return true;
   return false;
+}
+function getIntegrityFlagCount(s) {
+  if (!s.exam || !s.exam.integrity) return 0;
+  const i = s.exam.integrity;
+  return (i.focusLosses?.length || 0) + (i.copyAttempts || 0) + (i.rightClicks || 0) + (i.printAttempts || 0);
 }
 function getAlertList() {
   const alerts = [];
@@ -561,6 +625,12 @@ function getAlertList() {
         alerts.push({ student: s, type: 'Multiple Failures', detail: `${unit.toUpperCase()}: ${fails} failed attempts.`, severity: 'danger' });
       }
     });
+    if (s.exam?.submitted && !s.exam.passed) {
+      alerts.push({ student: s, type: 'Capstone Exam Failed', detail: `Score: ${s.exam.score}/${s.exam.total} (${s.exam.percentage}%) — single attempt used.`, severity: 'danger' });
+    }
+    if (getIntegrityFlagCount(s) >= 3) {
+      alerts.push({ student: s, type: 'Exam Integrity Flags', detail: `${getIntegrityFlagCount(s)} integrity events logged during Capstone Exam — manual review recommended.`, severity: 'warning' });
+    }
   });
   return alerts;
 }
@@ -587,6 +657,8 @@ function renderView(view) {
       case 'roster': return renderRoster(main);
       case 'add': return renderAddStudent(main);
       case 'grades': return renderGradeEntry(main);
+      case 'exams': return renderExams(main);
+      case 'feedback': return renderFeedbackInbox(main);
       case 'analytics': return renderAnalytics(main);
       case 'units': return renderUnitBreakdown(main);
       case 'reports': return renderReports(main);
@@ -607,6 +679,8 @@ function renderOverview(main) {
   const mastered = students.filter(s => getStudentStatus(s).label === 'Mastered').length;
   const inProgress = students.filter(s => getStudentStatus(s).label === 'In Progress').length;
   const atRisk = students.filter(s => isAtRisk(s)).length;
+  const examsTaken = students.filter(s => s.exam?.submitted).length;
+  const examsPassed = students.filter(s => s.exam?.passed).length;
   const alerts = getAlertList();
   const localProgress = readLocalStudentProgress();
 
@@ -658,6 +732,29 @@ function renderOverview(main) {
     </div>
 
     <div class="card">
+      <h2>📝 Capstone Exam Summary</h2>
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-value">${examsTaken}</div>
+          <div class="stat-label">Exams Taken</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-value">${examsPassed}</div>
+          <div class="stat-label">Exams Passed</div>
+        </div>
+        <div class="stat-card alert">
+          <div class="stat-value">${examsTaken - examsPassed}</div>
+          <div class="stat-label">Exams Failed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${total ? Math.round((examsTaken / total) * 100) : 0}%</div>
+          <div class="stat-label">Participation Rate</div>
+        </div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">Passing score: ${DB.state.settings.examPassingScore}/30 (50% = transmuted 3.0) • Single attempt only</p>
+    </div>
+
+    <div class="card">
       <h2>Class Progress Distribution</h2>
       ${renderDistributionChart(students)}
     </div>
@@ -675,8 +772,8 @@ function renderOverview(main) {
       <div class="flex flex-wrap gap-1">
         <button class="btn btn-primary" onclick="navigate('import')">📥 Import Student Data</button>
         <button class="btn btn-secondary" onclick="navigate('roster')">👥 Manage Roster</button>
-        <button class="btn btn-accent" onclick="navigate('alerts')">🚨 View Alerts</button>
-        <button class="btn btn-outline" onclick="navigate('reports')">📄 Generate Report</button>
+        <button class="btn btn-accent" onclick="navigate('exams')">📝 View Exam Results</button>
+        <button class="btn btn-outline" onclick="navigate('alerts')">🚨 View Alerts</button>
       </div>
     </div>
 
@@ -689,7 +786,7 @@ function renderOverview(main) {
         <strong>Tarlac State University</strong><br>
         College of Science — Nursing Department
       </div>
-      <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">© ${new Date().getFullYear()} — All Rights Reserved</p>
+      <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.5 — © ${new Date().getFullYear()} — All Rights Reserved</p>
     </div>
   `;
 }
@@ -736,6 +833,55 @@ function renderRecentActivity() {
       }).join('')}
     </tbody>
   </table></div>`;
+}
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+function renderAlerts(main) {
+  const alerts = getAlertList();
+  main.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <h1>🚨 Student Alerts</h1>
+        <button class="btn btn-outline btn-sm" onclick="navigate('overview')">← Back</button>
+      </div>
+      <p>Students flagged for low progress, low scores, inactivity, failed exams, or integrity concerns.</p>
+    </div>
+
+    ${alerts.length === 0 ? `
+      <div class="callout callout-success">
+        <strong>✅ No alerts.</strong> All students are on track.
+      </div>
+    ` : `
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Student</th><th>Type</th><th>Detail</th><th>Severity</th><th>Action</th></tr></thead>
+          <tbody>
+            ${alerts.map(a => `
+              <tr class="${a.severity === 'danger' ? 'alert-row' : ''}">
+                <td><strong>${escapeHtml(a.student.name)}</strong><br><small style="color:var(--gray);">${escapeHtml(a.student.studentNo || a.student.id)}</small></td>
+                <td>${escapeHtml(a.type)}</td>
+                <td>${escapeHtml(a.detail)}</td>
+                <td><span class="pill pill-${a.severity === 'danger' ? 'danger' : a.severity === 'warning' ? 'warning' : 'info'}">${a.severity.toUpperCase()}</span></td>
+                <td><button class="btn btn-sm btn-primary" onclick="viewStudent('${a.student.id}')">View</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table></div>
+      </div>
+    `}
+  `;
+  updateAlertBadge();
+}
+
+function updateAlertBadge() {
+  const count = getAlertList().length;
+  const badge = document.getElementById('alertCount');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
 }
 
 /* ============================================================
@@ -911,6 +1057,7 @@ function renderImportTab(tab) {
               <tr><td><strong>Group:</strong></td><td>${escapeHtml(local.student.group || '—')}</td></tr>
               <tr><td><strong>Email:</strong></td><td>${escapeHtml(local.student.email || '—')}</td></tr>
               <tr><td><strong>Units Completed:</strong></td><td>${Object.keys(local.progress || {}).length}/7</td></tr>
+              <tr><td><strong>Exam Status:</strong></td><td>${local.exam?.submitted ? (local.exam.passed ? '✅ PASSED ' + local.exam.score + '/' + local.exam.total : '❌ FAILED ' + local.exam.score + '/' + local.exam.total) : 'Not taken'}</td></tr>
             </table>
             <button class="btn btn-primary mt-2" onclick="importLocalProgress()">📥 Import This Student</button>
           </div>
@@ -972,7 +1119,6 @@ function attachImportHandlers(tab) {
     const dz = document.getElementById('qrImageDropZone');
     const fi = document.getElementById('qrImageInput');
     if (!dz || !fi) return;
-
     dz.addEventListener('click', () => fi.click());
     dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
@@ -990,7 +1136,6 @@ function attachImportHandlers(tab) {
     const dz = document.getElementById('dropZone');
     const fi = document.getElementById('fileInput');
     if (!dz || !fi) return;
-
     dz.addEventListener('click', () => fi.click());
     dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
@@ -1024,7 +1169,6 @@ async function startQRScanner() {
     if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
       throw new Error('Camera requires HTTPS. GitHub Pages provides this automatically.');
     }
-
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error('Camera not supported in this browser. Try Chrome, Edge, or Safari.');
     }
@@ -1107,7 +1251,6 @@ function scanFrame() {
     const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
       inversionAttempts: 'dontInvert',
     });
-
     if (code && code.data) {
       const now = Date.now();
       if (now - QRScanner.lastScanAt > QRScanner.cooldownMs) {
@@ -1122,10 +1265,7 @@ function scanFrame() {
 
 function stopQRScanner() {
   QRScanner.active = false;
-  if (QRScanner.rafId) {
-    cancelAnimationFrame(QRScanner.rafId);
-    QRScanner.rafId = null;
-  }
+  if (QRScanner.rafId) { cancelAnimationFrame(QRScanner.rafId); QRScanner.rafId = null; }
   if (QRScanner.stream) {
     QRScanner.stream.getTracks().forEach(t => t.stop());
     QRScanner.stream = null;
@@ -1161,7 +1301,7 @@ async function switchQRCamera() {
 }
 
 /* ============================================================
-   QR IMAGE UPLOAD HANDLER
+   QR IMAGE UPLOAD
    ============================================================ */
 function handleQRImage(file) {
   const statusEl = document.getElementById('qrImageStatus');
@@ -1185,13 +1325,11 @@ function handleQRImage(file) {
     const img = new Image();
     img.onload = () => {
       previewEl.innerHTML = `<img src="${e.target.result}" class="qr-upload-preview" alt="Uploaded QR" />`;
-
       const canvas = document.createElement('canvas');
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(img, 0, 0);
-
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
       if (!window.jsQR) {
@@ -1239,11 +1377,10 @@ function handleQRImage(file) {
 }
 
 /* ============================================================
-   QR DECODE HANDLER (shared)
+   QR DECODE HANDLER
    ============================================================ */
 function handleQRDecoded(qrData, source, targetEl) {
   const data = decodeStudentCode(qrData);
-
   if (!data || !data.student) {
     const html = `
       <div class="callout callout-danger">
@@ -1265,41 +1402,31 @@ function handleQRDecoded(qrData, source, targetEl) {
   }
 
   const container = targetEl || document.getElementById('qrResult');
-  if (container) {
-    showImportPreview(data, container.id, source === 'camera');
-  }
+  if (container) showImportPreview(data, container.id, source === 'camera');
   toast('✅ QR code decoded successfully!', 'success');
 }
 
-/* ============================================================
-   CODE DECODING
-   ============================================================ */
 function decodeStudentCode(code) {
   if (!code) return null;
   const str = String(code).trim();
-
   try {
     const json = decodeURIComponent(escape(atob(str)));
     const parsed = JSON.parse(json);
     if (parsed && parsed.student) return parsed;
-  } catch (e) { /* not base64 */ }
-
+  } catch (e) {}
   try {
     const parsed = JSON.parse(str);
     if (parsed && parsed.student) return parsed;
-  } catch (e) { /* not JSON */ }
-
+  } catch (e) {}
   return null;
 }
 
 function processPastedCode() {
   const code = document.getElementById('pasteCode').value.trim();
   if (!code) return toast('Please paste the code first.', 'warning');
-
   const data = decodeStudentCode(code);
   if (!data) return toast('Invalid code. Please check and try again.', 'error');
   if (!data.student) return toast('Missing student data.', 'error');
-
   showImportPreview(data, 'pastePreview');
 }
 
@@ -1327,6 +1454,7 @@ function showImportPreview(data, containerId, fromCamera) {
   const s = data.student;
   const pct = getPercentFromData(data);
   const avg = getAvgFromData(data);
+  const exam = data.exam || null;
 
   const existing = DB.state.students.find(x =>
     (s.studentNo && x.studentNo === s.studentNo) ||
@@ -1350,10 +1478,12 @@ function showImportPreview(data, containerId, fromCamera) {
         <tr><td><strong>Section:</strong></td><td>${escapeHtml(s.section || '—')}</td></tr>
         <tr><td><strong>Group Number:</strong></td><td>${escapeHtml(s.group || '—')}</td></tr>
         <tr><td><strong>Email:</strong></td><td>${escapeHtml(s.email || '—')}</td></tr>
-        <tr><td><strong>Registered:</strong></td><td>${escapeHtml(s.registeredAt ? new Date(s.registeredAt).toLocaleString() : '—')}</td></tr>
-        <tr><td><strong>Last Active:</strong></td><td>${escapeHtml(s.lastActive ? new Date(s.lastActive).toLocaleString() : '—')}</td></tr>
         <tr><td><strong>Units Completed:</strong></td><td>${pct}%</td></tr>
-        <tr><td><strong>Average Score:</strong></td><td>${avg}%</td></tr>
+        <tr><td><strong>Average Score (units):</strong></td><td>${avg}%</td></tr>
+        <tr><td><strong>Capstone Exam:</strong></td><td>${exam?.submitted
+          ? `${exam.score}/${exam.total} (${exam.percentage}%) — ${exam.passed ? '<span style="color:var(--success);font-weight:700;">PASSED</span>' : '<span style="color:var(--accent);font-weight:700;">FAILED</span>'}`
+          : 'Not taken'}</td></tr>
+        ${data.appVersion ? `<tr><td><strong>App Version:</strong></td><td>${escapeHtml(data.appVersion)}</td></tr>` : ''}
       </table>
 
       ${existing ? `
@@ -1394,7 +1524,6 @@ function getPercentFromData(data) {
   const done = units.filter(u => data.progress?.[u]?.completed).length;
   return Math.round((done / units.length) * 100);
 }
-
 function getAvgFromData(data) {
   const all = Object.values(data.quizAttempts || {}).flat().filter(x => typeof x === 'number');
   if (!all.length) return 0;
@@ -1421,7 +1550,10 @@ function confirmImport(dataStr, mode, existingId) {
     quizAttempts: data.quizAttempts || {},
     games: data.games || {},
     badges: data.badges || {},
+    exam: data.exam || null,
+    feedback: data.feedback || [],
     lastActive: s.lastActive || new Date().toISOString(),
+    appVersion: data.appVersion || '1.5',
   });
 
   if (mode === 'update') {
@@ -1467,55 +1599,6 @@ function importLocalProgress() {
 }
 
 /* ============================================================
-   ALERTS
-   ============================================================ */
-function renderAlerts(main) {
-  const alerts = getAlertList();
-  main.innerHTML = `
-    <div class="card">
-      <div class="card-header">
-        <h1>🚨 Student Alerts</h1>
-        <button class="btn btn-outline btn-sm" onclick="navigate('overview')">← Back</button>
-      </div>
-      <p>Students flagged for low progress, low scores, inactivity, or multiple failed attempts.</p>
-    </div>
-
-    ${alerts.length === 0 ? `
-      <div class="callout callout-success">
-        <strong>✅ No alerts.</strong> All students are on track.
-      </div>
-    ` : `
-      <div class="card">
-        <div class="table-wrap"><table>
-          <thead><tr><th>Student</th><th>Type</th><th>Detail</th><th>Severity</th><th>Action</th></tr></thead>
-          <tbody>
-            ${alerts.map(a => `
-              <tr class="${a.severity === 'danger' ? 'alert-row' : ''}">
-                <td><strong>${escapeHtml(a.student.name)}</strong><br><small style="color:var(--gray);">${escapeHtml(a.student.studentNo || a.student.id)}</small></td>
-                <td>${escapeHtml(a.type)}</td>
-                <td>${escapeHtml(a.detail)}</td>
-                <td><span class="pill pill-${a.severity === 'danger' ? 'danger' : a.severity === 'warning' ? 'warning' : 'info'}">${a.severity.toUpperCase()}</span></td>
-                <td><button class="btn btn-sm btn-primary" onclick="viewStudent('${a.student.id}')">View</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table></div>
-      </div>
-    `}
-  `;
-  updateAlertBadge();
-}
-
-function updateAlertBadge() {
-  const count = getAlertList().length;
-  const badge = document.getElementById('alertCount');
-  if (badge) {
-    badge.textContent = count;
-    badge.style.display = count > 0 ? 'inline-block' : 'none';
-  }
-}
-
-/* ============================================================
    ROSTER
    ============================================================ */
 function renderRoster(main) {
@@ -1543,9 +1626,9 @@ function renderRoster(main) {
               <th>Student</th>
               <th>Section</th>
               <th>Group</th>
-              <th>Email</th>
               <th>Progress</th>
-              <th>Avg Score</th>
+              <th>Unit Avg</th>
+              <th>Exam</th>
               <th>Status</th>
               <th>Last Active</th>
               <th>Actions</th>
@@ -1563,10 +1646,12 @@ function renderRoster(main) {
 
 function renderStudentRow(s) {
   const pct = getStudentPercent(s);
-  const avg = getStudentAverage(s);
+  const unitAvg = getUnitAverageOnly(s);
   const status = getStudentStatus(s);
   const atRisk = isAtRisk(s);
   const progressClass = pct >= 75 ? '' : pct >= 50 ? 'warn' : 'danger';
+  const exam = s.exam;
+  const flags = getIntegrityFlagCount(s);
   return `<tr class="${atRisk ? 'alert-row' : ''}">
     <td>
       <strong>${escapeHtml(s.name)}</strong>
@@ -1574,12 +1659,16 @@ function renderStudentRow(s) {
     </td>
     <td>${escapeHtml(s.section || '—')}</td>
     <td>${escapeHtml(s.group || '—')}</td>
-    <td><small>${escapeHtml(s.email || '—')}</small></td>
     <td>
       <div class="progress-bar"><div class="progress-fill ${progressClass}" style="width:${pct}%"></div></div>
       <small>${pct}%</small>
     </td>
-    <td><strong>${avg}%</strong></td>
+    <td><strong>${unitAvg}%</strong></td>
+    <td>
+      ${exam?.submitted
+        ? `<span class="pill ${exam.passed ? 'pill-success' : 'pill-danger'}">${exam.score}/${exam.total}</span>${flags > 0 ? `<span class="integrity-flag" title="${flags} integrity events">⚠️ ${flags}</span>` : ''}`
+        : '<span class="pill pill-gray">Not taken</span>'}
+    </td>
     <td><span class="pill ${status.cls}">${status.label}</span></td>
     <td><small>${fmtDate(s.lastActive)}</small></td>
     <td>
@@ -1688,11 +1777,8 @@ function saveStudent(event, editId) {
     const newStudent = ensureStudentProgress({
       id: uid(),
       ...data,
-      progress: {},
-      quizAttempts: {},
-      games: {},
-      badges: {},
-      lastActive: null,
+      progress: {}, quizAttempts: {}, games: {}, badges: {},
+      exam: null, feedback: [], lastActive: null,
     });
     DB.state.students.push(newStudent);
     logActivity(newStudent.id, 'Added to roster', newStudent.name);
@@ -1709,7 +1795,8 @@ function viewStudent(id) {
   const s = DB.state.students.find(x => x.id === id);
   if (!s) return toast('Student not found.', 'error');
   const pct = getStudentPercent(s);
-  const avg = getStudentAverage(s);
+  const unitAvg = getUnitAverageOnly(s);
+  const overallAvg = getStudentAverage(s);
   const status = getStudentStatus(s);
   const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
   const unitNames = {
@@ -1717,13 +1804,16 @@ function viewStudent(id) {
     unit4: 'Percussion', unit5: 'Auscultation', unit6: 'Disease Patterns',
     unit7: 'Interventions',
   };
+  const exam = s.exam;
+  const flags = getIntegrityFlagCount(s);
 
   document.getElementById('modalTitle').textContent = s.name;
   document.getElementById('modalBody').innerHTML = `
     <div class="flex gap-2 flex-wrap mb-2">
       <span class="pill ${status.cls}">${status.label}</span>
       <span class="pill pill-info">${pct}% Complete</span>
-      <span class="pill pill-${avg >= 90 ? 'success' : avg >= 75 ? 'warning' : 'danger'}">Avg ${avg}%</span>
+      <span class="pill pill-${unitAvg >= 90 ? 'success' : unitAvg >= 75 ? 'warning' : 'danger'}">Unit Avg ${unitAvg}%</span>
+      ${exam?.submitted ? `<span class="pill ${exam.passed ? 'pill-success' : 'pill-danger'}">Exam ${exam.score}/${exam.total}</span>` : '<span class="pill pill-gray">No Exam</span>'}
     </div>
 
     <p><strong>Student No:</strong> ${escapeHtml(s.studentNo || '—')}</p>
@@ -1731,12 +1821,13 @@ function viewStudent(id) {
     <p><strong>Group Number:</strong> ${escapeHtml(s.group || '—')}</p>
     <p><strong>Email:</strong> ${escapeHtml(s.email || '—')}</p>
     <p><strong>Enrolled:</strong> ${fmtDate(s.enrolled)}</p>
-    <p><strong>Last Active:</strong> ${fmtDate(s.lastActive)}</p>
+    <p><strong>Last Active:</strong> ${fmtDateTime(s.lastActive)}</p>
+    <p><strong>App Version (from student):</strong> ${escapeHtml(s.appVersion || '—')}</p>
     ${s.notes ? `<p><strong>Notes:</strong> ${escapeHtml(s.notes)}</p>` : ''}
 
-    <h3>Unit Progress</h3>
+    <h3>📚 Unit Progress</h3>
     <div class="table-wrap"><table>
-      <thead><tr><th>Unit</th><th>Status</th><th>Score</th><th>Attempts</th></tr></thead>
+      <thead><tr><th>Unit</th><th>Status</th><th>Best Score</th><th>Attempts</th></tr></thead>
       <tbody>
         ${units.map(u => {
           const p = s.progress?.[u];
@@ -1752,12 +1843,86 @@ function viewStudent(id) {
       </tbody>
     </table></div>
 
+    <h3>🎮 Mastery Games</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Game</th><th>Best Score</th><th>Attempts</th></tr></thead>
+      <tbody>
+        ${['blitz','tree','sound','redflag','matrix'].map(g => {
+          const attempts = s.games?.[g] || [];
+          const best = attempts.length ? Math.max(...attempts) : null;
+          return `<tr>
+            <td>${g.charAt(0).toUpperCase() + g.slice(1)}</td>
+            <td>${best !== null ? best + '%' : '—'}</td>
+            <td>${attempts.length ? attempts.join(', ') + '%' : '—'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>
+
+    ${exam?.submitted ? `
+      <h3>📝 Capstone Exam Result</h3>
+      <div class="table-wrap"><table>
+        <tbody>
+          <tr><td><strong>Exam ID</strong></td><td>${escapeHtml(exam.examId || '—')}</td></tr>
+          <tr><td><strong>Score</strong></td><td><strong>${exam.score}/${exam.total} (${exam.percentage}%)</strong></td></tr>
+          <tr><td><strong>Result</strong></td><td>${exam.passed
+            ? '<span class="pill pill-success">✅ PASSED</span>'
+            : '<span class="pill pill-danger">❌ NOT PASSED</span>'}</td></tr>
+          <tr><td><strong>Passing Score</strong></td><td>${exam.passingScore || 15}/30 (50%)</td></tr>
+          <tr><td><strong>Date Taken</strong></td><td>${fmtDateTime(exam.takenAt)}</td></tr>
+          <tr><td><strong>Duration</strong></td><td>${formatDuration(exam.durationSec)}</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>📊 Bloom's Taxonomy Breakdown</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Level</th><th>Score</th><th>%</th></tr></thead>
+        <tbody>
+          ${Object.entries(exam.bloomBreakdown || {}).map(([lvl, [got, total]]) => {
+            const pct = total ? Math.round(got / total * 100) : 0;
+            return `<tr>
+              <td>${lvl.charAt(0).toUpperCase() + lvl.slice(1)}</td>
+              <td>${got}/${total}</td>
+              <td>${pct}%</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+
+      <h3>🔒 Exam Integrity Report</h3>
+      <div class="table-wrap"><table>
+        <tbody>
+          <tr><td>Focus loss events (tab switch / blur)</td><td><strong>${exam.integrity?.focusLosses?.length || 0}</strong></td></tr>
+          <tr><td>Copy / paste attempts</td><td><strong>${exam.integrity?.copyAttempts || 0}</strong></td></tr>
+          <tr><td>Right-click attempts</td><td><strong>${exam.integrity?.rightClicks || 0}</strong></td></tr>
+          <tr><td>Print / screenshot attempts</td><td><strong>${exam.integrity?.printAttempts || 0}</strong></td></tr>
+        </tbody>
+      </table></div>
+      ${flags === 0
+        ? '<div class="callout callout-success"><strong>✅ No integrity concerns detected.</strong></div>'
+        : `<div class="callout callout-warning"><strong>⚠️ ${flags} integrity flag(s) logged — manual review recommended.</strong></div>`}
+    ` : '<div class="callout callout-info"><strong>📝 Capstone Exam not yet taken by this student.</strong></div>'}
+
+    ${(s.feedback && s.feedback.length) ? `
+      <h3>💬 Student Feedback (${s.feedback.length})</h3>
+      ${s.feedback.map(f => `
+        <div class="feedback-card">
+          <div class="feedback-meta">
+            ${fmtDateTime(f.submittedAt)} • ${escapeHtml(f.category || 'general')}
+            ${f.anonymous ? ' • Anonymous' : ''}
+          </div>
+          <div class="feedback-rating">${f.rating ? '⭐'.repeat(f.rating) : 'No rating'}</div>
+          <div class="feedback-body">${escapeHtml(f.message)}</div>
+        </div>
+      `).join('')}
+    ` : ''}
+
     <h3>Manual Grade Override</h3>
     <p style="font-size:0.85rem;color:var(--gray);">Use this if the student completed the module on a different device.</p>
     <div class="form-row">
       <div class="form-group">
         <label>Overall Score (%)</label>
-        <input type="number" id="m_score" min="0" max="100" value="${avg}" />
+        <input type="number" id="m_score" min="0" max="100" value="${unitAvg}" />
       </div>
       <div class="form-group">
         <label>Units Completed (0–7)</label>
@@ -1823,16 +1988,16 @@ function renderGradeEntry(main) {
         <h1>📝 Bulk Grade Entry</h1>
         <button class="btn btn-outline btn-sm" onclick="navigate('roster')">← Back</button>
       </div>
-      <p>Enter scores for all students at once. Each row is one student. Scores are 0–100.</p>
+      <p>Enter scores for all students at once. This overwrites unit quizzes.</p>
     </div>
 
     <div class="card">
       <div class="table-wrap"><table>
-        <thead><tr><th>Student</th><th>Section</th><th>Group</th><th>Score (%)</th><th>Units Completed</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Student</th><th>Section</th><th>Group</th><th>Unit Avg (%)</th><th>Units Completed</th><th>Notes</th></tr></thead>
         <tbody>
           ${students.length === 0 ? `<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:2rem;">No students yet.</td></tr>` : ''}
           ${students.map(s => {
-            const avg = getStudentAverage(s);
+            const avg = getUnitAverageOnly(s);
             const unitsDone = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'].filter(u => s.progress?.[u]?.completed).length;
             return `<tr>
               <td><strong>${escapeHtml(s.name)}</strong><br><small style="color:var(--gray);">${escapeHtml(s.studentNo || s.id)}</small></td>
@@ -1883,6 +2048,187 @@ function saveBulkGrades() {
 }
 
 /* ============================================================
+   EXAM RESULTS VIEW (NEW)
+   ============================================================ */
+function renderExams(main) {
+  const students = DB.state.students.filter(s => s.exam?.submitted);
+  const notTaken = DB.state.students.filter(s => !s.exam?.submitted);
+
+  main.innerHTML = `
+    <div class="card">
+      <h1>📝 Capstone Exam Results</h1>
+      <p style="color:var(--gray);">All exam attempts across the class.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-value">${students.length}</div>
+        <div class="stat-label">Exams Taken</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-value">${students.filter(s => s.exam.passed).length}</div>
+        <div class="stat-label">Passed</div>
+      </div>
+      <div class="stat-card alert">
+        <div class="stat-value">${students.filter(s => !s.exam.passed).length}</div>
+        <div class="stat-label">Failed</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-value">${students.filter(s => getIntegrityFlagCount(s) >= 3).length}</div>
+        <div class="stat-label">Flagged for Review</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Exam Results</h2>
+      <div class="table-wrap"><table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Section</th>
+            <th>Score</th>
+            <th>%</th>
+            <th>Result</th>
+            <th>Date Taken</th>
+            <th>Duration</th>
+            <th>Integrity</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.length === 0 ? `<tr><td colspan="9" style="text-align:center;color:var(--gray);padding:2rem;">No exam attempts yet.</td></tr>` : ''}
+          ${students.map(s => {
+            const flags = getIntegrityFlagCount(s);
+            return `<tr class="${!s.exam.passed || flags >= 3 ? 'alert-row' : ''}">
+              <td><strong>${escapeHtml(s.name)}</strong><br><small style="color:var(--gray);">${escapeHtml(s.studentNo || s.id)}</small></td>
+              <td>${escapeHtml(s.section || '—')}</td>
+              <td><strong>${s.exam.score}/${s.exam.total}</strong></td>
+              <td>${s.exam.percentage}%</td>
+              <td><span class="pill ${s.exam.passed ? 'pill-success' : 'pill-danger'}">${s.exam.passed ? '✅ PASSED' : '❌ FAILED'}</span></td>
+              <td><small>${fmtDateTime(s.exam.takenAt)}</small></td>
+              <td><small>${formatDuration(s.exam.durationSec)}</small></td>
+              <td>${flags === 0
+                ? '<span class="integrity-flag ok">✅ Clean</span>'
+                : `<span class="integrity-flag">⚠️ ${flags} event${flags > 1 ? 's' : ''}</span>`}</td>
+              <td><button class="btn btn-sm btn-primary" onclick="viewStudent('${s.id}')">View</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+    </div>
+
+    ${notTaken.length ? `
+      <div class="card">
+        <h2>⏳ Not Yet Taken (${notTaken.length})</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Student</th><th>Section</th><th>Units Completed</th><th>Unit Avg</th></tr></thead>
+          <tbody>
+            ${notTaken.map(s => `
+              <tr>
+                <td>${escapeHtml(s.name)}</td>
+                <td>${escapeHtml(s.section || '—')}</td>
+                <td>${getStudentPercent(s)}%</td>
+                <td>${getUnitAverageOnly(s)}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table></div>
+      </div>
+    ` : ''}
+  `;
+}
+
+/* ============================================================
+   FEEDBACK INBOX (NEW)
+   ============================================================ */
+function renderFeedbackInbox(main) {
+  const allFeedback = [];
+  DB.state.students.forEach(s => {
+    (s.feedback || []).forEach(f => {
+      allFeedback.push({ student: s, feedback: f });
+    });
+  });
+  allFeedback.sort((a, b) => new Date(b.feedback.submittedAt) - new Date(a.feedback.submittedAt));
+
+  const avgRating = allFeedback.filter(f => f.feedback.rating).length
+    ? (allFeedback.reduce((sum, f) => sum + (f.feedback.rating || 0), 0) / allFeedback.filter(f => f.feedback.rating).length).toFixed(1)
+    : '—';
+
+  main.innerHTML = `
+    <div class="card">
+      <h1>💬 Student Feedback Inbox</h1>
+      <p style="color:var(--gray);">Suggestions and comments submitted by students.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-value">${allFeedback.length}</div>
+        <div class="stat-label">Total Feedback</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-value">${avgRating}</div>
+        <div class="stat-label">Avg Rating</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${allFeedback.filter(f => f.feedback.category === 'bug').length}</div>
+        <div class="stat-label">Bug Reports</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-value">${allFeedback.filter(f => f.feedback.category === 'suggestion').length}</div>
+        <div class="stat-label">Suggestions</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📬 All Feedback</h2>
+      ${allFeedback.length === 0
+        ? '<p style="color:var(--gray);">No feedback received yet.</p>'
+        : allFeedback.map(item => `
+          <div class="feedback-card">
+            <div class="feedback-meta">
+              <strong>${escapeHtml(item.student.name)}</strong>
+              — ${escapeHtml(item.student.section || '')} ${item.student.group ? '• ' + escapeHtml(item.student.group) : ''}
+              ${item.feedback.anonymous ? ' • <em>Submitted anonymously</em>' : ''}
+            </div>
+            <div class="feedback-rating">
+              ${item.feedback.rating ? '⭐'.repeat(item.feedback.rating) : 'No rating'}
+              <span style="color:var(--gray);font-size:0.8rem;margin-left:0.5rem;">${escapeHtml(item.feedback.category || '')}</span>
+            </div>
+            <div class="feedback-body">${escapeHtml(item.feedback.message)}</div>
+            <div class="feedback-meta" style="margin-top:0.5rem;">${fmtDateTime(item.feedback.submittedAt)}</div>
+          </div>
+        `).join('')}
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" onclick="exportFeedbackCSV()">📤 Export Feedback as CSV</button>
+    </div>
+  `;
+}
+
+function exportFeedbackCSV() {
+  const rows = [['Student Name','Student No','Section','Group','Anonymous','Rating','Category','Message','Submitted At']];
+  DB.state.students.forEach(s => {
+    (s.feedback || []).forEach(f => {
+      rows.push([
+        f.anonymous ? 'Anonymous' : s.name,
+        f.anonymous ? '' : (s.studentNo || ''),
+        f.anonymous ? '' : (s.section || ''),
+        f.anonymous ? '' : (s.group || ''),
+        f.anonymous ? 'YES' : 'NO',
+        f.rating || '',
+        f.category || '',
+        (f.message || '').replace(/\n/g, ' '),
+        f.submittedAt || ''
+      ]);
+    });
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  downloadFile(csv, `feedback-${todayISO()}.csv`, 'text/csv');
+  toast('Feedback exported.', 'success');
+}
+
+/* ============================================================
    ANALYTICS
    ============================================================ */
 function renderAnalytics(main) {
@@ -1892,6 +2238,8 @@ function renderAnalytics(main) {
   const classAvg = avgScores.length ? Math.round(avgScores.reduce((a,b)=>a+b,0)/avgScores.length) : 0;
   const classProgress = total ? Math.round(students.reduce((a,s)=>a+getStudentPercent(s),0)/total) : 0;
   const completionRate = total ? Math.round(students.filter(s => getStudentPercent(s) === 100).length / total * 100) : 0;
+  const examTakers = students.filter(s => s.exam?.submitted);
+  const examPassRate = examTakers.length ? Math.round(examTakers.filter(s => s.exam.passed).length / examTakers.length * 100) : 0;
 
   main.innerHTML = `
     <div class="card">
@@ -1910,7 +2258,11 @@ function renderAnalytics(main) {
       </div>
       <div class="stat-card success">
         <div class="stat-value">${completionRate}%</div>
-        <div class="stat-label">Completion Rate</div>
+        <div class="stat-label">Units Completion</div>
+      </div>
+      <div class="stat-card ${examPassRate >= 75 ? 'success' : 'warning'}">
+        <div class="stat-value">${examPassRate}%</div>
+        <div class="stat-label">Exam Pass Rate</div>
       </div>
       <div class="stat-card">
         <div class="stat-value">${total}</div>
@@ -1927,6 +2279,35 @@ function renderAnalytics(main) {
       <h2>Section Comparison</h2>
       ${renderSectionComparison(students)}
     </div>
+
+    <div class="card">
+      <h2>📝 Exam Participation</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Section</th><th>Took Exam</th><th>Passed</th><th>Pass Rate</th></tr></thead>
+        <tbody>
+          ${(() => {
+            const sections = {};
+            students.forEach(s => {
+              const sec = s.section || 'Unassigned';
+              if (!sections[sec]) sections[sec] = { taken: 0, passed: 0, total: 0 };
+              sections[sec].total++;
+              if (s.exam?.submitted) {
+                sections[sec].taken++;
+                if (s.exam.passed) sections[sec].passed++;
+              }
+            });
+            return Object.entries(sections).map(([sec, d]) => `
+              <tr>
+                <td><strong>${escapeHtml(sec)}</strong></td>
+                <td>${d.taken}/${d.total}</td>
+                <td>${d.passed}</td>
+                <td>${d.taken ? Math.round(d.passed / d.taken * 100) : 0}%</td>
+              </tr>
+            `).join('');
+          })()}
+        </tbody>
+      </table></div>
+    </div>
   `;
 }
 
@@ -1939,7 +2320,7 @@ function renderScoreDistribution(students) {
     { label: '90–100%', min: 90, max: 100 },
   ];
   const counts = buckets.map(b => students.filter(s => {
-    const a = getStudentAverage(s);
+    const a = getUnitAverageOnly(s);
     return a > 0 && a >= b.min && a <= b.max;
   }).length);
   const max = Math.max(...counts, 1);
@@ -1960,7 +2341,7 @@ function renderSectionComparison(students) {
     const sec = s.section || 'Unassigned';
     if (!sections[sec]) sections[sec] = { count: 0, scores: [] };
     sections[sec].count++;
-    const a = getStudentAverage(s);
+    const a = getUnitAverageOnly(s);
     if (a > 0) sections[sec].scores.push(a);
   });
   const rows = Object.entries(sections).map(([sec, d]) => {
@@ -2037,7 +2418,7 @@ function renderReports(main) {
       <div class="stat-card">
         <div style="font-size:2.5rem;">📋</div>
         <h3>Class Summary</h3>
-        <p style="font-size:0.85rem;color:var(--gray);">Overall class performance report</p>
+        <p style="font-size:0.85rem;color:var(--gray);">Overall class performance</p>
         <button class="btn btn-primary btn-sm mt-1" onclick="generateClassReport()">Generate</button>
       </div>
       <div class="stat-card">
@@ -2049,14 +2430,26 @@ function renderReports(main) {
       <div class="stat-card">
         <div style="font-size:2.5rem;">🏆</div>
         <h3>Mastery Report</h3>
-        <p style="font-size:0.85rem;color:var(--gray);">Students who achieved mastery</p>
+        <p style="font-size:0.85rem;color:var(--gray);">Mastered students</p>
         <button class="btn btn-success btn-sm mt-1" onclick="generateMasteryReport()">Generate</button>
       </div>
       <div class="stat-card">
         <div style="font-size:2.5rem;">📊</div>
         <h3>Unit Report</h3>
-        <p style="font-size:0.85rem;color:var(--gray);">Per-unit completion and scores</p>
+        <p style="font-size:0.85rem;color:var(--gray);">Per-unit completion</p>
         <button class="btn btn-secondary btn-sm mt-1" onclick="generateUnitReport()">Generate</button>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2.5rem;">📝</div>
+        <h3>Exam Report</h3>
+        <p style="font-size:0.85rem;color:var(--gray);">Capstone exam results</p>
+        <button class="btn btn-primary btn-sm mt-1" onclick="generateExamReport()">Generate</button>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2.5rem;">🔒</div>
+        <h3>Integrity Report</h3>
+        <p style="font-size:0.85rem;color:var(--gray);">Exam integrity flags</p>
+        <button class="btn btn-accent btn-sm mt-1" onclick="generateIntegrityReport()">Generate</button>
       </div>
     </div>
 
@@ -2072,7 +2465,7 @@ function showReport(title, html) {
       <h2>${title}</h2>
       <button class="btn btn-primary btn-sm no-print" onclick="window.print()">🖨️ Print</button>
     </div>
-    <p style="color:var(--gray);font-size:0.85rem;">Generated ${new Date().toLocaleString()} by ${escapeHtml(DB.state.settings.instructorName)}</p>
+    <p style="color:var(--gray);font-size:0.85rem;">Generated ${new Date().toLocaleString()} by ${escapeHtml(DB.state.settings.instructorName)} — App v1.5</p>
     ${html}
   `;
   area.scrollIntoView({ behavior: 'smooth' });
@@ -2082,7 +2475,8 @@ function generateClassReport() {
   const students = DB.state.students;
   const rows = students.map(s => {
     const pct = getStudentPercent(s);
-    const avg = getStudentAverage(s);
+    const avg = getUnitAverageOnly(s);
+    const exam = s.exam;
     const status = getStudentStatus(s).label;
     return `<tr>
       <td>${escapeHtml(s.name)}</td>
@@ -2091,19 +2485,23 @@ function generateClassReport() {
       <td>${escapeHtml(s.group || '—')}</td>
       <td>${pct}%</td>
       <td>${avg}%</td>
+      <td>${exam?.submitted ? `${exam.score}/${exam.total} (${exam.percentage}%)` : '—'}</td>
+      <td>${exam?.submitted ? (exam.passed ? '✅ PASS' : '❌ FAIL') : '—'}</td>
       <td>${status}</td>
     </tr>`;
   }).join('');
-  const avgScores = students.map(getStudentAverage).filter(x => x > 0);
+  const avgScores = students.map(getUnitAverageOnly).filter(x => x > 0);
   const classAvg = avgScores.length ? Math.round(avgScores.reduce((a,b)=>a+b,0)/avgScores.length) : 0;
   showReport('Class Summary Report', `
     <div class="callout callout-info">
-      <strong>Class Average:</strong> ${classAvg}% |
-      <strong>Total Students:</strong> ${students.length}
+      <strong>Class Average (Units):</strong> ${classAvg}% |
+      <strong>Total Students:</strong> ${students.length} |
+      <strong>Exams Taken:</strong> ${students.filter(s=>s.exam?.submitted).length} |
+      <strong>Exams Passed:</strong> ${students.filter(s=>s.exam?.passed).length}
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Group</th><th>Progress</th><th>Avg</th><th>Status</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--gray);">No students.</td></tr>'}</tbody>
+      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Group</th><th>Units</th><th>Unit Avg</th><th>Exam</th><th>Exam Result</th><th>Status</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--gray);">No students.</td></tr>'}</tbody>
     </table></div>
   `);
 }
@@ -2117,7 +2515,7 @@ function generateAtRiskReport() {
       <td>${escapeHtml(s.name)}</td>
       <td>${escapeHtml(s.studentNo || '—')}</td>
       <td>${getStudentPercent(s)}%</td>
-      <td>${getStudentAverage(s)}%</td>
+      <td>${getUnitAverageOnly(s)}%</td>
       <td>${studentAlerts.map(a => escapeHtml(a.type)).join(', ')}</td>
     </tr>`;
   }).join('');
@@ -2126,7 +2524,7 @@ function generateAtRiskReport() {
       <strong>${students.length}</strong> student(s) flagged for intervention.
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Student No</th><th>Progress</th><th>Avg</th><th>Alert Types</th></tr></thead>
+      <thead><tr><th>Name</th><th>Student No</th><th>Progress</th><th>Unit Avg</th><th>Alert Types</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--gray);">No at-risk students.</td></tr>'}</tbody>
     </table></div>
   `);
@@ -2138,16 +2536,17 @@ function generateMasteryReport() {
     <td>${escapeHtml(s.name)}</td>
     <td>${escapeHtml(s.studentNo || '—')}</td>
     <td>${escapeHtml(s.section || '—')}</td>
-    <td>${getStudentAverage(s)}%</td>
-    <td>${fmtDate(s.lastActive)}</td>
+    <td>${getUnitAverageOnly(s)}%</td>
+    <td>${s.exam?.score}/${s.exam?.total} (${s.exam?.percentage}%)</td>
+    <td>${fmtDateTime(s.exam?.takenAt)}</td>
   </tr>`).join('');
   showReport('Mastery Report', `
     <div class="callout callout-success">
-      <strong>${mastered.length}</strong> student(s) achieved mastery (100% progress + ≥90% average).
+      <strong>${mastered.length}</strong> student(s) achieved mastery (100% units ≥90% avg + exam passed).
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Avg</th><th>Completed</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--gray);">No students have achieved mastery yet.</td></tr>'}</tbody>
+      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Unit Avg</th><th>Exam</th><th>Exam Date</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--gray);">No students achieved mastery yet.</td></tr>'}</tbody>
     </table></div>
   `);
 }
@@ -2174,6 +2573,60 @@ function generateUnitReport() {
     <div class="table-wrap"><table>
       <thead><tr><th>Unit</th><th>Completed</th><th>Completion %</th><th>Avg Score</th></tr></thead>
       <tbody>${rows}</tbody>
+    </table></div>
+  `);
+}
+
+function generateExamReport() {
+  const takers = DB.state.students.filter(s => s.exam?.submitted);
+  const rows = takers.map(s => `<tr>
+    <td>${escapeHtml(s.name)}</td>
+    <td>${escapeHtml(s.studentNo || '—')}</td>
+    <td>${escapeHtml(s.section || '—')}</td>
+    <td>${s.exam.score}/${s.exam.total} (${s.exam.percentage}%)</td>
+    <td>${s.exam.passed ? '✅ PASSED' : '❌ FAILED'}</td>
+    <td>${fmtDateTime(s.exam.takenAt)}</td>
+    <td>${formatDuration(s.exam.durationSec)}</td>
+  </tr>`).join('');
+  const passRate = takers.length ? Math.round(takers.filter(s => s.exam.passed).length / takers.length * 100) : 0;
+  showReport('Capstone Exam Report', `
+    <div class="callout callout-info">
+      <strong>Exams Taken:</strong> ${takers.length} |
+      <strong>Passed:</strong> ${takers.filter(s=>s.exam.passed).length} |
+      <strong>Failed:</strong> ${takers.filter(s=>!s.exam.passed).length} |
+      <strong>Pass Rate:</strong> ${passRate}%
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Score</th><th>Result</th><th>Date</th><th>Duration</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--gray);">No exam attempts yet.</td></tr>'}</tbody>
+    </table></div>
+  `);
+}
+
+function generateIntegrityReport() {
+  const flagged = DB.state.students.filter(s => getIntegrityFlagCount(s) > 0);
+  const rows = flagged.map(s => {
+    const i = s.exam.integrity || {};
+    return `<tr>
+      <td>${escapeHtml(s.name)}</td>
+      <td>${escapeHtml(s.studentNo || '—')}</td>
+      <td>${escapeHtml(s.section || '—')}</td>
+      <td>${i.focusLosses?.length || 0}</td>
+      <td>${i.copyAttempts || 0}</td>
+      <td>${i.rightClicks || 0}</td>
+      <td>${i.printAttempts || 0}</td>
+      <td><strong>${getIntegrityFlagCount(s)}</strong></td>
+      <td>${s.exam.passed ? '✅ PASSED' : '❌ FAILED'}</td>
+    </tr>`;
+  }).join('');
+  showReport('Exam Integrity Report', `
+    <div class="callout callout-${flagged.length ? 'warning' : 'success'}">
+      <strong>${flagged.length}</strong> student(s) had integrity flags logged during the Capstone Exam.
+      ${flagged.length ? 'Manual review recommended.' : 'No concerns detected.'}
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Student No</th><th>Section</th><th>Focus Loss</th><th>Copy</th><th>Right-Click</th><th>Print</th><th>Total Flags</th><th>Exam Result</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--gray);">No integrity flags logged.</td></tr>'}</tbody>
     </table></div>
   `);
 }
@@ -2226,14 +2679,27 @@ function renderExport(main) {
 function exportCSV() {
   const students = DB.state.students;
   if (!students.length) return toast('No data to export.', 'warning');
-  const headers = ['Name','StudentNo','Section','Group','Email','Enrolled','Progress%','AvgScore','Status','Unit1','Unit2','Unit3','Unit4','Unit5','Unit6','Unit7','Notes'];
+  const headers = [
+    'Name','StudentNo','Section','Group','Email','Enrolled','UnitsProgress%','UnitAvg%','OverallAvg%','Status',
+    'Unit1','Unit2','Unit3','Unit4','Unit5','Unit6','Unit7',
+    'ExamID','ExamScore','ExamTotal','ExamPercentage','ExamResult','ExamDate','ExamDuration',
+    'IntegrityFocusLoss','IntegrityCopy','IntegrityRightClick','IntegrityPrint','IntegrityTotal',
+    'Notes'
+  ];
   const rows = students.map(s => {
     const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
     const unitScores = units.map(u => s.quizAttempts?.[u]?.length ? Math.max(...s.quizAttempts[u]) : '');
+    const exam = s.exam;
     return [
       s.name, s.studentNo || '', s.section || '', s.group || '', s.email || '', s.enrolled || '',
-      getStudentPercent(s), getStudentAverage(s), getStudentStatus(s).label,
-      ...unitScores, (s.notes || '').replace(/\n/g, ' ')
+      getStudentPercent(s), getUnitAverageOnly(s), getStudentAverage(s), getStudentStatus(s).label,
+      ...unitScores,
+      exam?.examId || '', exam?.score || '', exam?.total || '', exam?.percentage || '',
+      exam?.submitted ? (exam.passed ? 'PASSED' : 'FAILED') : 'NOT TAKEN',
+      exam?.takenAt || '', exam?.durationSec || '',
+      exam?.integrity?.focusLosses?.length || '', exam?.integrity?.copyAttempts || '',
+      exam?.integrity?.rightClicks || '', exam?.integrity?.printAttempts || '', getIntegrityFlagCount(s),
+      (s.notes || '').replace(/\n/g, ' ')
     ];
   });
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -2242,7 +2708,7 @@ function exportCSV() {
 }
 
 function exportJSON() {
-  const data = { exported: new Date().toISOString(), ...DB.state };
+  const data = { exported: new Date().toISOString(), appVersion: '1.5', ...DB.state };
   downloadFile(JSON.stringify(data, null, 2), `respiratory-mastery-backup-${todayISO()}.json`, 'application/json');
   toast('JSON backup exported.', 'success');
 }
@@ -2312,7 +2778,7 @@ function renderSettings(main) {
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Passing Score (%)</label>
+            <label>Unit Passing Score (%)</label>
             <input type="number" id="s_pass" min="50" max="100" value="${s.passingScore}" />
           </div>
           <div class="form-group">
@@ -2322,6 +2788,10 @@ function renderSettings(main) {
           <div class="form-group">
             <label>Inactive Days (alert)</label>
             <input type="number" id="s_days" min="1" max="60" value="${s.inactiveDays}" />
+          </div>
+          <div class="form-group">
+            <label>Exam Passing Score (out of 30)</label>
+            <input type="number" id="s_exam_pass" min="1" max="30" value="${s.examPassingScore || 15}" />
           </div>
         </div>
         <button type="submit" class="btn btn-primary">💾 Save Settings</button>
@@ -2334,6 +2804,7 @@ function renderSettings(main) {
       <p><strong>Student Data Key:</strong> <code>${DB.studentKeyPrefix}</code></p>
       <p><strong>Total Students:</strong> ${DB.state.students.length}</p>
       <p><strong>Activity Log Entries:</strong> ${DB.state.activityLog.length}</p>
+      <p><strong>App Version:</strong> 1.5</p>
       <p style="font-size:0.85rem;color:var(--gray);">Data is stored in your browser's localStorage. It is NOT synced to a server. Use Export to back up.</p>
     </div>
 
@@ -2346,7 +2817,7 @@ function renderSettings(main) {
         <strong>Tarlac State University</strong><br>
         College of Science — Nursing Department
       </div>
-      <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">© ${new Date().getFullYear()} — All Rights Reserved</p>
+      <p style="margin-top:0.75rem;font-size:0.72rem;color:var(--gray);">Version 1.5 — © ${new Date().getFullYear()} — All Rights Reserved</p>
     </div>
   `;
 }
@@ -2359,6 +2830,7 @@ function saveSettings(event) {
     passingScore: parseInt(document.getElementById('s_pass').value, 10) || 90,
     atRiskThreshold: parseInt(document.getElementById('s_risk').value, 10) || 75,
     inactiveDays: parseInt(document.getElementById('s_days').value, 10) || 7,
+    examPassingScore: parseInt(document.getElementById('s_exam_pass').value, 10) || 15,
   };
   saveDB();
   toast('Settings saved.', 'success');
@@ -2371,6 +2843,7 @@ function renderHelp(main) {
   main.innerHTML = `
     <div class="card">
       <h1>❓ Help & Documentation</h1>
+      <p style="color:var(--gray);">Version 1.5 — aligned with Student App v1.5</p>
     </div>
 
     <div class="card">
@@ -2379,60 +2852,39 @@ function renderHelp(main) {
       <div class="table-wrap"><table>
         <thead><tr><th>Method</th><th>Best for</th><th>How</th></tr></thead>
         <tbody>
-          <tr>
-            <td><strong>📷 QR Camera</strong></td>
-            <td>Scanning students' phones in class</td>
-            <td>Student shows QR → Point camera → Auto-detected</td>
-          </tr>
-          <tr>
-            <td><strong>🖼️ QR Image</strong></td>
-            <td>Screenshots sent via Messenger</td>
-            <td>Student sends screenshot → Upload image → Auto-decoded</td>
-          </tr>
-          <tr>
-            <td><strong>📋 Paste Code</strong></td>
-            <td>Copy-paste via chat</td>
-            <td>Student sends text code → Paste → Decoded</td>
-          </tr>
-          <tr>
-            <td><strong>📁 Upload JSON</strong></td>
-            <td>Files sent via email/Drive</td>
-            <td>Student downloads JSON → Send → Upload</td>
-          </tr>
-          <tr>
-            <td><strong>🖥️ Auto (Same Device)</strong></td>
-            <td>Shared lab computers</td>
-            <td>Student completes on this computer → Auto-imports</td>
-          </tr>
-          <tr>
-            <td><strong>✏️ Manual Entry</strong></td>
-            <td>Any scenario</td>
-            <td>Type in scores by hand</td>
-          </tr>
+          <tr><td><strong>📷 QR Camera</strong></td><td>Scanning students' phones in class</td><td>Student shows QR → Point camera → Auto-detected</td></tr>
+          <tr><td><strong>🖼️ QR Image</strong></td><td>Screenshots sent via Messenger</td><td>Student sends screenshot → Upload image → Auto-decoded</td></tr>
+          <tr><td><strong>📋 Paste Code</strong></td><td>Copy-paste via chat</td><td>Student sends text code → Paste → Decoded</td></tr>
+          <tr><td><strong>📁 Upload JSON</strong></td><td>Files sent via email/Drive</td><td>Student downloads JSON → Send → Upload</td></tr>
+          <tr><td><strong>🖥️ Auto (Same Device)</strong></td><td>Shared lab computers</td><td>Student completes on this computer → Auto-imports</td></tr>
+          <tr><td><strong>✏️ Manual Entry</strong></td><td>Any scenario</td><td>Type in scores by hand</td></tr>
         </tbody>
       </table></div>
     </div>
 
     <div class="card">
-      <h3>📷 QR Camera Tips</h3>
+      <h3>📝 Capstone Exam Overview (v1.5)</h3>
       <ul style="margin-left:1.5rem;">
-        <li><strong>Grant camera permission</strong> when prompted by the browser.</li>
-        <li><strong>Hold steady</strong> — QR should fill the frame.</li>
-        <li><strong>Good lighting</strong> makes scanning faster.</li>
-        <li>On mobile, the <strong>back camera</strong> is used by default (better quality).</li>
-        <li>If it doesn't detect within 5 seconds, move closer or adjust angle.</li>
-        <li>Click <strong>"Switch Camera"</strong> to use a different camera on your device.</li>
+        <li><strong>30 items</strong> — NLE-format multiple choice</li>
+        <li><strong>Bloom's Taxonomy</strong> aligned: Remember → Understand → Apply → Analyze → Evaluate → Create</li>
+        <li><strong>Randomized</strong> per student: question order AND answer options</li>
+        <li><strong>60 minutes</strong> time limit, auto-submit</li>
+        <li><strong>Passing:</strong> 15/30 (50% = transmuted grade 3.0)</li>
+        <li><strong>Single attempt only</strong> — permanently locked after submission</li>
+        <li><strong>Anti-cheat:</strong> tab-switch, copy, right-click, print tracked</li>
       </ul>
     </div>
 
     <div class="card">
-      <h3>🖼️ QR Image Upload Tips</h3>
+      <h3>🔒 Exam Integrity Flags</h3>
+      <p>Each exam logs the following events:</p>
       <ul style="margin-left:1.5rem;">
-        <li>Best for screenshots sent via chat/email.</li>
-        <li>QR code must be <strong>clear, complete, and not cropped</strong>.</li>
-        <li>Black QR on white background works best.</li>
-        <li>The system automatically <strong>upscales blurry images</strong> for better detection.</li>
+        <li><strong>Focus loss</strong> — student switched tabs or minimized window</li>
+        <li><strong>Copy/paste</strong> — attempts to copy content (blocked)</li>
+        <li><strong>Right-click</strong> — attempts to open context menu (blocked)</li>
+        <li><strong>Print/screenshot</strong> — attempts to capture the exam</li>
       </ul>
+      <p>Students with 3+ flags appear in the Alerts panel and are marked in the Exam Results view for manual review.</p>
     </div>
 
     <div class="card">
@@ -2445,6 +2897,8 @@ function renderHelp(main) {
           <tr><td>Critical Score</td><td>Average &lt;60%</td></tr>
           <tr><td>Inactive</td><td>No activity for 7+ days and &lt;100% progress</td></tr>
           <tr><td>Multiple Failures</td><td>3+ failed attempts on the same unit</td></tr>
+          <tr><td>Capstone Exam Failed</td><td>Exam score &lt;15/30</td></tr>
+          <tr><td>Exam Integrity Flags</td><td>3+ integrity events logged during exam</td></tr>
         </tbody>
       </table></div>
     </div>
@@ -2454,6 +2908,7 @@ function renderHelp(main) {
       <p><strong>JEMUEL C. MARI, MAN, RN, LPT</strong></p>
       <p>Clinical Instructor | Teacher II — Department of Education</p>
       <p>Tarlac State University — College of Science — Nursing Department</p>
+      <p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">App Version: 1.5</p>
     </div>
   `;
 }
