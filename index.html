@@ -1570,39 +1570,39 @@ function submitQuiz(num) {
 }
 
 /* ============================================================
-   MASTERY GAMES
+   MASTERY GAMES — FIXED VERSIONS
    ============================================================ */
 var GAME_DATA = {
   blitz: {
     name: 'Pattern Blitz', icon: '⚡',
     desc: 'Match the assessment pattern to the condition.',
     rounds: [
-      { pattern: '↑ Fremitus + Dull + Crackles', answer: 'Pneumonia', options: ['Pneumonia','Effusion','PTX','Asthma'] },
-      { pattern: '↓ Fremitus + Dull + Absent', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','PTX','Emphysema'] },
-      { pattern: '↓ Fremitus + Hyperresonant + Absent', answer: 'Pneumothorax', options: ['Pneumonia','Effusion','Pneumothorax','Asthma'] },
-      { pattern: 'Barrel Chest + Hyperresonant + Diminished', answer: 'Emphysema', options: ['Pneumonia','Emphysema','Asthma','PTX'] },
-      { pattern: 'Bilateral Crackles + Pink Frothy', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','PE'] },
-      { pattern: 'Post-op + Dull + Diminished', answer: 'Atelectasis', options: ['Pneumonia','Effusion','Atelectasis','PTX'] },
-      { pattern: 'Wheezes + Prolonged Expiration', answer: 'Asthma', options: ['Pneumonia','COPD','Asthma','PE'] },
-      { pattern: 'Sudden Dyspnea + Normal Sounds', answer: 'Pulmonary Embolism', options: ['Pneumonia','PE','Asthma','PTX'] },
-      { pattern: 'Chronic Cough + Hemoptysis + Night Sweats', answer: 'Tuberculosis', options: ['Pneumonia','TB','Bronchitis','PE'] },
-      { pattern: 'Productive Cough + Rhonchi + Wheezes', answer: 'Chronic Bronchitis', options: ['Pneumonia','TB','Chronic Bronchitis','Asthma'] }
+      { pattern: '↑ Fremitus + Dull + Crackles', answer: 'Pneumonia', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Asthma'] },
+      { pattern: '↓ Fremitus + Dull + Absent', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Emphysema'] },
+      { pattern: '↓ Fremitus + Hyperresonant + Absent', answer: 'Pneumothorax', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Asthma'] },
+      { pattern: 'Barrel Chest + Hyperresonant + Diminished', answer: 'Emphysema', options: ['Pneumonia','Emphysema','Asthma','Pneumothorax'] },
+      { pattern: 'Bilateral Crackles + Pink Frothy', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
+      { pattern: 'Post-op + Dull + Diminished', answer: 'Atelectasis', options: ['Pneumonia','Pleural Effusion','Atelectasis','Pneumothorax'] },
+      { pattern: 'Wheezes + Prolonged Expiration', answer: 'Asthma', options: ['Pneumonia','Chronic Bronchitis','Asthma','Pulmonary Embolism'] },
+      { pattern: 'Sudden Dyspnea + Normal Sounds', answer: 'Pulmonary Embolism', options: ['Pneumonia','Pulmonary Embolism','Asthma','Pneumothorax'] },
+      { pattern: 'Chronic Cough + Hemoptysis + Night Sweats', answer: 'Tuberculosis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Pulmonary Embolism'] },
+      { pattern: 'Productive Cough + Rhonchi + Wheezes', answer: 'Chronic Bronchitis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Asthma'] }
     ]
   },
   tree: {
     name: 'Decision Tree', icon: '🌳',
     desc: 'Follow the clinical reasoning path from finding to diagnosis.',
     rounds: [
-      { clue: 'You hear crackles. The patient has a fever.', answer: 'Pneumonia', options: ['Pneumonia','Pulmonary Edema','Atelectasis','PE'] },
-      { clue: 'You hear crackles. The patient has pink frothy sputum.', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','PE'] },
-      { clue: 'You hear crackles. The patient is post-op.', answer: 'Atelectasis', options: ['Pneumonia','Pulmonary Edema','Atelectasis','PE'] },
-      { clue: 'You hear wheezes. The patient has a history of asthma.', answer: 'Asthma', options: ['Asthma','Chronic Bronchitis','PE','PTX'] },
-      { clue: 'You hear wheezes. The patient is a chronic smoker.', answer: 'Chronic Bronchitis', options: ['Asthma','Chronic Bronchitis','PE','PTX'] },
-      { clue: 'Breath sounds are absent. Percussion is dull.', answer: 'Pleural Effusion or Hemothorax', options: ['PTX','Pleural Effusion or Hemothorax','Pneumonia','Asthma'] },
-      { clue: 'Breath sounds are absent. Percussion is hyperresonant.', answer: 'Pneumothorax', options: ['PTX','Effusion','Pneumonia','PE'] },
-      { clue: 'Severe dyspnea but lungs sound normal.', answer: 'Pulmonary Embolism', options: ['PE','Asthma','PTX','Pneumonia'] },
-      { clue: 'Increased fremitus present.', answer: 'Pneumonia / TB / Consolidation', options: ['PE','Pneumonia / TB / Consolidation','Effusion','PTX'] },
-      { clue: 'Decreased fremitus present.', answer: 'Effusion / PTX / Hemothorax / Emphysema', options: ['Pneumonia','Effusion / PTX / Hemothorax / Emphysema','Asthma','PE'] }
+      { clue: 'You hear crackles. The patient has a fever.', answer: 'Pneumonia', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
+      { clue: 'You hear crackles. The patient has pink frothy sputum.', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
+      { clue: 'You hear crackles. The patient is post-op.', answer: 'Atelectasis', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
+      { clue: 'You hear wheezes. The patient has a history of asthma.', answer: 'Asthma', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
+      { clue: 'You hear wheezes. The patient is a chronic smoker.', answer: 'Chronic Bronchitis', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
+      { clue: 'Breath sounds are absent. Percussion is dull.', answer: 'Pleural Effusion or Hemothorax', options: ['Pneumothorax','Pleural Effusion or Hemothorax','Pneumonia','Asthma'] },
+      { clue: 'Breath sounds are absent. Percussion is hyperresonant.', answer: 'Pneumothorax', options: ['Pneumothorax','Pleural Effusion','Pneumonia','Pulmonary Embolism'] },
+      { clue: 'Severe dyspnea but lungs sound normal.', answer: 'Pulmonary Embolism', options: ['Pulmonary Embolism','Asthma','Pneumothorax','Pneumonia'] },
+      { clue: 'Increased fremitus present.', answer: 'Pneumonia / Tuberculosis / Consolidation', options: ['Pulmonary Embolism','Pneumonia / Tuberculosis / Consolidation','Pleural Effusion','Pneumothorax'] },
+      { clue: 'Decreased fremitus present.', answer: 'Pleural Effusion / Pneumothorax / Hemothorax / Emphysema', options: ['Pneumonia','Pleural Effusion / Pneumothorax / Hemothorax / Emphysema','Asthma','Pulmonary Embolism'] }
     ]
   },
   sound: {
@@ -1613,7 +1613,7 @@ var GAME_DATA = {
       { desc: 'High-pitched musical sounds', answer: 'Wheezes', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Snoring or gurgling sounds that clear with cough', answer: 'Rhonchi', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'High-pitched crowing sound', answer: 'Stridor', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
-      { desc: 'Grating sound over pleural surfaces', answer: 'Pleural Friction Rub', options: ['Crackles','Wheezes','Friction Rub','Stridor'] },
+      { desc: 'Grating sound over pleural surfaces', answer: 'Pleural Friction Rub', options: ['Crackles','Wheezes','Pleural Friction Rub','Stridor'] },
       { desc: 'Soft, low-pitched sounds heard over most lung fields', answer: 'Vesicular', options: ['Vesicular','Bronchial','Bronchovesicular','Crackles'] },
       { desc: 'Musical sounds that indicate airway narrowing', answer: 'Wheezes', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Indicates fluid inside alveoli', answer: 'Crackles', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
@@ -1625,31 +1625,31 @@ var GAME_DATA = {
     name: 'Red Flag Rush', icon: '🚨',
     desc: 'Identify the correct priority action for each emergency finding.',
     rounds: [
-      { flag: 'SpO₂ < 90%', answer: 'Notify provider immediately and administer oxygen', options: ['Notify provider immediately and administer oxygen','Document and reassess in 4h','Encourage ambulation','Offer fluids'] },
-      { flag: 'Silent chest', answer: 'Activate rapid response — impending arrest', options: ['Activate rapid response — impending arrest','Administer bronchodilator and reassess','Document','Encourage coughing'] },
-      { flag: 'Tracheal deviation', answer: 'Tension pneumothorax — immediate rapid response', options: ['Tension pneumothorax — immediate rapid response','Pneumonia — antibiotics','Effusion — thoracentesis','PE — anticoagulants'] },
-      { flag: 'Cyanosis', answer: 'Late sign of hypoxemia — immediate oxygen assessment', options: ['Late sign of hypoxemia — immediate oxygen assessment','Early sign — reassure','Normal finding','Monitor only'] },
-      { flag: 'RR < 8', answer: 'Stimulate patient and evaluate medication effects', options: ['Stimulate patient and evaluate medication effects','Document','Encourage deep breathing','Ambulate'] },
-      { flag: 'RR > 30', answer: 'Escalate care — increasing distress', options: ['Escalate care — increasing distress','Reassure','Document','Offer fluids'] },
-      { flag: 'Severe stridor', answer: 'Emergency airway assessment and oxygen', options: ['Emergency airway assessment and oxygen','Encourage coughing','Offer fluids','Document'] },
-      { flag: 'Altered LOC', answer: 'Emergency notification — cerebral hypoxia', options: ['Emergency notification — cerebral hypoxia','Reassure','Offer fluids','Ambulate'] }
+      { flag: 'SpO₂ < 90%', answer: 'Notify provider immediately and administer oxygen', options: ['Notify provider immediately and administer oxygen','Document and reassess in 4 hours','Encourage ambulation','Offer fluids'] },
+      { flag: 'Silent chest', answer: 'Activate rapid response — impending arrest', options: ['Activate rapid response — impending arrest','Administer bronchodilator and reassess','Document and continue monitoring','Encourage coughing'] },
+      { flag: 'Tracheal deviation', answer: 'Tension pneumothorax — immediate rapid response', options: ['Tension pneumothorax — immediate rapid response','Pneumonia — antibiotics','Pleural effusion — thoracentesis','Pulmonary embolism — anticoagulants'] },
+      { flag: 'Cyanosis', answer: 'Late sign of hypoxemia — immediate oxygen assessment', options: ['Late sign of hypoxemia — immediate oxygen assessment','Early sign — reassure the patient','Normal finding — continue monitoring','Monitor only'] },
+      { flag: 'RR < 8', answer: 'Stimulate patient and evaluate medication effects', options: ['Stimulate patient and evaluate medication effects','Document and reassess in 1 hour','Encourage deep breathing','Ambulate the patient'] },
+      { flag: 'RR > 30', answer: 'Escalate care — increasing distress', options: ['Escalate care — increasing distress','Reassure the patient','Document and continue monitoring','Offer oral fluids'] },
+      { flag: 'Severe stridor', answer: 'Emergency airway assessment and oxygen', options: ['Emergency airway assessment and oxygen','Encourage coughing to clear airway','Offer oral fluids','Document and reassess in 30 minutes'] },
+      { flag: 'Altered LOC', answer: 'Emergency notification — cerebral hypoxia', options: ['Emergency notification — cerebral hypoxia','Reassure the patient and family','Offer oral fluids','Ambulate the patient'] }
     ]
   },
   matrix: {
     name: 'Matrix Master', icon: '🧩',
     desc: 'Identify the condition from the complete assessment pattern.',
     rounds: [
-      { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Consolidation', answer: 'Pneumonia', options: ['Pneumonia','Effusion','PTX','Atelectasis'] },
-      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Absent | Key: Fluid', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','PTX','Atelectasis'] },
-      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Absent | Key: Blood + Trauma', answer: 'Hemothorax', options: ['Pneumonia','Effusion','Hemothorax','PTX'] },
-      { pattern: 'Fremitus: ↓ | Percussion: Hyperresonant | Sounds: Absent | Key: Air', answer: 'Pneumothorax', options: ['Pneumonia','Effusion','PTX','Emphysema'] },
-      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Diminished | Key: Post-op', answer: 'Atelectasis', options: ['Pneumonia','Effusion','Atelectasis','PTX'] },
-      { pattern: 'Fremitus: Normal | Percussion: Normal/Dull | Sounds: Crackles | Key: Pink Frothy', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','PE'] },
-      { pattern: 'Fremitus: Normal | Percussion: Hyperresonant | Sounds: Wheezes | Key: Prolonged Expiration', answer: 'Asthma', options: ['Pneumonia','Asthma','COPD','PE'] },
-      { pattern: 'Fremitus: ↓ | Percussion: Hyperresonant | Sounds: Diminished | Key: Barrel Chest', answer: 'Emphysema', options: ['Pneumonia','Asthma','Emphysema','PTX'] },
-      { pattern: 'Fremitus: Normal | Percussion: Resonant | Sounds: Rhonchi/Wheezes | Key: Productive Cough', answer: 'Chronic Bronchitis', options: ['Pneumonia','Chronic Bronchitis','TB','Asthma'] },
-      { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Hemoptysis', answer: 'Tuberculosis', options: ['Pneumonia','TB','Bronchitis','PE'] },
-      { pattern: 'Fremitus: Normal | Percussion: Normal | Sounds: Normal | Key: Sudden Dyspnea', answer: 'Pulmonary Embolism', options: ['Pneumonia','PE','Asthma','PTX'] }
+      { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Consolidation', answer: 'Pneumonia', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Atelectasis'] },
+      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Absent | Key: Fluid', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Atelectasis'] },
+      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Absent | Key: Blood + Trauma', answer: 'Hemothorax', options: ['Pneumonia','Pleural Effusion','Hemothorax','Pneumothorax'] },
+      { pattern: 'Fremitus: ↓ | Percussion: Hyperresonant | Sounds: Absent | Key: Air', answer: 'Pneumothorax', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Emphysema'] },
+      { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Diminished | Key: Post-op', answer: 'Atelectasis', options: ['Pneumonia','Pleural Effusion','Atelectasis','Pneumothorax'] },
+      { pattern: 'Fremitus: Normal | Percussion: Normal/Dull | Sounds: Crackles | Key: Pink Frothy', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
+      { pattern: 'Fremitus: Normal | Percussion: Hyperresonant | Sounds: Wheezes | Key: Prolonged Expiration', answer: 'Asthma', options: ['Pneumonia','Asthma','Chronic Bronchitis','Pulmonary Embolism'] },
+      { pattern: 'Fremitus: ↓ | Percussion: Hyperresonant | Sounds: Diminished | Key: Barrel Chest', answer: 'Emphysema', options: ['Pneumonia','Asthma','Emphysema','Pneumothorax'] },
+      { pattern: 'Fremitus: Normal | Percussion: Resonant | Sounds: Rhonchi/Wheezes | Key: Productive Cough', answer: 'Chronic Bronchitis', options: ['Pneumonia','Chronic Bronchitis','Tuberculosis','Asthma'] },
+      { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Hemoptysis', answer: 'Tuberculosis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Pulmonary Embolism'] },
+      { pattern: 'Fremitus: Normal | Percussion: Normal | Sounds: Normal | Key: Sudden Dyspnea', answer: 'Pulmonary Embolism', options: ['Pneumonia','Pulmonary Embolism','Asthma','Pneumothorax'] }
     ]
   }
 };
@@ -1775,12 +1775,9 @@ function finishGame() {
 }
 
 /* ============================================================
-   CAPSTONE EXAM — NLE-ALIGNED, COMPETENCY-BASED
-   Aligned with Enhanced TOS (Resolution No. 10, s. 2025)
-   Cognitive Levels: Application, Analysis, Evaluation
+   CAPSTONE EXAM — 30 NLE-ALIGNED ITEMS (FIXED)
    ============================================================ */
 var EXAM_BANK = [
-  // ===== CLINICAL JUDGMENT: RECOGNIZE CUES / ANALYZE =====
   { q: 'A nurse is assessing a client 4 hours after abdominal surgery. The client is drowsy but arousable. Which assessment finding requires the nurse\'s IMMEDIATE action?',
     options: ['Respiratory rate of 24 breaths/min with shallow breathing', 'Incisional pain rated 5 out of 10', 'Serosanguineous drainage on the dressing', 'Blood pressure of 110/70 mmHg'],
     answer: 'Respiratory rate of 24 breaths/min with shallow breathing' },
@@ -1793,7 +1790,6 @@ var EXAM_BANK = [
     options: ['Temperature of 38.2°C (100.8°F)', 'Productive cough with yellow sputum', 'SpO₂ of 88% on room air with increasing respiratory effort', 'Crackles auscultated at the right base'],
     answer: 'SpO₂ of 88% on room air with increasing respiratory effort' },
 
-  // ===== CLINICAL JUDGMENT: PRIORITIZE HYPOTHESES =====
   { q: 'A client presents with sudden onset of unilateral chest pain, severe dyspnea, and absent breath sounds on the right side. Percussion reveals hyperresonance. Which condition should the nurse suspect FIRST?',
     options: ['Pneumonia with consolidation', 'Pneumothorax', 'Pleural effusion', 'Pulmonary embolism'],
     answer: 'Pneumothorax' },
@@ -1806,7 +1802,6 @@ var EXAM_BANK = [
     options: ['Pneumonia', 'Pulmonary edema', 'Pulmonary embolism', 'Chronic bronchitis'],
     answer: 'Pulmonary edema' },
 
-  // ===== CLINICAL JUDGMENT: GENERATE SOLUTIONS =====
   { q: 'A client is diagnosed with a large pleural effusion. The nurse prepares the client for which procedure to remove the accumulated fluid?',
     options: ['Thoracentesis', 'Chest tube insertion', 'Bronchoscopy', 'Needle decompression'],
     answer: 'Thoracentesis' },
@@ -1819,7 +1814,6 @@ var EXAM_BANK = [
     options: ['Breathe rapidly through the mouth', 'Use pursed-lip breathing during exhalation', 'Lie flat during episodes of dyspnea', 'Increase respiratory rate to improve oxygenation'],
     answer: 'Use pursed-lip breathing during exhalation' },
 
-  // ===== CLINICAL JUDGMENT: TAKE ACTION =====
   { q: 'The nurse is caring for a client with a chest tube after a pneumothorax. Which finding requires IMMEDIATE intervention?',
     options: ['Bubbling in the water seal chamber', 'Sudden cessation of bubbling with increased dyspnea', 'Serous drainage at the insertion site', 'Pain at the chest tube insertion site'],
     answer: 'Sudden cessation of bubbling with increased dyspnea' },
@@ -1836,7 +1830,6 @@ var EXAM_BANK = [
     options: ['Heart rate of 98 beats/min', 'Respiratory rate of 22 breaths/min', 'Sudden onset of confusion and restlessness', 'Blood pressure of 118/76 mmHg'],
     answer: 'Sudden onset of confusion and restlessness' },
 
-  // ===== CLINICAL JUDGMENT: EVALUATE OUTCOMES =====
   { q: 'A client with pneumonia has been receiving antibiotics and oxygen therapy for 48 hours. Which finding indicates that the treatment is EFFECTIVE?',
     options: ['SpO₂ of 94% on room air', 'Temperature of 38.5°C (101.3°F)', 'Respiratory rate of 28 breaths/min', 'Persistent crackles at the right base'],
     answer: 'SpO₂ of 94% on room air' },
@@ -1845,7 +1838,6 @@ var EXAM_BANK = [
     options: ['Increased use of accessory muscles', 'Prolonged expiratory phase', 'Decreased wheezing and improved peak flow', 'Respiratory rate of 32 breaths/min'],
     answer: 'Decreased wheezing and improved peak flow' },
 
-  // ===== PHYSIOLOGICAL INTEGRITY: REDUCTION OF RISK =====
   { q: 'A nurse is providing discharge teaching to a client with chronic obstructive pulmonary disease (COPD). Which statement by the client indicates CORRECT understanding of home oxygen therapy?',
     options: ['I will increase my oxygen flow rate when I feel short of breath', 'I will use my oxygen only during periods of activity', 'I will keep my oxygen flow rate at the prescribed level', 'I will turn off my oxygen when I sleep to prevent dependence'],
     answer: 'I will keep my oxygen flow rate at the prescribed level' },
@@ -1854,7 +1846,6 @@ var EXAM_BANK = [
     options: ['Position the client supine to prevent dizziness', 'Auscultate breath sounds and monitor for complications', 'Encourage the client to perform deep breathing exercises', 'Administer the prescribed analgesic for pain'],
     answer: 'Auscultate breath sounds and monitor for complications' },
 
-  // ===== PHYSIOLOGICAL INTEGRITY: PHYSIOLOGICAL ADAPTATION =====
   { q: 'A client with acute respiratory failure is showing signs of severe hypoxemia, confusion, and cyanosis. Which nursing action should be implemented FIRST?',
     options: ['Obtain arterial blood gas samples', 'Assess the airway and administer oxygen as ordered', 'Position the client in high Fowler\'s position', 'Notify the healthcare provider'],
     answer: 'Assess the airway and administer oxygen as ordered' },
@@ -1863,7 +1854,6 @@ var EXAM_BANK = [
     options: ['Fever, productive cough, and dull percussion', 'Sudden dyspnea, tachycardia, and normal breath sounds', 'Barrel chest, hyperresonance, and diminished breath sounds', 'Productive cough, rhonchi, and prolonged expiration'],
     answer: 'Sudden dyspnea, tachycardia, and normal breath sounds' },
 
-  // ===== SAFE AND EFFECTIVE CARE ENVIRONMENT: MANAGEMENT OF CARE =====
   { q: 'A nurse is delegating care to a nursing assistant. Which task is APPROPRIATE for the nurse to delegate?',
     options: ['Assessing a client\'s respiratory status', 'Administering oxygen therapy', 'Obtaining a sputum specimen for culture', 'Teaching a client how to use an incentive spirometer'],
     answer: 'Obtaining a sputum specimen for culture' },
@@ -1872,7 +1862,6 @@ var EXAM_BANK = [
     options: ['Activity intolerance related to hypoxia', 'Impaired gas exchange related to alveolar consolidation', 'Ineffective airway clearance related to retained secretions', 'Risk for fluid volume deficit related to fever'],
     answer: 'Impaired gas exchange related to alveolar consolidation' },
 
-  // ===== SAFE AND EFFECTIVE CARE ENVIRONMENT: SAFETY AND INFECTION CONTROL =====
   { q: 'A nurse is preparing to care for a client with tuberculosis. Which personal protective equipment (PPE) is REQUIRED when entering the client\'s room?',
     options: ['Surgical mask and gloves', 'N95 respirator and gloves', 'Gown and gloves only', 'N95 respirator, gown, and gloves'],
     answer: 'N95 respirator and gloves' },
@@ -1881,7 +1870,6 @@ var EXAM_BANK = [
     options: ['Place the client in a room with another client who has a similar infection', 'Wear a surgical mask when providing direct care within 3 feet of the client', 'Wear gloves only when handling respiratory secretions', 'Discontinue standard precautions if the client is afebrile'],
     answer: 'Wear a surgical mask when providing direct care within 3 feet of the client' },
 
-  // ===== HEALTH PROMOTION AND MAINTENANCE =====
   { q: 'A nurse is teaching a community group about prevention of respiratory infections. Which instruction should the nurse include as the MOST effective preventive measure?',
     options: ['Avoid all public gatherings during flu season', 'Perform hand hygiene frequently and avoid touching the face', 'Take prophylactic antibiotics during winter months', 'Increase vitamin C intake during periods of stress'],
     answer: 'Perform hand hygiene frequently and avoid touching the face' },
@@ -1890,16 +1878,14 @@ var EXAM_BANK = [
     options: ['Annual chest X-ray for all smokers over age 50', 'Low-dose CT scan for eligible high-risk individuals', 'Sputum cytology every 6 months', 'PET scan for all current and former smokers'],
     answer: 'Low-dose CT scan for eligible high-risk individuals' },
 
-  // ===== PHARMACOLOGICAL AND PARENTERAL THERAPIES =====
   { q: 'A client is prescribed albuterol via metered-dose inhaler for acute bronchospasm. Which instruction should the nurse include when teaching the client about this medication?',
-    options: ['Use the inhaler only when experiencing severe symptoms', 'Rinse the mouth after each use to prevent fungal infection', 'Take the medication at the same time each day regardless of symptoms', 'Expect immediate relief that lasts for 12 hours'],
-    answer: 'Use the inhaler only when experiencing severe symptoms' },
+    options: ['Use the inhaler at the first sign of breathing difficulty', 'Rinse the mouth after each use to prevent fungal infection', 'Take the medication at the same time each day regardless of symptoms', 'Expect relief that lasts for 12 hours'],
+    answer: 'Use the inhaler at the first sign of breathing difficulty' },
 
   { q: 'A nurse is preparing to administer oxygen to a client with COPD. Which principle should guide the nurse\'s practice?',
-    options: ['Administer oxygen at the highest flow rate to correct hypoxemia rapidly', 'Monitor for signs of oxygen toxicity at flow rates above 2 L/min', 'Maintain oxygen saturation at 100% to prevent tissue damage', 'Administer oxygen continuously regardless of saturation levels'],
-    answer: 'Monitor for signs of oxygen toxicity at flow rates above 2 L/min' },
+    options: ['Administer oxygen at the highest flow rate to correct hypoxemia rapidly', 'Maintain a low oxygen flow rate to prevent carbon dioxide retention', 'Maintain oxygen saturation at 100% to prevent tissue damage', 'Administer oxygen continuously regardless of saturation levels'],
+    answer: 'Maintain a low oxygen flow rate to prevent carbon dioxide retention' },
 
-  // ===== BASIC CARE AND COMFORT =====
   { q: 'A client with pneumonia is experiencing pleuritic chest pain. Which nursing intervention is MOST appropriate to promote comfort?',
     options: ['Encourage the client to lie flat to reduce lung expansion', 'Apply a heating pad to the affected area', 'Administer prescribed analgesics before activities', 'Restrict fluid intake to reduce coughing'],
     answer: 'Administer prescribed analgesics before activities' },
@@ -1908,25 +1894,9 @@ var EXAM_BANK = [
     options: ['Supine with the head elevated 15 degrees', 'High Fowler\'s position', 'Left lateral position', 'Prone position'],
     answer: 'High Fowler\'s position' },
 
-  // ===== PRIORITIZATION AND DELEGATION =====
   { q: 'A nurse is caring for four clients on a medical-surgical unit. Which client should the nurse assess FIRST?',
     options: ['A client with pneumonia who is scheduled for discharge today', 'A client with COPD who reports increased shortness of breath', 'A client with a pleural effusion who is awaiting thoracentesis', 'A client with bronchitis who is requesting pain medication'],
-    answer: 'A client with COPD who reports increased shortness of breath' },
-
-  // ===== PROFESSIONALISM AND ETHICAL PRACTICE =====
-  { q: 'A client with terminal lung cancer has a living will stating no mechanical ventilation. The family insists on intubation. What is the nurse\'s PRIORITY action?',
-    options: ['Follow the family\'s wishes since they are the decision-makers', 'Advocate for the client\'s documented wishes while providing emotional support to the family', 'Refuse to participate in the client\'s care', 'Contact the hospital ethics committee immediately without discussion'],
-    answer: 'Advocate for the client\'s documented wishes while providing emotional support to the family' },
-
-  // ===== COMMUNICATION AND DOCUMENTATION =====
-  { q: 'A nurse documents the following: "Client reports increased shortness of breath. RR 28, labored, SpO₂ 89% on room air. Bilateral crackles auscultated. Notified Dr. Smith, awaiting orders." Which component of the nursing process does this documentation represent?',
-    options: ['Assessment only', 'Assessment and evaluation', 'Assessment, intervention, and communication', 'Planning and implementation'],
-    answer: 'Assessment, intervention, and communication' },
-
-  // ===== LEADERSHIP AND MANAGEMENT =====
-  { q: 'A nurse manager is developing a protocol to reduce hospital-acquired pneumonia rates. Which intervention is MOST effective and should be prioritized?',
-    options: ['Administer prophylactic antibiotics to all postoperative clients', 'Implement ventilator bundle protocols and oral care for intubated clients', 'Restrict visitors to prevent transmission of infection', 'Obtain daily chest X-rays for all clients'],
-    answer: 'Implement ventilator bundle protocols and oral care for intubated clients' }
+    answer: 'A client with COPD who reports increased shortness of breath' }
 ];
 
 /* ---------- EXAM ROUTING ---------- */
