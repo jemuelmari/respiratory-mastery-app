@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0D7377" />
-  <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="icon.svg" />
-  <title>🫁 Respiratory Mastery v3.0</title>
+  <title>🫁 Respiratory Mastery v3.1</title>
   <style>
     :root {
       --primary: #0D7377; --primary-dark: #095456; --primary-light: #E0F2F1;
@@ -26,7 +24,6 @@
       --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
       --shadow: 0 8px 24px rgba(0,0,0,0.08);
       --shadow-lg: 0 20px 48px rgba(0,0,0,0.15);
-      --shadow-glow: 0 0 24px rgba(13,115,119,0.3);
       --font-head: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-body: 'Inter', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --sidebar-w: 280px;
@@ -49,9 +46,7 @@
     button { font-family: inherit; cursor: pointer; }
     input, select, textarea { font-family: inherit; }
     a { color: var(--secondary); text-decoration: none; }
-
     .app-container { display: flex; min-height: 100vh; }
-
     .sidebar {
       width: var(--sidebar-w);
       background: linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 50%, var(--dark-3) 100%);
@@ -78,7 +73,6 @@
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       display: flex; align-items: center; justify-content: center;
       font-size: 1.6rem; flex-shrink: 0;
-      box-shadow: var(--shadow-glow);
     }
     .sidebar-header h1 { font-size: 1.05rem; color: var(--white); }
     .sidebar-header small {
@@ -97,7 +91,6 @@
       display: flex; align-items: center; justify-content: center;
       font-family: var(--font-head); font-weight: 800; font-size: 1.2rem;
       color: var(--white); margin-bottom: 0.65rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .student-card .name {
       font-family: var(--font-head); font-weight: 700;
@@ -120,7 +113,6 @@
     .student-card .chip-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
     .student-card .chip-btn.danger { background: rgba(229,57,53,0.25); border-color: rgba(229,57,53,0.4); }
     .student-card .chip-btn.danger:hover { background: rgba(229,57,53,0.4); }
-
     .nav-section { margin-bottom: 1.25rem; position: relative; z-index: 1; }
     .nav-section-title {
       font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.2px;
@@ -144,16 +136,11 @@
     }
     .nav-item .icon { font-size: 1.05rem; width: 1.5rem; text-align: center; display: flex; align-items: center; justify-content: center; }
     .nav-item.logout { color: #FFCDD2; }
-
     .sidebar-footer {
       margin-top: auto; padding: 1rem 0.5rem 0.5rem;
       border-top: 1px solid rgba(255,255,255,0.08);
       font-size: 0.72rem; line-height: 1.55;
       color: rgba(255,255,255,0.55); position: relative; z-index: 1;
-    }
-    .sidebar-footer .dev-label {
-      font-size: 0.62rem; text-transform: uppercase;
-      letter-spacing: 1px; opacity: 0.6; margin-bottom: 0.3rem;
     }
     .sidebar-footer .dev-name { font-weight: 700; color: var(--white); font-size: 0.78rem; }
     .sidebar-footer .version-tag {
@@ -163,7 +150,6 @@
       color: var(--white); border-radius: 999px;
       font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
     }
-
     .main-content {
       margin-left: var(--sidebar-w); flex: 1;
       padding: 2rem 2.5rem 4rem; max-width: 1100px;
@@ -188,13 +174,11 @@
       h1 { font-size: 1.5rem; }
       h2 { font-size: 1.2rem; }
     }
-
     .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       border-radius: var(--radius-lg); padding: 2rem 2.25rem;
       color: var(--white); margin-bottom: 1.5rem;
       position: relative; overflow: hidden;
-      box-shadow: 0 12px 32px rgba(13,115,119,0.25);
     }
     .hero::before {
       content: ''; position: absolute; top: -50%; right: -10%;
@@ -216,12 +200,11 @@
     }
     .hero-stat .stat-value { font-family: var(--font-head); font-weight: 800; font-size: 1.5rem; line-height: 1; }
     .hero-stat .stat-label { font-size: 0.72rem; opacity: 0.8; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
     .card {
       background: var(--white); border-radius: var(--radius);
       padding: 1.5rem; box-shadow: var(--shadow-sm);
       border: 1px solid rgba(0,0,0,0.04);
-      margin-bottom: 1.25rem; transition: all 0.2s;
+      margin-bottom: 1.25rem;
     }
     .card-header {
       display: flex; justify-content: space-between; align-items: center;
@@ -229,7 +212,6 @@
     }
     .card-title { font-size: 1.05rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 0.5rem; }
     .card-subtitle { font-size: 0.82rem; color: var(--gray); margin-top: 0.2rem; }
-
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
       gap: 0.5rem; padding: 0.7rem 1.35rem;
@@ -238,24 +220,22 @@
       font-size: 0.88rem; transition: all 0.2s;
       text-decoration: none; white-space: nowrap;
     }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white); box-shadow: 0 4px 14px rgba(13,115,119,0.3); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white); }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13,115,119,0.4); }
-    .btn-secondary { background: linear-gradient(135deg, var(--secondary), #1565C0); color: var(--white); box-shadow: 0 4px 14px rgba(30,136,229,0.3); }
+    .btn-secondary { background: linear-gradient(135deg, var(--secondary), #1565C0); color: var(--white); }
     .btn-success { background: linear-gradient(135deg, var(--success), #2E7D32); color: var(--white); }
     .btn-outline { background: var(--white); color: var(--primary); border: 2px solid var(--primary-light); }
-    .btn-outline:hover { background: var(--primary-light); border-color: var(--primary); }
+    .btn-outline:hover { background: var(--primary-light); }
     .btn-sm { padding: 0.45rem 0.85rem; font-size: 0.78rem; border-radius: 10px; }
     .btn-lg { padding: 0.9rem 1.75rem; font-size: 0.95rem; border-radius: 14px; }
     .btn-block { width: 100%; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
     .stat-tile {
       background: var(--white); border-radius: var(--radius);
       padding: 1.15rem; border: 1px solid rgba(0,0,0,0.04);
-      box-shadow: var(--shadow-sm); transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
     }
-    .stat-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     .stat-tile .stat-icon {
       width: 42px; height: 42px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
@@ -266,9 +246,8 @@
     .stat-tile .stat-icon.purple { background: var(--purple-light); }
     .stat-tile .stat-icon.orange { background: var(--warning-light); }
     .stat-tile .stat-icon.green { background: var(--success-light); }
-    .stat-tile .stat-value { font-family: var(--font-head); font-weight: 800; font-size: 1.75rem; color: var(--dark); line-height: 1; letter-spacing: -0.03em; }
+    .stat-tile .stat-value { font-family: var(--font-head); font-weight: 800; font-size: 1.75rem; color: var(--dark); line-height: 1; }
     .stat-tile .stat-label { font-size: 0.75rem; color: var(--gray); margin-top: 0.3rem; font-weight: 500; }
-
     .progress-ring-wrap { display: flex; align-items: center; gap: 1.75rem; padding: 0.5rem 0; flex-wrap: wrap; }
     .progress-ring { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
     .progress-ring svg { transform: rotate(-90deg); }
@@ -280,16 +259,12 @@
     .progress-details { flex: 1; min-width: 200px; }
     .progress-details .progress-info { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.82rem; color: var(--gray); }
     .progress-details .progress-info strong { color: var(--primary); font-family: var(--font-head); }
-
     .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
-    .badge-tile { background: var(--light); border-radius: 14px; padding: 1rem 0.75rem; text-align: center; border: 2px solid transparent; transition: all 0.3s; }
-    .badge-tile.unlocked { background: linear-gradient(135deg, var(--success-light), #C8E6C9); border-color: var(--success); box-shadow: 0 4px 12px rgba(67,160,71,0.2); }
-    .badge-tile.unlocked .badge-icon { filter: drop-shadow(0 4px 8px rgba(67,160,71,0.4)); animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    .badge-tile { background: var(--light); border-radius: 14px; padding: 1rem 0.75rem; text-align: center; border: 2px solid transparent; }
+    .badge-tile.unlocked { background: linear-gradient(135deg, var(--success-light), #C8E6C9); border-color: var(--success); }
     .badge-tile.locked { opacity: 0.55; }
     .badge-icon { font-size: 2rem; display: block; }
     .badge-name { font-size: 0.72rem; font-weight: 700; margin-top: 0.35rem; font-family: var(--font-head); color: var(--dark); }
-
     .unit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .unit-card {
       background: var(--white); border-radius: var(--radius);
@@ -299,7 +274,7 @@
       overflow: hidden; display: flex; flex-direction: column;
     }
     .unit-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary); }
-    .unit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary-light); }
+    .unit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
     .unit-card.completed::after {
       content: '✓'; position: absolute; top: 0.75rem; right: 0.75rem;
       background: var(--success); color: var(--white);
@@ -316,45 +291,35 @@
     .status-pending { background: var(--gray); }
     .status-progress { background: var(--warning); }
     .status-complete { background: var(--success); }
-
     .exam-hero {
       background: linear-gradient(135deg, var(--purple) 0%, #6A1B9A 100%);
       border-radius: var(--radius); padding: 1.75rem;
       color: var(--white); margin-bottom: 1.25rem;
-      position: relative; overflow: hidden;
     }
     .exam-hero.locked { background: linear-gradient(135deg, var(--gray) 0%, #4A5568 100%); }
     .exam-hero.passed { background: linear-gradient(135deg, var(--success) 0%, #2E7D32 100%); }
     .exam-hero.failed { background: linear-gradient(135deg, var(--accent) 0%, #C62828 100%); }
-    .exam-hero-content { position: relative; z-index: 1; }
     .exam-hero h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
     .exam-hero p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 1rem; }
-
     .table-wrap { overflow-x: auto; margin: 0 -0.5rem; padding: 0 0.5rem; }
     table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-    th { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white); padding: 0.75rem; text-align: left; font-family: var(--font-head); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    th:first-child { border-radius: 10px 0 0 0; }
-    th:last-child { border-radius: 0 10px 0 0; }
+    th { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--white); padding: 0.75rem; text-align: left; font-family: var(--font-head); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
     td { padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--gray-light); }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--primary-light); }
-
     .callout { padding: 1rem 1.25rem; border-radius: 12px; margin: 1rem 0; border-left: 4px solid; font-size: 0.88rem; }
     .callout-warning { background: var(--warning-light); border-color: var(--warning); }
     .callout-danger { background: var(--accent-light); border-color: var(--accent); }
     .callout-success { background: var(--success-light); border-color: var(--success); }
     .callout-info { background: var(--secondary-light); border-color: var(--secondary); }
-
     .auth-screen {
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
       padding: 1.5rem; background: linear-gradient(135deg, #0D7377 0%, #1E88E5 50%, #5C6BC0 100%);
-      position: relative; overflow: hidden;
     }
     .auth-card {
       background: var(--white); border-radius: var(--radius-lg);
       box-shadow: 0 24px 64px rgba(0,0,0,0.3);
       max-width: 620px; width: 100%;
-      padding: 2.5rem 2rem; position: relative; z-index: 1;
+      padding: 2.5rem 2rem; position: relative;
     }
     .auth-header { text-align: center; margin-bottom: 1.75rem; }
     .auth-logo {
@@ -362,31 +327,34 @@
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       display: flex; align-items: center; justify-content: center;
       font-size: 2.5rem; margin: 0 auto 1rem;
-      box-shadow: 0 12px 32px rgba(13,115,119,0.4);
-      animation: float 3s ease-in-out infinite;
     }
     .auth-card h1 { color: var(--dark); font-size: 1.6rem; margin-bottom: 0.35rem; font-weight: 800; }
     .auth-subtitle { color: var(--gray); font-size: 0.9rem; }
     .auth-version { font-size: 0.72rem; color: var(--gray); margin-top: 0.35rem; font-weight: 600; display: inline-block; padding: 0.15rem 0.6rem; background: var(--light); border-radius: 999px; }
     .auth-tabs { display: flex; gap: 0.35rem; margin-bottom: 1.5rem; background: var(--light); padding: 0.35rem; border-radius: 14px; }
-    .auth-tab { flex: 1; padding: 0.75rem; border: none; background: transparent; border-radius: 10px; font-family: var(--font-head); font-weight: 600; font-size: 0.9rem; color: var(--gray); transition: all 0.2s; }
+    .auth-tab { flex: 1; padding: 0.75rem; border: none; background: transparent; border-radius: 10px; font-family: var(--font-head); font-weight: 600; font-size: 0.9rem; color: var(--gray); }
     .auth-tab.active { background: var(--white); color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .back-btn { position: absolute; top: 1.25rem; left: 1.25rem; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: 10px; border: 2px solid var(--primary-light); background: var(--white); color: var(--primary); font-family: var(--font-head); font-weight: 600; font-size: 0.82rem; transition: all 0.2s; }
-    .back-btn:hover { background: var(--primary-light); transform: translateX(-2px); }
-
+    .back-btn { position: absolute; top: 1.25rem; left: 1.25rem; padding: 0.5rem 1rem; border-radius: 10px; border: 2px solid var(--primary-light); background: var(--white); color: var(--primary); font-family: var(--font-head); font-weight: 600; font-size: 0.82rem; }
     .form-group { margin-bottom: 1.1rem; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.82rem; font-family: var(--font-head); color: var(--dark-2); }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.85rem 1rem; border: 2px solid var(--gray-light); border-radius: 12px; font-size: 0.92rem; background: var(--white); color: var(--dark); transition: all 0.2s; font-family: var(--font-body); }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(13,115,119,0.1); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.85rem 1rem;
+      border: 2px solid var(--gray-light);
+      border-radius: 12px; font-size: 0.92rem;
+      background: var(--white); color: var(--dark);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(13,115,119,0.1);
+    }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
     .form-hint { font-size: 0.72rem; color: var(--gray); margin-top: 0.35rem; }
-    .form-error { background: var(--accent-light); color: var(--accent); padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; display: none; border-left: 3px solid var(--accent); }
+    .form-error { background: var(--accent-light); color: var(--accent); padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
     .form-error.show { display: block; }
-
     .saved-list { display: flex; flex-direction: column; gap: 0.7rem; max-height: 380px; overflow-y: auto; padding: 0.25rem; margin-bottom: 1rem; }
-    .saved-card { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1rem; border: 2px solid var(--gray-light); border-radius: 14px; cursor: pointer; background: var(--white); transition: all 0.2s; text-align: left; width: 100%; font-family: var(--font-body); }
-    .saved-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .saved-card { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1rem; border: 2px solid var(--gray-light); border-radius: 14px; cursor: pointer; background: var(--white); text-align: left; width: 100%; font-family: var(--font-body); }
+    .saved-card:hover { border-color: var(--primary); background: var(--primary-light); }
     .saved-card .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: var(--white); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
     .saved-card .saved-name { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; color: var(--dark); margin-bottom: 0.15rem; }
     .saved-card .saved-meta { font-size: 0.75rem; color: var(--gray); }
@@ -394,42 +362,36 @@
     .saved-card .saved-progress small { display: block; font-size: 0.65rem; color: var(--gray); font-weight: 500; }
     .empty-saved { text-align: center; padding: 3rem 1.5rem; color: var(--gray); font-size: 0.9rem; background: var(--light); border-radius: 14px; margin-bottom: 1rem; }
     .empty-saved .icon { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(15,32,39,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(6px); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,32,39,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--white); border-radius: var(--radius-lg); max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+    .modal { background: var(--white); border-radius: var(--radius-lg); max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal-content { padding: 2rem; text-align: center; }
     .modal-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.25rem; }
     .modal h2 { color: var(--dark); font-size: 1.35rem; margin-bottom: 0.5rem; font-weight: 800; }
     .modal p { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; }
     .modal-student { background: var(--light); border-radius: 12px; padding: 1rem; text-align: left; margin-bottom: 1.5rem; }
     .modal-actions { display: flex; flex-direction: column; gap: 0.65rem; }
-    .modal-btn { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; border-radius: 12px; border: 2px solid var(--gray-light); background: var(--white); cursor: pointer; text-align: left; width: 100%; font-family: var(--font-body); transition: all 0.2s; }
+    .modal-btn { display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; border-radius: 12px; border: 2px solid var(--gray-light); background: var(--white); cursor: pointer; text-align: left; width: 100%; font-family: var(--font-body); }
     .modal-btn:hover { border-color: var(--primary); background: var(--primary-light); }
     .modal-btn .opt-icon { font-size: 1.75rem; flex-shrink: 0; }
     .modal-btn .opt-title { font-family: var(--font-head); font-weight: 700; font-size: 0.9rem; color: var(--dark); margin-bottom: 0.15rem; }
     .modal-btn .opt-desc { font-size: 0.75rem; color: var(--gray); line-height: 1.4; }
-    .btn-cancel { background: transparent; color: var(--gray); border: none; padding: 0.75rem; margin-top: 0.5rem; font-family: var(--font-head); font-weight: 600; font-size: 0.88rem; cursor: pointer; }
-
-    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--dark); color: var(--white); padding: 1rem 1.25rem; border-radius: 14px; box-shadow: var(--shadow-lg); z-index: 999; transform: translateY(200%); transition: transform 0.3s; max-width: 360px; font-size: 0.88rem; display: flex; align-items: center; gap: 0.65rem; font-weight: 500; }
+    .btn-cancel { background: transparent; color: var(--gray); border: none; padding: 0.75rem; margin-top: 0.5rem; font-family: var(--font-head); font-weight: 600; font-size: 0.88rem; }
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--dark); color: var(--white); padding: 1rem 1.25rem; border-radius: 14px; box-shadow: var(--shadow-lg); z-index: 999; transform: translateY(200%); transition: transform 0.3s; max-width: 360px; font-size: 0.88rem; display: flex; align-items: center; gap: 0.65rem; }
     .toast.show { transform: translateY(0); }
     .toast.success { background: linear-gradient(135deg, var(--success), #2E7D32); }
     .toast.error { background: linear-gradient(135deg, var(--accent), #C62828); }
     .toast.warning { background: linear-gradient(135deg, var(--warning), #E65100); }
-
     .loader { display: flex; align-items: center; justify-content: center; padding: 4rem; flex-direction: column; gap: 1rem; color: var(--gray); }
     .spinner { width: 44px; height: 44px; border: 4px solid var(--gray-light); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .code-display { background: linear-gradient(135deg, var(--success-light), #A5D6A7); border: 3px solid var(--success); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; }
     .code-display .code-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary-dark); font-weight: 700; margin-bottom: 0.75rem; }
     .code-display .code-value { font-family: 'Courier New', monospace; font-size: 2.5rem; font-weight: 800; color: var(--primary-dark); letter-spacing: 5px; background: var(--white); padding: 1rem 1.25rem; border-radius: 14px; border: 3px dashed var(--primary); margin: 0 auto 1rem; max-width: 400px; }
-
     .certificate { background: linear-gradient(135deg, #FFFDF5 0%, #FFF8E1 50%, #FFFDF5 100%); border: 8px double var(--primary); border-radius: var(--radius); padding: 2.5rem 2rem; text-align: center; max-width: 700px; margin: 1rem auto; }
     .certificate h2 { color: var(--primary); font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; }
     .certificate .name { font-size: 2rem; font-family: var(--font-head); color: var(--dark); font-weight: 800; border-bottom: 3px solid var(--primary); display: inline-block; padding: 0.5rem 2rem; margin: 1rem 0; }
     .certificate .score { font-size: 1.35rem; color: var(--success); font-weight: 800; margin: 0.75rem 0; }
-
     .hidden { display: none !important; }
     .text-center { text-align: center; }
     .mt-1 { margin-top: 0.5rem; }
@@ -451,7 +413,7 @@
       <div class="auth-logo">🫁</div>
       <h1>Respiratory Assessment Mastery</h1>
       <p class="auth-subtitle" id="authSubtitle">NCM 101B Lab — Please register to begin</p>
-      <span class="auth-version">Version 3.0</span>
+      <span class="auth-version">Version 3.1</span>
     </div>
     <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" data-tab="register" onclick="switchAuthTab('register')">📝 Register</button>
@@ -477,6 +439,16 @@
           <option>Group 10</option>
         </select>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>School Year *</label>
+          <select id="reg_schoolYear" required></select>
+        </div>
+        <div class="form-group">
+          <label>Semester *</label>
+          <select id="reg_semester" required></select>
+        </div>
+      </div>
       <div class="form-group">
         <label>TSU Email *</label>
         <input type="email" id="reg_email" required placeholder="juan.delacruz@tsu.edu.ph" />
@@ -499,7 +471,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo-wrap">🫁</div>
-      <div><h1>Respiratory Mastery</h1><small>NCM 101B Lab — v3.0</small></div>
+      <div><h1>Respiratory Mastery</h1><small>NCM 101B Lab — v3.1</small></div>
     </div>
     <div class="student-card">
       <div class="avatar" id="chipAvatar">—</div>
@@ -528,8 +500,8 @@
       <div class="nav-section">
         <div class="nav-section-title">Mastery</div>
         <button class="nav-item" data-view="games"><span class="icon">🎮</span> Mastery Games</button>
-        <button class="nav-item" id="navExam" data-view="exam"><span class="icon">📝</span> Capstone Exam</button>
-        <button class="nav-item" id="navCert" data-view="certificate"><span class="icon">🏆</span> Certificate</button>
+        <button class="nav-item" data-view="exam"><span class="icon">📝</span> Capstone Exam</button>
+        <button class="nav-item" data-view="certificate"><span class="icon">🏆</span> Certificate</button>
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Submit</div>
@@ -547,7 +519,7 @@
       <div>Clinical Instructor</div>
       <div>Teacher II — DepEd</div>
       <div>Tarlac State University</div>
-      <div class="version-tag">v3.0</div>
+      <div class="version-tag">v3.1</div>
     </div>
   </aside>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); this.style.display='none'"></div>
@@ -587,10 +559,10 @@
       <div class="modal-student">
         <strong style="font-family:var(--font-head);">Exam Parameters</strong>
         <div style="font-size:0.82rem;line-height:1.8;margin-top:0.5rem;">
-          • 30 items — NLE-aligned, competency-based<br>
+          • 30 items — NLE-aligned<br>
           • 60 minutes time limit<br>
           • Passing: 15/30 (50%)<br>
-          • Questions randomized per student<br>
+          • Questions randomized<br>
           • <strong style="color:var(--accent);">ONE attempt only</strong>
         </div>
       </div>
@@ -611,8 +583,13 @@
 <script>
 var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
 
+var SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033'];
+var SEMESTERS = ['1st Semester', '2nd Semester'];
+var CURRENT_SY = '2026-2027';
+var CURRENT_SEM = '1st Semester';
+
 var APP = {
-  version: '3.0',
+  version: '3.1',
   storageKey: 'respMastery_v1',
   savedSessionsKey: 'respMastery_savedSessions',
   state: {
@@ -624,7 +601,6 @@ var APP = {
   authMode: 'register'
 };
 
-/* ---------- UTILITIES ---------- */
 function loadState() {
   try { var s = localStorage.getItem(APP.storageKey); if (s) APP.state = Object.assign({}, APP.state, JSON.parse(s)); } catch (e) {}
   if (!APP.state.feedback) APP.state.feedback = [];
@@ -649,9 +625,7 @@ function registerSavedSession(record) {
   if (sessions.length > 20) sessions.splice(0, sessions.length - 20);
   saveSavedSessions(sessions);
 }
-function removeSavedSession(key) {
-  saveSavedSessions(loadSavedSessions().filter(function(s) { return s.key !== key; }));
-}
+function removeSavedSession(key) { saveSavedSessions(loadSavedSessions().filter(function(s) { return s.key !== key; })); }
 function toast(msg, type) {
   type = type || '';
   var el = document.getElementById('toast');
@@ -679,7 +653,23 @@ function getGreeting() {
   return 'Good evening';
 }
 
-/* ---------- AUTH ---------- */
+function populateSYSemDropdowns() {
+  var sySel = document.getElementById('reg_schoolYear');
+  var semSel = document.getElementById('reg_semester');
+  if (!sySel || !semSel) return;
+  if (!sySel.options.length) {
+    sySel.innerHTML = '<option value="">— Select School Year —</option>' +
+      SCHOOL_YEARS.map(function(sy) {
+        return '<option value="' + sy + '"' + (sy === CURRENT_SY ? ' selected' : '') + '>' + sy + (sy === CURRENT_SY ? ' (Current)' : '') + '</option>';
+      }).join('');
+  }
+  if (!semSel.options.length) {
+    semSel.innerHTML = SEMESTERS.map(function(s) {
+      return '<option value="' + s + '"' + (s === CURRENT_SEM ? ' selected' : '') + '>' + s + (s === CURRENT_SEM ? ' (Current)' : '') + '</option>';
+    }).join('');
+  }
+}
+
 function switchAuthTab(tab) {
   APP.authMode = tab;
   document.querySelectorAll('.auth-tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
@@ -701,6 +691,8 @@ function submitRegistration(event) {
   var studentNo = document.getElementById('reg_studentNo').value.trim();
   var section = document.getElementById('reg_section').value.trim();
   var group = document.getElementById('reg_group').value.trim();
+  var schoolYear = document.getElementById('reg_schoolYear').value.trim();
+  var semester = document.getElementById('reg_semester').value.trim();
   var email = document.getElementById('reg_email').value.trim().toLowerCase();
   var errors = [];
   if (!firstName) errors.push('First Name is required');
@@ -708,6 +700,8 @@ function submitRegistration(event) {
   if (!studentNo) errors.push('Student Number is required');
   if (!section) errors.push('Section is required');
   if (!group) errors.push('Group is required');
+  if (!schoolYear) errors.push('School Year is required');
+  if (!semester) errors.push('Semester is required');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Valid TSU email is required');
   if (errors.length) {
     errEl.innerHTML = errors.map(function(e) { return '• ' + e; }).join('<br>');
@@ -717,6 +711,7 @@ function submitRegistration(event) {
   APP.state.student = {
     firstName: firstName, lastName: lastName, fullName: firstName + ' ' + lastName,
     studentNo: studentNo, section: section, group: group, email: email,
+    schoolYear: schoolYear, semester: semester,
     registeredAt: new Date().toISOString(), lastActive: new Date().toISOString()
   };
   APP.state.progress = {}; APP.state.quizAttempts = {}; APP.state.games = {};
@@ -744,11 +739,13 @@ function renderSavedStudents() {
     var pct = calcProgressPct(s.progress);
     var avg = calcAvg(s.quizAttempts);
     var key = s.key || s.student.studentNo || s.student.email;
+    var sy = s.student.schoolYear || '';
+    var sem = s.student.semester || '';
     html += '<button class="saved-card" onclick=\'loadSessionByKey("' + escapeJs(key) + '")\'>' +
       '<div class="avatar">' + initialsOf(name) + '</div>' +
       '<div style="flex:1;min-width:0;">' +
       '<div class="saved-name">' + escapeHtml(name) + '</div>' +
-      '<div class="saved-meta">' + escapeHtml(s.student.studentNo || '—') + ' • ' + escapeHtml(s.student.section || '—') + '</div>' +
+      '<div class="saved-meta">' + escapeHtml(s.student.studentNo || '—') + ' • ' + escapeHtml(s.student.section || '—') + (sy ? ' • ' + escapeHtml(sy) + ' ' + escapeHtml(sem) : '') + '</div>' +
       '</div>' +
       '<div class="saved-progress">' + pct + '%<small>' + avg + '% avg</small></div>' +
       '</button>';
@@ -799,6 +796,9 @@ function openEditProfile() {
   document.getElementById('reg_section').value = s.section || '';
   document.getElementById('reg_group').value = s.group || '';
   document.getElementById('reg_email').value = s.email || '';
+  populateSYSemDropdowns();
+  document.getElementById('reg_schoolYear').value = s.schoolYear || CURRENT_SY;
+  document.getElementById('reg_semester').value = s.semester || CURRENT_SEM;
   var form = document.getElementById('registerForm');
   form.onsubmit = saveProfileEdit;
   document.getElementById('regSubmitBtn').textContent = '💾 Save Changes';
@@ -820,6 +820,7 @@ function closeEditProfile() {
   document.getElementById('backBtn').classList.add('hidden');
   document.getElementById('authTabs').classList.remove('hidden');
   document.getElementById('authError').classList.remove('show');
+  populateSYSemDropdowns();
   updateStudentChip();
 }
 function saveProfileEdit(event) {
@@ -831,6 +832,8 @@ function saveProfileEdit(event) {
     studentNo: document.getElementById('reg_studentNo').value.trim(),
     section: document.getElementById('reg_section').value.trim(),
     group: document.getElementById('reg_group').value.trim(),
+    schoolYear: document.getElementById('reg_schoolYear').value.trim(),
+    semester: document.getElementById('reg_semester').value.trim(),
     email: document.getElementById('reg_email').value.trim().toLowerCase()
   });
   saveState();
@@ -852,16 +855,20 @@ function updateStudentChip() {
   if (!s) return;
   document.getElementById('chipAvatar').textContent = initialsOf(s.fullName);
   document.getElementById('chipName').textContent = s.fullName;
-  document.getElementById('chipMeta').innerHTML = escapeHtml(s.studentNo) + ' — ' + escapeHtml(s.section) + '<br>' + escapeHtml(s.group || '—');
+  document.getElementById('chipMeta').innerHTML =
+    escapeHtml(s.studentNo) + ' — ' + escapeHtml(s.section) + '<br>' +
+    escapeHtml(s.group || '—') + '<br>' +
+    '<span style="color:rgba(255,255,255,0.55);font-size:0.68rem;">' +
+    escapeHtml(s.schoolYear || '') + ' • ' + escapeHtml(s.semester || '') + '</span>';
 }
 
-/* ---------- LOGOUT ---------- */
 function openLogoutModal() {
   var s = APP.state.student;
   if (!s) return;
   document.getElementById('logoutStudentInfo').innerHTML =
     '<strong style="font-family:var(--font-head);display:block;margin-bottom:0.25rem;">' + escapeHtml(s.fullName) + '</strong>' +
     '<small style="color:var(--gray);">' + escapeHtml(s.studentNo) + ' — ' + escapeHtml(s.section) + '<br>' +
+    escapeHtml(s.schoolYear || '') + ' • ' + escapeHtml(s.semester || '') + '<br>' +
     'Progress: ' + getProgressPercent() + '%</small>';
   document.getElementById('logoutModal').classList.add('show');
 }
@@ -888,7 +895,6 @@ function performLogout(mode) {
   }
 }
 
-/* ---------- NAVIGATION ---------- */
 function navigate(view) {
   APP.state.currentView = view;
   if (APP.state.student) APP.state.student.lastActive = new Date().toISOString();
@@ -923,7 +929,6 @@ function renderView(view) {
   }, 120);
 }
 
-/* ---------- PROGRESS ---------- */
 function getProgressPercent() {
   var units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
   var done = units.filter(function(u) { return APP.state.progress[u] && APP.state.progress[u].completed; }).length;
@@ -953,8 +958,6 @@ function nextUnit() {
   for (var i = 1; i <= 7; i++) if (!isUnitComplete('unit' + i)) return 'unit' + i;
   return 'exam';
 }
-
-/* ---------- EXAM UNLOCK ---------- */
 function isExamUnlocked() {
   var units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
   var games = ['blitz','tree','sound','redflag','matrix'];
@@ -971,7 +974,6 @@ function isCertificateUnlocked() {
   return !!(APP.state.exam && APP.state.exam.submitted && APP.state.exam.passed);
 }
 
-/* ---------- HOME ---------- */
 function renderHome(main) {
   var pct = getProgressPercent();
   var b = APP.state.badges;
@@ -985,7 +987,7 @@ function renderHome(main) {
   var html = '';
 
   html += '<div class="hero fade-in"><div class="hero-content">';
-  html += '<p class="hero-greeting">' + getGreeting() + '</p>';
+  html += '<p class="hero-greeting">' + getGreeting() + ' — ' + escapeHtml(s.schoolYear || '') + ' • ' + escapeHtml(s.semester || '') + '</p>';
   html += '<h1>👋 Hi, ' + escapeHtml(s.firstName) + '!</h1>';
   html += '<p class="hero-subtitle">Continue your journey to master respiratory assessment. You\'re doing great!</p>';
   html += '<div class="hero-stats">';
@@ -1002,7 +1004,6 @@ function renderHome(main) {
     html += '<button class="btn btn-primary btn-sm" onclick="copySubmissionCode()">📋 Copy Code</button></div>';
     html += '</div>';
   }
-
   if (retakePending) {
     html += '<div class="card fade-in" style="background:var(--purple-light);border:2px solid var(--purple);">';
     html += '<div class="card-title" style="color:var(--purple);">🔓 Retake Available!</div>';
@@ -1010,27 +1011,23 @@ function renderHome(main) {
     html += '<button class="btn btn-primary mt-2" onclick="navigate(\'exam\')">Go to Retake Entry →</button></div>';
   }
 
-  html += '<div class="card fade-in">';
-  html += '<div class="card-header"><div><div class="card-title">📊 Your Progress</div>';
+  html += '<div class="card fade-in"><div class="card-header"><div><div class="card-title">📊 Your Progress</div>';
   html += '<div class="card-subtitle">Track your mastery across all units</div></div></div>';
   html += '<div class="progress-ring-wrap">';
-  html += '<div class="progress-ring">';
-  html += '<svg width="120" height="120">';
+  html += '<div class="progress-ring"><svg width="120" height="120">';
   html += '<defs><linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">';
   html += '<stop offset="0%" stop-color="#43A047"/><stop offset="100%" stop-color="#0D7377"/></linearGradient></defs>';
   html += '<circle class="ring-bg" cx="60" cy="60" r="50"/>';
   html += '<circle class="ring-fill" cx="60" cy="60" r="50" style="stroke-dashoffset:' + ringOffset + '"/>';
   html += '</svg>';
   html += '<div class="ring-text"><div class="ring-value">' + pct + '%</div><div class="ring-label">Complete</div></div></div>';
-  html += '<div class="progress-details">';
-  html += '<h3>' + (pct === 100 ? '🎉 All Units Complete!' : 'Keep Going!') + '</h3>';
+  html += '<div class="progress-details"><h3>' + (pct === 100 ? '🎉 All Units Complete!' : 'Keep Going!') + '</h3>';
   html += '<div class="progress-info">';
   html += '<div>📚 <strong>' + Object.keys(APP.state.progress).length + '/7</strong> Units</div>';
   html += '<div>🎯 <strong>' + averageScore() + '%</strong> Average</div>';
   html += '</div></div></div></div>';
 
-  html += '<div class="card fade-in">';
-  html += '<div class="card-header"><div class="card-title">🏆 Achievement Badges</div></div>';
+  html += '<div class="card fade-in"><div class="card-header"><div class="card-title">🏆 Achievement Badges</div></div>';
   html += '<div class="badge-grid">' +
     badgeTile('🥉', 'Baseline', b.baseline) +
     badgeTile('🥈', 'Pattern Spotter', b.patternSpotter) +
@@ -1039,8 +1036,7 @@ function renderHome(main) {
     badgeTile('🏆', 'Respiratory Master', b.respiratoryMaster) +
     '</div></div>';
 
-  html += '<div class="card fade-in">';
-  html += '<div class="card-header"><div><div class="card-title">📚 Learning Units</div>';
+  html += '<div class="card fade-in"><div class="card-header"><div><div class="card-title">📚 Learning Units</div>';
   html += '<div class="card-subtitle">Complete all units to unlock the Capstone Exam</div></div></div>';
   html += '<div class="unit-grid">';
   var units = [
@@ -1086,8 +1082,7 @@ function renderHome(main) {
   }
   html += '</div></div>';
 
-  html += '<div class="card fade-in">';
-  html += '<div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>';
+  html += '<div class="card fade-in"><div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>';
   html += '<div class="flex flex-wrap gap-1">';
   html += '<button class="btn btn-primary" onclick="navigate(\'' + nextUnit() + '\')">📚 Continue Learning</button>';
   html += '<button class="btn btn-secondary" onclick="navigate(\'handoff\')">📤 Submit Progress</button>';
@@ -1098,7 +1093,6 @@ function renderHome(main) {
   html += '<div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray);font-weight:700;margin-bottom:0.5rem;">Developed by</div>';
   html += '<div style="font-family:var(--font-head);font-weight:700;font-size:1.1rem;color:var(--primary);margin-bottom:0.35rem;">JEMUEL C. MARI, MAN, RN, LPT</div>';
   html += '<div style="font-size:0.82rem;line-height:1.7;">Clinical Instructor<br>Teacher II — Department of Education<br><strong>Tarlac State University</strong><br>College of Science — Nursing Department</div>';
-  html += '<p style="margin-top:0.75rem;font-size:0.7rem;color:var(--gray);">Version ' + APP.version + ' — © ' + new Date().getFullYear() + '</p>';
   html += '</div>';
 
   main.innerHTML = html;
@@ -1110,12 +1104,9 @@ function badgeTile(icon, name, unlocked) {
     '<div class="badge-name">' + name + '</div></div>';
 }
 
-/* ============================================================
-   UNIT REVIEW CONTENT
-   ============================================================ */
+/* ---------- UNIT CONTENT ---------- */
 var UNIT_CONTENT = {
-  unit1: {
-    intro: 'Before recognizing abnormalities, you must master normal findings. Any deviation requires further assessment.',
+  unit1: { intro: 'Before recognizing abnormalities, you must master normal findings. Any deviation requires further assessment.',
     sections: [
       { heading: '✅ The Normal Respiratory Baseline', type: 'table', headers: ['Assessment Area', 'Normal Findings'],
         rows: [
@@ -1135,10 +1126,8 @@ var UNIT_CONTENT = {
         ] },
       { heading: '🧠 The Expert Nurse\'s Mindset', type: 'callout', variant: 'info',
         html: '<strong>Expert nurses do not diagnose based on one abnormal finding.</strong><br>Instead, they correlate:<br>• Subjective symptoms<br>• Inspection findings<br>• Palpation findings<br>• Percussion findings<br>• Auscultation findings<br>• Oxygenation status<br><br>→ to identify the <strong>probable underlying condition</strong>.' }
-    ]
-  },
-  unit2: {
-    intro: 'The first look tells the story. Inspection begins the moment you see the patient — before you touch anything.',
+    ] },
+  unit2: { intro: 'The first look tells the story. Inspection begins the moment you see the patient.',
     sections: [
       { heading: '🌬️ Respiratory Rate', type: 'table', headers: ['Finding', 'Definition', 'Possible Causes'],
         rows: [
@@ -1159,106 +1148,66 @@ var UNIT_CONTENT = {
           ['Nasal Flaring', 'Respiratory compromise'],
           ['Tripod Position', 'Advanced respiratory distress']
         ] }
-    ]
-  },
-  unit3: {
-    intro: 'Feeling the vibrations of disease. Palpation confirms what inspection suggested.',
+    ] },
+  unit3: { intro: 'Feeling the vibrations of disease. Palpation confirms what inspection suggested.',
     sections: [
       { heading: '📐 Chest Expansion', type: 'table', headers: ['Finding', 'Meaning'],
-        rows: [
-          ['Symmetrical', 'Normal'],
-          ['Unequal Expansion', 'Pneumothorax, Pleural Effusion, Atelectasis, Hemothorax']
-        ] },
+        rows: [['Symmetrical', 'Normal'], ['Unequal Expansion', 'Pneumothorax, Pleural Effusion, Atelectasis, Hemothorax']] },
       { heading: '📈 Increased Tactile Fremitus', type: 'callout', variant: 'warning',
-        html: '<strong>Occurs when lung tissue becomes denser.</strong><br><br><strong>Conditions:</strong><br>• Pneumonia<br>• Consolidation<br>• Tuberculosis<br><br><strong>🧠 Memory Aid:</strong> <code>Increased Fremitus = Consolidation</code>' },
+        html: '<strong>Occurs when lung tissue becomes denser.</strong><br><br>• Pneumonia<br>• Consolidation<br>• Tuberculosis<br><br><strong>🧠 Memory Aid:</strong> <code>Increased Fremitus = Consolidation</code>' },
       { heading: '📉 Decreased Tactile Fremitus', type: 'callout', variant: 'info',
-        html: '<strong>Occurs when air or fluid blocks vibration transmission.</strong><br><br><strong>Conditions:</strong><br>• Pleural Effusion<br>• Pneumothorax<br>• Hemothorax<br>• Emphysema<br><br><strong>🧠 Memory Aid:</strong> <code>Decreased Fremitus = Air or Fluid Outside the Lung</code>' }
-    ]
-  },
-  unit4: {
-    intro: 'Listening to the density. Percussion reveals whether the underlying tissue is air-filled, fluid-filled, or solid.',
+        html: '<strong>Occurs when air or fluid blocks vibration transmission.</strong><br><br>• Pleural Effusion<br>• Pneumothorax<br>• Hemothorax<br>• Emphysema<br><br><strong>🧠 Memory Aid:</strong> <code>Decreased Fremitus = Air or Fluid Outside the Lung</code>' }
+    ] },
+  unit4: { intro: 'Listening to the density. Percussion reveals whether underlying tissue is air-filled, fluid-filled, or solid.',
     sections: [
       { heading: '🔔 Normal Percussion', type: 'callout', variant: 'success', html: '<strong>Resonant</strong> — heard over normal lung tissue.' },
       { heading: '🔇 Dullness', type: 'table', headers: ['Significance', 'Possible Conditions'],
-        rows: [
-          ['Increased tissue density', 'Pneumonia'],
-          ['Fluid accumulation', 'Pleural Effusion'],
-          ['Blood accumulation', 'Hemothorax'],
-          ['Lung collapse', 'Atelectasis'],
-          ['Tumor', 'Lung Mass']
-        ] },
+        rows: [['Increased tissue density', 'Pneumonia'], ['Fluid accumulation', 'Pleural Effusion'], ['Blood accumulation', 'Hemothorax'], ['Lung collapse', 'Atelectasis'], ['Tumor', 'Lung Mass']] },
       { heading: '🧠 Memory Aid', type: 'callout', variant: 'warning', html: '<code>DULL = FLUID OR SOLID</code>' },
       { heading: '🥁 Hyperresonance', type: 'table', headers: ['Significance', 'Possible Conditions'],
-        rows: [
-          ['Excess air', 'Pneumothorax'],
-          ['Air trapping', 'Emphysema'],
-          ['Severe Bronchospasm', 'Asthma']
-        ] },
+        rows: [['Excess air', 'Pneumothorax'], ['Air trapping', 'Emphysema'], ['Severe Bronchospasm', 'Asthma']] },
       { heading: '🧠 Memory Aid', type: 'callout', variant: 'warning', html: '<code>HYPERRESONANT = TOO MUCH AIR</code>' }
-    ]
-  },
-  unit5: {
-    intro: 'Hearing the story of the lungs. Auscultation is the most specific of the four assessment techniques.',
+    ] },
+  unit5: { intro: 'Hearing the story of the lungs. Auscultation is the most specific of the four assessment techniques.',
     sections: [
       { heading: '✅ Normal Breath Sounds — Vesicular', type: 'callout', variant: 'success', html: '<strong>Characteristics:</strong><br>• Soft<br>• Low pitched<br>• Heard over most lung fields' },
       { heading: '💧 Crackles', type: 'table', headers: ['Attribute', 'Detail'],
-        rows: [
-          ['Description', 'Fine popping sounds similar to rubbing hair between fingers'],
-          ['Indicates', 'Fluid inside alveoli'],
-          ['Common Causes', 'Pneumonia, Pulmonary Edema, CHF, Atelectasis'],
-          ['Associated Symptoms', 'Dyspnea, Productive cough, Tachypnea']
-        ] },
+        rows: [['Description', 'Fine popping sounds'], ['Indicates', 'Fluid inside alveoli'], ['Causes', 'Pneumonia, Pulmonary Edema, CHF, Atelectasis'], ['Symptoms', 'Dyspnea, Productive cough, Tachypnea']] },
       { heading: '🎵 Wheezes', type: 'table', headers: ['Attribute', 'Detail'],
-        rows: [
-          ['Description', 'High-pitched musical sounds'],
-          ['Indicates', 'Airway narrowing'],
-          ['Common Causes', 'Asthma, COPD, Allergic Reactions'],
-          ['Associated Symptoms', 'Chest tightness, Difficulty exhaling, Dyspnea']
-        ] },
+        rows: [['Description', 'High-pitched musical sounds'], ['Indicates', 'Airway narrowing'], ['Causes', 'Asthma, COPD, Allergic Reactions'], ['Symptoms', 'Chest tightness, Difficulty exhaling']] },
       { heading: '😴 Rhonchi', type: 'table', headers: ['Attribute', 'Detail'],
-        rows: [
-          ['Description', 'Snoring or gurgling sounds'],
-          ['Indicates', 'Large airway secretions'],
-          ['Common Causes', 'Chronic Bronchitis, Pneumonia'],
-          ['Key Feature', '<strong>Often clears after coughing</strong>']
-        ] },
+        rows: [['Description', 'Snoring or gurgling sounds'], ['Indicates', 'Large airway secretions'], ['Causes', 'Chronic Bronchitis, Pneumonia'], ['Key Feature', '<strong>Often clears after coughing</strong>']] },
       { heading: '🚨 Stridor', type: 'callout', variant: 'danger',
-        html: '<strong>Description:</strong> High-pitched crowing sound<br><strong>Indicates:</strong> Upper airway obstruction<br><strong>Common Causes:</strong> Anaphylaxis, Epiglottitis, Airway Edema<br><br><strong>⚠️ EMERGENCY FINDING.</strong>' },
+        html: '<strong>Description:</strong> High-pitched crowing sound<br><strong>Indicates:</strong> Upper airway obstruction<br><strong>Causes:</strong> Anaphylaxis, Epiglottitis, Airway Edema<br><br><strong>⚠️ EMERGENCY FINDING.</strong>' },
       { heading: '🪵 Pleural Friction Rub', type: 'table', headers: ['Attribute', 'Detail'],
-        rows: [
-          ['Description', 'Grating sound'],
-          ['Indicates', 'Pleural inflammation'],
-          ['Common Causes', 'Pleurisy, Pleural Inflammation']
-        ] }
-    ]
-  },
-  unit6: {
-    intro: 'The signature patterns of 13 respiratory conditions.',
+        rows: [['Description', 'Grating sound'], ['Indicates', 'Pleural inflammation'], ['Causes', 'Pleurisy, Pleural Inflammation']] }
+    ] },
+  unit6: { intro: 'The signature patterns of 13 respiratory conditions.',
     sections: [
       { heading: '🦠 1. Pneumonia', type: 'disease', patho: 'Alveoli fill with inflammatory exudate.',
         symptoms: ['Fever', 'Productive cough', 'Dyspnea', 'Pleuritic chest pain'],
         pattern: { Inspection: 'Tachypnea', Expansion: 'Slightly reduced', Fremitus: 'Increased', Percussion: 'Dull', Auscultation: 'Crackles' },
         signature: '↑ Fremitus + Dull Percussion + Crackles = <strong>Pneumonia</strong>' },
-      { heading: '💧 2. Pleural Effusion', type: 'disease', patho: 'Fluid accumulates in the pleural space.',
+      { heading: '💧 2. Pleural Effusion', type: 'disease', patho: 'Fluid accumulates in pleural space.',
         symptoms: ['Dyspnea', 'Orthopnea', 'Chest heaviness'],
         pattern: { Inspection: 'Dyspnea', Expansion: 'Decreased', Fremitus: 'Decreased', Percussion: 'Dull', Auscultation: 'Diminished or Absent' },
-        signature: '↓ Fremitus + Dullness + Absent Breath Sounds = <strong>Pleural Effusion</strong>' },
+        signature: '↓ Fremitus + Dullness + Absent Sounds = <strong>Pleural Effusion</strong>' },
       { heading: '🩸 3. Hemothorax', type: 'disease', patho: 'Blood accumulates in pleural cavity.',
-        symptoms: ['Trauma history', 'Dyspnea', 'Chest pain', 'Signs of shock'],
+        symptoms: ['Trauma history', 'Dyspnea', 'Chest pain', 'Shock'],
         pattern: { Inspection: 'Trauma signs', Expansion: 'Decreased', Fremitus: 'Decreased', Percussion: 'Dull', Auscultation: 'Absent' },
-        signature: '↓ Fremitus + Dullness + Absent Breath Sounds + <strong>Trauma</strong> = <strong>Hemothorax</strong>' },
-      { heading: '💨 4. Pneumothorax', type: 'disease', patho: 'Air enters pleural cavity causing lung collapse.',
+        signature: '↓ Fremitus + Dullness + Absent Sounds + <strong>Trauma</strong> = <strong>Hemothorax</strong>' },
+      { heading: '💨 4. Pneumothorax', type: 'disease', patho: 'Air enters pleural cavity causing collapse.',
         symptoms: ['Sudden dyspnea', 'Sudden chest pain'],
         pattern: { Expansion: 'Unequal', Fremitus: 'Decreased', Percussion: 'Hyperresonant', 'Breath Sounds': 'Absent', SpO2: 'Decreased' },
-        signature: 'Hyperresonance + Absent Breath Sounds + Sudden Dyspnea = <strong>Pneumothorax</strong>' },
+        signature: 'Hyperresonance + Absent Sounds + Sudden Dyspnea = <strong>Pneumothorax</strong>' },
       { heading: '🚨 5. Tension Pneumothorax', type: 'callout', variant: 'danger',
-        html: '<strong>Pathophysiology:</strong> Rapidly progressive pneumothorax with mediastinal shift.<br><br><strong>Additional Findings:</strong><br>• Severe respiratory distress<br>• <strong>Tracheal deviation</strong><br>• Distended neck veins<br>• Hypotension<br>• Cyanosis<br><br><strong>Nursing Priority:</strong> MEDICAL EMERGENCY — activate rapid response immediately.' },
+        html: '<strong>Pathophysiology:</strong> Progressive pneumothorax with mediastinal shift.<br><br><strong>Findings:</strong><br>• Severe respiratory distress<br>• <strong>Tracheal deviation</strong><br>• Distended neck veins<br>• Hypotension<br>• Cyanosis<br><br><strong>MEDICAL EMERGENCY.</strong>' },
       { heading: '🫁 6. Atelectasis', type: 'disease', patho: 'Alveolar collapse.',
         symptoms: ['Postoperative patient', 'Dyspnea', 'Fatigue'],
         pattern: { Expansion: 'Reduced', Fremitus: 'Decreased', Percussion: 'Dull', 'Breath Sounds': 'Diminished', 'Respiratory Rate': 'Increased' },
-        signature: 'Post-op Patient + Dullness + Diminished Breath Sounds = <strong>Atelectasis</strong>' },
+        signature: 'Post-op + Dullness + Diminished Sounds = <strong>Atelectasis</strong>' },
       { heading: '💦 7. Pulmonary Edema', type: 'disease', patho: 'Fluid accumulates inside alveoli.',
-        symptoms: ['Severe dyspnea', 'Orthopnea', 'Feeling of drowning', 'Pink frothy sputum'],
+        symptoms: ['Severe dyspnea', 'Orthopnea', 'Pink frothy sputum'],
         pattern: { RR: 'Increased', 'Breath Sounds': 'Bilateral Crackles', SpO2: 'Low', Position: 'Unable to lie flat' },
         signature: 'Bilateral Crackles + Orthopnea + Pink Frothy Sputum = <strong>Pulmonary Edema</strong>' },
       { heading: '🌬️ 8. Asthma', type: 'disease', patho: 'Reversible bronchoconstriction.',
@@ -1270,22 +1219,22 @@ var UNIT_CONTENT = {
         symptoms: ['Progressive dyspnea', 'Exercise intolerance'],
         pattern: { 'Chest Shape': 'Barrel Chest', Percussion: 'Hyperresonant', 'Breath Sounds': 'Diminished', Breathing: 'Pursed-Lip' },
         signature: 'Barrel Chest + Hyperresonance + Diminished Sounds = <strong>Emphysema</strong>' },
-      { heading: '🚬 10. Chronic Bronchitis', type: 'disease', patho: 'Chronic inflammation with excessive mucus production.',
-        symptoms: ['Productive cough', 'Excessive mucus production'],
+      { heading: '🚬 10. Chronic Bronchitis', type: 'disease', patho: 'Chronic inflammation with excessive mucus.',
+        symptoms: ['Productive cough', 'Excessive mucus'],
         pattern: { Inspection: 'Cyanosis', 'Breath Sounds': 'Rhonchi + Wheezes', Cough: 'Productive' },
         signature: 'Productive Cough + Rhonchi + Wheezes = <strong>Chronic Bronchitis</strong>' },
       { heading: '🦠 11. Tuberculosis', type: 'disease', patho: 'Mycobacterium tuberculosis infection.',
         symptoms: ['Chronic cough >2 weeks', 'Weight loss', 'Night sweats', 'Hemoptysis'],
-        pattern: { Inspection: 'Cachexia', 'Breath Sounds': 'Upper Lobe Crackles', Fremitus: 'Increased (if consolidation present)', Percussion: 'Dull' },
-        signature: 'Chronic Cough + Hemoptysis + Weight Loss + Night Sweats = <strong>Tuberculosis</strong>' },
+        pattern: { Inspection: 'Cachexia', 'Breath Sounds': 'Upper Lobe Crackles', Fremitus: 'Increased (if consolidation)', Percussion: 'Dull' },
+        signature: 'Chronic Cough + Hemoptysis + Weight Loss = <strong>Tuberculosis</strong>' },
       { heading: '🩸 12. Pulmonary Embolism', type: 'disease', patho: 'Clot obstructs pulmonary vasculature.',
         symptoms: ['Sudden dyspnea', 'Sudden chest pain', 'Tachycardia'],
         pattern: { RR: 'Tachypnea', HR: 'Tachycardia', SpO2: 'Low', Auscultation: 'Often Normal' },
-        signature: 'Severe Dyspnea + Normal Breath Sounds + Sudden Onset = <strong>Pulmonary Embolism</strong>' },
+        signature: 'Severe Dyspnea + Normal Sounds + Sudden Onset = <strong>Pulmonary Embolism</strong>' },
       { heading: '🚨 13. Acute Respiratory Failure', type: 'callout', variant: 'danger',
-        html: '<strong>Late Findings:</strong><br>• Severe hypoxemia<br>• Cyanosis<br>• Confusion<br>• Altered LOC<br>• Silent chest<br>• Severe dyspnea<br><br><strong>Immediate Nursing Actions:</strong><br>1. Assess airway.<br>2. Call for assistance.<br>3. Administer oxygen as ordered.<br>4. Monitor continuously.<br>5. Prepare emergency equipment.' },
+        html: '<strong>Late Findings:</strong> Severe hypoxemia, Cyanosis, Confusion, Altered LOC, Silent chest, Severe dyspnea<br><br><strong>Immediate Actions:</strong> 1. Assess airway. 2. Call for assistance. 3. Administer O2. 4. Monitor continuously. 5. Prepare emergency equipment.' },
       { heading: '📊 Master Differential Diagnosis Matrix', type: 'table',
-        headers: ['Condition', 'Fremitus', 'Percussion', 'Breath Sounds', 'Key Identifier'],
+        headers: ['Condition', 'Fremitus', 'Percussion', 'Breath Sounds', 'Key ID'],
         rows: [
           ['Normal', 'Normal', 'Resonant', 'Vesicular', 'Healthy'],
           ['Pneumonia', '↑', 'Dull', 'Crackles', 'Consolidation'],
@@ -1293,97 +1242,85 @@ var UNIT_CONTENT = {
           ['Hemothorax', '↓', 'Dull', 'Absent', 'Blood + Trauma'],
           ['Pneumothorax', '↓', 'Hyperresonant', 'Absent', 'Air'],
           ['Atelectasis', '↓', 'Dull', 'Diminished', 'Post-op'],
-          ['Pulmonary Edema', 'Normal', 'Normal/Dull', 'Crackles', 'Pink Frothy Sputum'],
-          ['Asthma', 'Normal', 'Hyperresonant', 'Wheezes', 'Prolonged Expiration'],
+          ['Pulmonary Edema', 'Normal', 'Normal/Dull', 'Crackles', 'Pink Frothy'],
+          ['Asthma', 'Normal', 'Hyperresonant', 'Wheezes', 'Prolonged Exp.'],
           ['Emphysema', '↓', 'Hyperresonant', 'Diminished', 'Barrel Chest'],
           ['Chronic Bronchitis', 'Normal', 'Resonant', 'Rhonchi/Wheezes', 'Productive Cough'],
           ['Tuberculosis', '↑', 'Dull', 'Crackles', 'Hemoptysis'],
-          ['Pulmonary Embolism', 'Usually Normal', 'Usually Normal', 'Usually Normal', 'Sudden Dyspnea']
-        ] },
-      { heading: '🌳 The Respiratory Assessment Decision Tree', type: 'callout', variant: 'info',
-        html: '<strong>If you hear CRACKLES:</strong><br>• Fever? → Pneumonia<br>• Pink frothy sputum? → Pulmonary Edema<br>• Post-op patient? → Atelectasis<br><br><strong>If you hear WHEEZES:</strong><br>• History of asthma? → Asthma<br>• Chronic smoker? → COPD<br><br><strong>If breath sounds are ABSENT:</strong><br>• Dull percussion → Pleural Effusion or Hemothorax<br>• Hyperresonant → Pneumothorax<br><br><strong>If dyspnea is SEVERE but lungs sound NORMAL:</strong><br>→ Think Pulmonary Embolism' }
-    ]
-  },
-  unit7: {
-    intro: 'From assessment to action. Every intervention should answer: Does it improve airway patency, ventilation, oxygenation, reduce work of breathing, and prevent deterioration?',
+          ['Pulmonary Embolism', 'Normal', 'Normal', 'Normal', 'Sudden Dyspnea']
+        ] }
+    ] },
+  unit7: { intro: 'From assessment to action.',
     sections: [
       { heading: '🎯 Goals of Respiratory Nursing Interventions', type: 'callout', variant: 'info',
-        html: '• Maintain a patent airway<br>• Promote adequate ventilation<br>• Improve oxygenation<br>• Prevent respiratory deterioration<br>• Detect emergencies early<br>• Reduce complications<br><br><strong>ABC Priority:</strong> Airway and breathing problems always take priority over other assessments.' },
+        html: '• Maintain patent airway<br>• Promote ventilation<br>• Improve oxygenation<br>• Prevent deterioration<br>• Detect emergencies early<br>• Reduce complications<br><br><strong>ABC Priority:</strong> Airway and breathing take priority.' },
       { heading: '📈 The Deterioration Cascade', type: 'callout', variant: 'warning',
-        html: 'Respiratory failure rarely occurs suddenly. Patients progress through predictable stages:<br><br>1. Increased respiratory effort<br>2. Tachypnea<br>3. Hypoxemia<br>4. Fatigue<br>5. Altered mental status<br>6. Respiratory failure' },
+        html: '1. Increased respiratory effort<br>2. Tachypnea<br>3. Hypoxemia<br>4. Fatigue<br>5. Altered mental status<br>6. Respiratory failure' },
       { heading: '🦠 1. Pneumonia — Interventions', type: 'interventions',
-        independent: [
-          '<strong>High Fowler\'s Position</strong> — Maximizes lung expansion',
-          '<strong>Encourage Oral Fluids</strong> — Liquefies secretions',
-          '<strong>Deep Breathing & Coughing</strong> — Promotes alveolar expansion',
-          '<strong>Incentive Spirometry</strong> — Reopens collapsed alveoli',
-          '<strong>Early Ambulation</strong> — Increases lung expansion'
-        ],
-        dependent: ['<strong>Administer Oxygen</strong> — Corrects hypoxemia', '<strong>Administer Antibiotics</strong> — Eliminates organisms'],
-        collaborative: ['Respiratory therapy', 'Sputum culture collection'],
+        independent: ['<strong>High Fowler\'s Position</strong> — Maximizes expansion', '<strong>Encourage Fluids</strong> — Liquefies secretions', '<strong>Deep Breathing & Coughing</strong> — Mobilizes secretions', '<strong>Incentive Spirometry</strong> — Reopens alveoli', '<strong>Early Ambulation</strong> — Increases expansion'],
+        dependent: ['<strong>Oxygen</strong> — Corrects hypoxemia', '<strong>Antibiotics</strong> — Eliminates organisms'],
+        collaborative: ['Respiratory therapy', 'Sputum culture'],
         evaluation: 'Clearer breath sounds • Improved oxygenation • Reduced fever' },
       { heading: '💧 2. Pleural Effusion — Interventions', type: 'interventions',
-        independent: ['<strong>High Fowler\'s Position</strong>', '<strong>Monitor Respiratory Status</strong>'],
+        independent: ['<strong>High Fowler\'s</strong>', '<strong>Monitor Respiratory Status</strong>'],
         dependent: ['<strong>Prepare for Thoracentesis</strong>', '<strong>Post-Thoracentesis Care</strong>'],
         evaluation: 'Improved breath sounds • Improved oxygenation' },
       { heading: '🩸 3. Hemothorax — Interventions', type: 'interventions',
-        independent: ['<strong>Frequent Vital Sign Monitoring</strong>', '<strong>Assess Skin Color and Perfusion</strong>'],
-        dependent: ['<strong>Administer Oxygen</strong>', '<strong>Prepare for Chest Tube Insertion</strong>'],
+        independent: ['<strong>Frequent VS</strong>', '<strong>Assess Perfusion</strong>'],
+        dependent: ['<strong>Oxygen</strong>', '<strong>Chest Tube</strong>'],
         collaborative: ['Notify Trauma Team'],
         evaluation: 'Stable hemodynamics • Improved respiration' },
       { heading: '💨 4. Pneumothorax — Interventions', type: 'interventions',
-        independent: ['<strong>Respiratory Monitoring</strong>', '<strong>Position Patient for Comfort</strong>'],
-        dependent: ['<strong>Administer Oxygen</strong>', '<strong>Assist with Chest Tube Placement</strong>'],
-        collaborative: ['Immediate provider notification'],
+        independent: ['<strong>Respiratory Monitoring</strong>', '<strong>Position Comfort</strong>'],
+        dependent: ['<strong>Oxygen</strong>', '<strong>Chest Tube</strong>'],
+        collaborative: ['Provider notification'],
         evaluation: 'Improved lung expansion' },
-      { heading: '🚨 5. Tension Pneumothorax — Interventions', type: 'callout', variant: 'danger',
-        html: '<strong>MEDICAL EMERGENCY</strong><br><br><strong>Findings:</strong> Tracheal deviation • Distended neck veins • Severe hypoxemia<br><br><strong>Nursing Actions:</strong><br>• Activate rapid response immediately<br>• High-flow oxygen<br>• Continuous monitoring<br>• Prepare for needle decompression' },
+      { heading: '🚨 5. Tension Pneumothorax', type: 'callout', variant: 'danger',
+        html: '<strong>MEDICAL EMERGENCY</strong><br><br>Tracheal deviation • Distended neck veins • Severe hypoxemia<br><br>• Rapid response<br>• High-flow oxygen<br>• Needle decompression preparation' },
       { heading: '🫁 6. Atelectasis — Interventions', type: 'interventions',
-        independent: ['<strong>Turn Every 2 Hours</strong>', '<strong>Deep Breathing Exercises</strong>', '<strong>Incentive Spirometry</strong>', '<strong>Early Ambulation</strong>'],
-        dependent: ['<strong>Administer Oxygen</strong>'],
-        evaluation: 'Improved lung expansion • Improved SpO₂' },
+        independent: ['<strong>Turn q2h</strong>', '<strong>Deep Breathing</strong>', '<strong>Incentive Spirometry</strong>', '<strong>Early Ambulation</strong>'],
+        dependent: ['<strong>Oxygen</strong>'],
+        evaluation: 'Improved expansion • Improved SpO₂' },
       { heading: '💦 7. Pulmonary Edema — Interventions', type: 'interventions',
-        independent: ['<strong>High Fowler\'s Position</strong> — Reduces venous return', '<strong>Monitor Intake and Output</strong>'],
-        dependent: ['<strong>Administer Oxygen</strong>', '<strong>Administer Prescribed Diuretics</strong>'],
+        independent: ['<strong>High Fowler\'s</strong> — Reduces venous return', '<strong>Monitor I&O</strong>'],
+        dependent: ['<strong>Oxygen</strong>', '<strong>Diuretics</strong>'],
         collaborative: ['Cardiac Monitoring'],
         evaluation: 'Reduced crackles • Easier breathing' },
       { heading: '🌬️ 8. Asthma — Interventions', type: 'interventions',
-        independent: ['<strong>Identify Triggers</strong>', '<strong>Maintain Calm Environment</strong>', '<strong>Position Upright</strong>', '<strong>Monitor Peak Expiratory Flow</strong>'],
-        dependent: ['<strong>Bronchodilators</strong>', '<strong>Corticosteroids</strong>', '<strong>Administer Oxygen</strong>'],
+        independent: ['<strong>Identify Triggers</strong>', '<strong>Calm Environment</strong>', '<strong>Upright Positioning</strong>', '<strong>Monitor Peak Flow</strong>'],
+        dependent: ['<strong>Bronchodilators</strong>', '<strong>Corticosteroids</strong>', '<strong>Oxygen</strong>'],
         collaborative: ['Peak flow monitoring'],
         redFlag: 'Silent chest = impending respiratory failure',
         evaluation: 'Reduced wheezing • Improved airflow' },
       { heading: '🎈 9. Emphysema — Interventions', type: 'interventions',
         independent: ['<strong>Pursed-Lip Breathing</strong>', '<strong>Energy Conservation</strong>', '<strong>Small Frequent Meals</strong>'],
-        dependent: ['<strong>Administer Oxygen as Prescribed</strong>'],
+        dependent: ['<strong>Oxygen as Prescribed</strong>'],
         collaborative: ['Pulmonary Rehabilitation'],
         evaluation: 'Improved activity tolerance' },
       { heading: '🚬 10. Chronic Bronchitis — Interventions', type: 'interventions',
-        independent: ['<strong>Encourage Hydration</strong>', '<strong>Teach Effective Coughing</strong>', '<strong>Smoking Cessation Education</strong>'],
-        dependent: ['<strong>Bronchodilators</strong>', '<strong>Oxygen if prescribed</strong>'],
+        independent: ['<strong>Hydration</strong>', '<strong>Effective Coughing</strong>', '<strong>Smoking Cessation</strong>'],
+        dependent: ['<strong>Bronchodilators</strong>', '<strong>Oxygen</strong>'],
         evaluation: 'Easier secretion clearance' },
       { heading: '🦠 11. Tuberculosis — Interventions', type: 'interventions',
-        independent: ['<strong>Implement Airborne Precautions</strong>', '<strong>Ensure Proper N95 Use</strong>', '<strong>Patient Education</strong>'],
-        dependent: ['<strong>Administer Antitubercular Medications</strong>'],
-        collaborative: ['Coordinate with Infection Control'],
+        independent: ['<strong>Airborne Precautions</strong>', '<strong>N95 Use</strong>', '<strong>Patient Education</strong>'],
+        dependent: ['<strong>Antitubercular Meds</strong>'],
+        collaborative: ['Infection Control'],
         evaluation: 'Treatment adherence • Reduced symptoms' },
       { heading: '🩸 12. Pulmonary Embolism — Interventions', type: 'interventions',
-        independent: ['<strong>Continuous Assessment</strong>', '<strong>Monitor Oxygenation</strong>', '<strong>Bed Rest During Acute Phase</strong>'],
-        dependent: ['<strong>Administer Oxygen</strong>', '<strong>Administer Anticoagulants</strong>'],
+        independent: ['<strong>Continuous Assessment</strong>', '<strong>Monitor Oxygenation</strong>', '<strong>Bed Rest</strong>'],
+        dependent: ['<strong>Oxygen</strong>', '<strong>Anticoagulants</strong>'],
         collaborative: ['Rapid Provider Notification'],
         evaluation: 'Stable oxygenation • Hemodynamic stability' },
       { heading: '🚨 13. Acute Respiratory Failure — Interventions', type: 'interventions',
         independent: ['<strong>ABC Assessment</strong>', '<strong>Continuous Monitoring</strong>'],
-        dependent: ['<strong>Advanced Oxygen Delivery</strong>', '<strong>Prepare for Mechanical Ventilation</strong>'],
-        collaborative: ['Rapid Response or ICU Transfer'],
+        dependent: ['<strong>Advanced O2 Delivery</strong>', '<strong>Prepare for Ventilation</strong>'],
+        collaborative: ['Rapid Response / ICU'],
         evaluation: 'Improved gas exchange • Stable mental status' },
       { heading: '🌟 Clinical Pearls', type: 'callout', variant: 'success',
-        html: '• Crackles + fever = <strong>pneumonia</strong><br>• Crackles + pink frothy sputum = <strong>pulmonary edema</strong><br>• Hyperresonance + absent breath sounds = <strong>pneumothorax</strong><br>• Dullness + absent breath sounds = <strong>pleural effusion or hemothorax</strong><br>• Severe dyspnea + normal lung sounds = <strong>pulmonary embolism</strong><br>• Silent chest is <strong>worse than wheezing</strong><br>• Cyanosis is a <strong>late sign</strong>' }
-    ]
-  }
+        html: '• Crackles + fever = <strong>pneumonia</strong><br>• Crackles + pink frothy = <strong>pulmonary edema</strong><br>• Hyperresonance + absent = <strong>pneumothorax</strong><br>• Dullness + absent = <strong>pleural effusion or hemothorax</strong><br>• Severe dyspnea + normal sounds = <strong>pulmonary embolism</strong><br>• Silent chest is <strong>worse than wheezing</strong><br>• Cyanosis is a <strong>late sign</strong>' }
+    ] }
 };
 
-/* ---------- UNITS ---------- */
 function renderUnit(main, num) {
   var unitKey = 'unit' + num;
   var content = UNIT_CONTENT[unitKey];
@@ -1445,9 +1382,8 @@ function renderUnitSection(sec) {
     case 'disease':
       html += '<div class="card fade-in"><div class="card-header"><div class="card-title">' + sec.heading + '</div></div>';
       html += '<p style="font-size:0.88rem;"><strong>Pathophysiology:</strong> ' + escapeHtml(sec.patho) + '</p>';
-      if (sec.symptoms && sec.symptoms.length) {
-        html += '<p style="font-size:0.88rem;margin-top:0.5rem;"><strong>Symptoms:</strong></p>';
-        html += '<ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;">';
+      if (sec.symptoms) {
+        html += '<p style="font-size:0.88rem;margin-top:0.5rem;"><strong>Symptoms:</strong></p><ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;">';
         sec.symptoms.forEach(function(s) { html += '<li>' + escapeHtml(s) + '</li>'; });
         html += '</ul>';
       }
@@ -1465,21 +1401,18 @@ function renderUnitSection(sec) {
       break;
     case 'interventions':
       html += '<div class="card fade-in"><div class="card-header"><div class="card-title">' + sec.heading + '</div></div>';
-      if (sec.independent && sec.independent.length) {
-        html += '<p style="font-weight:700;color:var(--primary);margin-top:0.5rem;font-size:0.9rem;">🟢 Independent Nursing Interventions</p>';
-        html += '<ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
+      if (sec.independent) {
+        html += '<p style="font-weight:700;color:var(--primary);margin-top:0.5rem;font-size:0.9rem;">🟢 Independent</p><ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
         sec.independent.forEach(function(i) { html += '<li>' + i + '</li>'; });
         html += '</ul>';
       }
-      if (sec.dependent && sec.dependent.length) {
-        html += '<p style="font-weight:700;color:var(--secondary);margin-top:0.5rem;font-size:0.9rem;">🔵 Dependent Nursing Interventions</p>';
-        html += '<ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
+      if (sec.dependent) {
+        html += '<p style="font-weight:700;color:var(--secondary);margin-top:0.5rem;font-size:0.9rem;">🔵 Dependent</p><ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
         sec.dependent.forEach(function(i) { html += '<li>' + i + '</li>'; });
         html += '</ul>';
       }
-      if (sec.collaborative && sec.collaborative.length) {
-        html += '<p style="font-weight:700;color:var(--purple);margin-top:0.5rem;font-size:0.9rem;">🟣 Collaborative Interventions</p>';
-        html += '<ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
+      if (sec.collaborative) {
+        html += '<p style="font-weight:700;color:var(--purple);margin-top:0.5rem;font-size:0.9rem;">🟣 Collaborative</p><ul style="margin-left:1.5rem;font-size:0.85rem;line-height:1.8;margin-bottom:0.75rem;">';
         sec.collaborative.forEach(function(i) { html += '<li>' + i + '</li>'; });
         html += '</ul>';
       }
@@ -1487,8 +1420,6 @@ function renderUnitSection(sec) {
       if (sec.evaluation) html += '<div class="callout callout-success" style="margin-top:0.5rem;"><strong>✅ Evaluation:</strong> ' + sec.evaluation + '</div>';
       html += '</div>';
       break;
-    default:
-      html += '<div class="card fade-in"><div class="card-header"><div class="card-title">' + sec.heading + '</div></div></div>';
   }
   return html;
 }
@@ -1502,9 +1433,8 @@ function initQuiz(num) {
       '<p style="font-weight:600;margin-bottom:0.75rem;font-size:0.95rem;">' + (i+1) + '. ' + escapeHtml(q.q) + '</p>' +
       '<div class="quiz-options">' +
       q.options.map(function(o) {
-        return '<button class="quiz-opt" onclick="selectOption(this)" data-q="' + i + '" data-selected="0" style="display:block;width:100%;text-align:left;padding:0.75rem 1rem;border:2px solid var(--gray-light);border-radius:10px;background:#fff;margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.88rem;transition:all 0.15s;">' + escapeHtml(o) + '</button>';
-      }).join('') +
-      '</div></div>';
+        return '<button class="quiz-opt" onclick="selectOption(this)" data-q="' + i + '" data-selected="0" style="display:block;width:100%;text-align:left;padding:0.75rem 1rem;border:2px solid var(--gray-light);border-radius:10px;background:#fff;margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.88rem;">' + escapeHtml(o) + '</button>';
+      }).join('') + '</div></div>';
   }).join('');
 }
 
@@ -1569,13 +1499,9 @@ function submitQuiz(num) {
   if (APP.state.student) registerSavedSession(buildStudentRecord());
 }
 
-/* ============================================================
-   MASTERY GAMES — FIXED VERSIONS
-   ============================================================ */
+/* ---------- MASTERY GAMES ---------- */
 var GAME_DATA = {
-  blitz: {
-    name: 'Pattern Blitz', icon: '⚡',
-    desc: 'Match the assessment pattern to the condition.',
+  blitz: { name: 'Pattern Blitz', icon: '⚡', desc: 'Match the assessment pattern to the condition.',
     rounds: [
       { pattern: '↑ Fremitus + Dull + Crackles', answer: 'Pneumonia', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Asthma'] },
       { pattern: '↓ Fremitus + Dull + Absent', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Emphysema'] },
@@ -1587,43 +1513,34 @@ var GAME_DATA = {
       { pattern: 'Sudden Dyspnea + Normal Sounds', answer: 'Pulmonary Embolism', options: ['Pneumonia','Pulmonary Embolism','Asthma','Pneumothorax'] },
       { pattern: 'Chronic Cough + Hemoptysis + Night Sweats', answer: 'Tuberculosis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Pulmonary Embolism'] },
       { pattern: 'Productive Cough + Rhonchi + Wheezes', answer: 'Chronic Bronchitis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Asthma'] }
-    ]
-  },
-  tree: {
-    name: 'Decision Tree', icon: '🌳',
-    desc: 'Follow the clinical reasoning path from finding to diagnosis.',
+    ] },
+  tree: { name: 'Decision Tree', icon: '🌳', desc: 'Follow the clinical reasoning path.',
     rounds: [
       { clue: 'You hear crackles. The patient has a fever.', answer: 'Pneumonia', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
       { clue: 'You hear crackles. The patient has pink frothy sputum.', answer: 'Pulmonary Edema', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
       { clue: 'You hear crackles. The patient is post-op.', answer: 'Atelectasis', options: ['Pneumonia','Pulmonary Edema','Atelectasis','Pulmonary Embolism'] },
-      { clue: 'You hear wheezes. The patient has a history of asthma.', answer: 'Asthma', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
-      { clue: 'You hear wheezes. The patient is a chronic smoker.', answer: 'Chronic Bronchitis', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
-      { clue: 'Breath sounds are absent. Percussion is dull.', answer: 'Pleural Effusion or Hemothorax', options: ['Pneumothorax','Pleural Effusion or Hemothorax','Pneumonia','Asthma'] },
-      { clue: 'Breath sounds are absent. Percussion is hyperresonant.', answer: 'Pneumothorax', options: ['Pneumothorax','Pleural Effusion','Pneumonia','Pulmonary Embolism'] },
+      { clue: 'You hear wheezes. History of asthma.', answer: 'Asthma', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
+      { clue: 'You hear wheezes. Chronic smoker.', answer: 'Chronic Bronchitis', options: ['Asthma','Chronic Bronchitis','Pulmonary Embolism','Pneumothorax'] },
+      { clue: 'Breath sounds absent. Dull percussion.', answer: 'Pleural Effusion or Hemothorax', options: ['Pneumothorax','Pleural Effusion or Hemothorax','Pneumonia','Asthma'] },
+      { clue: 'Breath sounds absent. Hyperresonant.', answer: 'Pneumothorax', options: ['Pneumothorax','Pleural Effusion','Pneumonia','Pulmonary Embolism'] },
       { clue: 'Severe dyspnea but lungs sound normal.', answer: 'Pulmonary Embolism', options: ['Pulmonary Embolism','Asthma','Pneumothorax','Pneumonia'] },
       { clue: 'Increased fremitus present.', answer: 'Pneumonia / Tuberculosis / Consolidation', options: ['Pulmonary Embolism','Pneumonia / Tuberculosis / Consolidation','Pleural Effusion','Pneumothorax'] },
       { clue: 'Decreased fremitus present.', answer: 'Pleural Effusion / Pneumothorax / Hemothorax / Emphysema', options: ['Pneumonia','Pleural Effusion / Pneumothorax / Hemothorax / Emphysema','Asthma','Pulmonary Embolism'] }
-    ]
-  },
-  sound: {
-    name: 'Sound ID', icon: '🔊',
-    desc: 'Identify the adventitious sound from its description.',
+    ] },
+  sound: { name: 'Sound ID', icon: '🔊', desc: 'Identify the adventitious sound.',
     rounds: [
-      { desc: 'Fine popping sounds similar to rubbing hair between fingers', answer: 'Crackles', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
+      { desc: 'Fine popping sounds like rubbing hair between fingers', answer: 'Crackles', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'High-pitched musical sounds', answer: 'Wheezes', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Snoring or gurgling sounds that clear with cough', answer: 'Rhonchi', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'High-pitched crowing sound', answer: 'Stridor', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Grating sound over pleural surfaces', answer: 'Pleural Friction Rub', options: ['Crackles','Wheezes','Pleural Friction Rub','Stridor'] },
-      { desc: 'Soft, low-pitched sounds heard over most lung fields', answer: 'Vesicular', options: ['Vesicular','Bronchial','Bronchovesicular','Crackles'] },
-      { desc: 'Musical sounds that indicate airway narrowing', answer: 'Wheezes', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
+      { desc: 'Soft, low-pitched sounds over most lung fields', answer: 'Vesicular', options: ['Vesicular','Bronchial','Bronchovesicular','Crackles'] },
+      { desc: 'Musical sounds indicating airway narrowing', answer: 'Wheezes', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Indicates fluid inside alveoli', answer: 'Crackles', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Indicates large airway secretions', answer: 'Rhonchi', options: ['Crackles','Wheezes','Rhonchi','Stridor'] },
       { desc: 'Emergency finding — upper airway obstruction', answer: 'Stridor', options: ['Crackles','Wheezes','Rhonchi','Stridor'] }
-    ]
-  },
-  redflag: {
-    name: 'Red Flag Rush', icon: '🚨',
-    desc: 'Identify the correct priority action for each emergency finding.',
+    ] },
+  redflag: { name: 'Red Flag Rush', icon: '🚨', desc: 'Identify the priority action.',
     rounds: [
       { flag: 'SpO₂ < 90%', answer: 'Notify provider immediately and administer oxygen', options: ['Notify provider immediately and administer oxygen','Document and reassess in 4 hours','Encourage ambulation','Offer fluids'] },
       { flag: 'Silent chest', answer: 'Activate rapid response — impending arrest', options: ['Activate rapid response — impending arrest','Administer bronchodilator and reassess','Document and continue monitoring','Encourage coughing'] },
@@ -1633,11 +1550,8 @@ var GAME_DATA = {
       { flag: 'RR > 30', answer: 'Escalate care — increasing distress', options: ['Escalate care — increasing distress','Reassure the patient','Document and continue monitoring','Offer oral fluids'] },
       { flag: 'Severe stridor', answer: 'Emergency airway assessment and oxygen', options: ['Emergency airway assessment and oxygen','Encourage coughing to clear airway','Offer oral fluids','Document and reassess in 30 minutes'] },
       { flag: 'Altered LOC', answer: 'Emergency notification — cerebral hypoxia', options: ['Emergency notification — cerebral hypoxia','Reassure the patient and family','Offer oral fluids','Ambulate the patient'] }
-    ]
-  },
-  matrix: {
-    name: 'Matrix Master', icon: '🧩',
-    desc: 'Identify the condition from the complete assessment pattern.',
+    ] },
+  matrix: { name: 'Matrix Master', icon: '🧩', desc: 'Identify the condition from the full pattern.',
     rounds: [
       { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Consolidation', answer: 'Pneumonia', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Atelectasis'] },
       { pattern: 'Fremitus: ↓ | Percussion: Dull | Sounds: Absent | Key: Fluid', answer: 'Pleural Effusion', options: ['Pneumonia','Pleural Effusion','Pneumothorax','Atelectasis'] },
@@ -1650,17 +1564,14 @@ var GAME_DATA = {
       { pattern: 'Fremitus: Normal | Percussion: Resonant | Sounds: Rhonchi/Wheezes | Key: Productive Cough', answer: 'Chronic Bronchitis', options: ['Pneumonia','Chronic Bronchitis','Tuberculosis','Asthma'] },
       { pattern: 'Fremitus: ↑ | Percussion: Dull | Sounds: Crackles | Key: Hemoptysis', answer: 'Tuberculosis', options: ['Pneumonia','Tuberculosis','Chronic Bronchitis','Pulmonary Embolism'] },
       { pattern: 'Fremitus: Normal | Percussion: Normal | Sounds: Normal | Key: Sudden Dyspnea', answer: 'Pulmonary Embolism', options: ['Pneumonia','Pulmonary Embolism','Asthma','Pneumothorax'] }
-    ]
-  }
+    ] }
 };
 
 function renderGames(main) {
   var html = '<div class="hero fade-in" style="padding:1.75rem 2rem;"><div class="hero-content">';
-  html += '<p class="hero-greeting">Mastery</p>';
-  html += '<h1>🎮 Mastery Games</h1>';
+  html += '<p class="hero-greeting">Mastery</p><h1>🎮 Mastery Games</h1>';
   html += '<p class="hero-subtitle">Sharpen your pattern recognition. Score ≥90% on all 5 games to unlock the Capstone Exam.</p>';
-  html += '</div></div>';
-  html += '<div class="unit-grid">';
+  html += '</div></div><div class="unit-grid">';
   Object.keys(GAME_DATA).forEach(function(key) {
     var g = GAME_DATA[key];
     var best = getGameBestScore(key);
@@ -1678,10 +1589,7 @@ function renderGames(main) {
 }
 
 var activeGame = null;
-function startGame(key) {
-  activeGame = { key: key, round: 0, correct: 0, total: 0 };
-  renderGameRound();
-}
+function startGame(key) { activeGame = { key: key, round: 0, correct: 0, total: 0 }; renderGameRound(); }
 
 function renderGameRound() {
   var main = document.getElementById('mainContent');
@@ -1691,19 +1599,14 @@ function renderGameRound() {
   var item = data[activeGame.round];
   var prompt = item.pattern || item.clue || item.desc || item.flag;
   var options = item.options;
-
-  var html = '<div class="card fade-in">';
-  html += '<div class="card-header"><div><div class="card-title">' + g.icon + ' ' + g.name + '</div>';
+  var html = '<div class="card fade-in"><div class="card-header"><div><div class="card-title">' + g.icon + ' ' + g.name + '</div>';
   html += '<div class="card-subtitle">Round ' + (activeGame.round + 1) + ' of ' + data.length + '</div></div></div>';
   html += '<div class="callout callout-info" style="font-size:1rem;font-weight:600;">' + escapeHtml(prompt) + '</div>';
   html += '<div id="gameOpts">';
   options.forEach(function(o, idx) {
-    html += '<button class="quiz-opt" onclick="answerGame(' + idx + ')" data-idx="' + idx + '" style="display:block;width:100%;text-align:left;padding:0.85rem 1rem;border:2px solid var(--gray-light);border-radius:10px;background:#fff;margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.9rem;transition:all 0.15s;">' + escapeHtml(o) + '</button>';
+    html += '<button class="quiz-opt" onclick="answerGame(' + idx + ')" data-idx="' + idx + '" style="display:block;width:100%;text-align:left;padding:0.85rem 1rem;border:2px solid var(--gray-light);border-radius:10px;background:#fff;margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.9rem;">' + escapeHtml(o) + '</button>';
   });
-  html += '</div>';
-  html += '<div id="gameFeedback"></div>';
-  html += '</div>';
-
+  html += '</div><div id="gameFeedback"></div></div>';
   main.innerHTML = html;
 }
 
@@ -1716,33 +1619,20 @@ function answerGame(idx) {
   var correct = choice === item.answer;
   activeGame.total++;
   if (correct) activeGame.correct++;
-
   var container = document.getElementById('gameOpts');
   var siblings = container.querySelectorAll('.quiz-opt');
   siblings.forEach(function(s) { s.disabled = true; });
   var btn = container.querySelector('.quiz-opt[data-idx="' + idx + '"]');
-  if (btn) {
-    btn.style.borderColor = correct ? 'var(--success)' : 'var(--accent)';
-    btn.style.background = correct ? 'var(--success-light)' : 'var(--accent-light)';
-  }
+  if (btn) { btn.style.borderColor = correct ? 'var(--success)' : 'var(--accent)'; btn.style.background = correct ? 'var(--success-light)' : 'var(--accent-light)'; }
   siblings.forEach(function(s) {
-    if (s.textContent.trim() === item.answer && s !== btn) {
-      s.style.borderColor = 'var(--success)';
-      s.style.background = 'var(--success-light)';
-    }
+    if (s.textContent.trim() === item.answer && s !== btn) { s.style.borderColor = 'var(--success)'; s.style.background = 'var(--success-light)'; }
   });
-
   var fb = document.getElementById('gameFeedback');
   fb.innerHTML = '<div class="callout callout-' + (correct ? 'success' : 'danger') + '" style="margin-top:0.75rem;">' +
     (correct ? '✅ Correct!' : '❌ Incorrect. Correct answer: <strong>' + escapeHtml(item.answer) + '</strong>') + '</div>';
-
   setTimeout(function() {
     activeGame.round++;
-    if (activeGame.round >= data.length) {
-      finishGame();
-    } else {
-      renderGameRound();
-    }
+    if (activeGame.round >= data.length) finishGame(); else renderGameRound();
   }, 1100);
 }
 
@@ -1751,168 +1641,98 @@ function finishGame() {
   var key = activeGame.key;
   var pct = Math.round((activeGame.correct / activeGame.total) * 100);
   var pass = pct >= 90;
-
   if (!APP.state.games[key]) APP.state.games[key] = [];
   APP.state.games[key].push(pct);
   saveState();
   if (APP.state.student) registerSavedSession(buildStudentRecord());
-
   var html = '<div class="card fade-in text-center" style="padding:2.5rem 1.5rem;">';
   html += '<div style="font-size:5rem;margin-bottom:1rem;">' + (pass ? '🏆' : '📋') + '</div>';
-  html += '<h1 style="color:' + (pass ? 'var(--success)' : 'var(--accent)') + ';margin-bottom:0.5rem;">';
-  html += (pass ? 'Game Mastered!' : 'Keep Practicing') + '</h1>';
+  html += '<h1 style="color:' + (pass ? 'var(--success)' : 'var(--accent)') + ';">' + (pass ? 'Game Mastered!' : 'Keep Practicing') + '</h1>';
   html += '<p style="font-size:1.75rem;font-weight:800;color:var(--primary);margin:1rem 0;">' + activeGame.correct + '/' + activeGame.total + '</p>';
   html += '<p style="color:var(--gray);">(' + pct + '%)</p>';
-  html += '<div class="callout callout-' + (pass ? 'success' : 'warning') + '" style="margin-top:1rem;">';
-  html += pass ? '✅ You reached 90%!' : '⚠️ You need 90% to master this game.';
-  html += '</div>';
+  html += '<div class="callout callout-' + (pass ? 'success' : 'warning') + '" style="margin-top:1rem;">' + (pass ? '✅ You reached 90%!' : '⚠️ You need 90% to master.') + '</div>';
   html += '<div style="display:flex;gap:0.75rem;margin-top:1rem;justify-content:center;flex-wrap:wrap;">';
   html += '<button class="btn btn-primary" onclick="startGame(\'' + key + '\')">🔄 Retry</button>';
-  html += '<button class="btn btn-outline" onclick="navigate(\'games\')">← All Games</button>';
-  html += '</div></div>';
+  html += '<button class="btn btn-outline" onclick="navigate(\'games\')">← All Games</button></div></div>';
   main.innerHTML = html;
   activeGame = null;
 }
 
-/* ============================================================
-   CAPSTONE EXAM — 30 NLE-ALIGNED ITEMS (FIXED)
-   ============================================================ */
+/* ---------- EXAM ---------- */
 var EXAM_BANK = [
-  { q: 'A nurse is assessing a client 4 hours after abdominal surgery. The client is drowsy but arousable. Which assessment finding requires the nurse\'s IMMEDIATE action?',
-    options: ['Respiratory rate of 24 breaths/min with shallow breathing', 'Incisional pain rated 5 out of 10', 'Serosanguineous drainage on the dressing', 'Blood pressure of 110/70 mmHg'],
-    answer: 'Respiratory rate of 24 breaths/min with shallow breathing' },
-
-  { q: 'A client with a history of asthma is admitted with increasing shortness of breath. The nurse auscultates the lungs and notes that wheezing is now absent and breath sounds are nearly inaudible. What is the PRIORITY nursing action?',
-    options: ['Administer the prescribed PRN bronchodilator and reassess in 15 minutes', 'Activate the rapid response team and prepare emergency airway equipment', 'Document the finding and continue to monitor the client', 'Encourage the client to use pursed-lip breathing'],
-    answer: 'Activate the rapid response team and prepare emergency airway equipment' },
-
-  { q: 'A nurse is caring for a client with pneumonia. Which finding indicates that the client\'s condition is DETERIORATING?',
-    options: ['Temperature of 38.2°C (100.8°F)', 'Productive cough with yellow sputum', 'SpO₂ of 88% on room air with increasing respiratory effort', 'Crackles auscultated at the right base'],
-    answer: 'SpO₂ of 88% on room air with increasing respiratory effort' },
-
-  { q: 'A client presents with sudden onset of unilateral chest pain, severe dyspnea, and absent breath sounds on the right side. Percussion reveals hyperresonance. Which condition should the nurse suspect FIRST?',
-    options: ['Pneumonia with consolidation', 'Pneumothorax', 'Pleural effusion', 'Pulmonary embolism'],
-    answer: 'Pneumothorax' },
-
-  { q: 'A postoperative client develops a low-grade fever, productive cough, and crackles at the right lung base. Tactile fremitus is increased. The nurse should suspect which complication?',
-    options: ['Atelectasis', 'Pneumonia', 'Pulmonary embolism', 'Pleural effusion'],
-    answer: 'Pneumonia' },
-
-  { q: 'A client with heart failure presents with severe dyspnea, orthopnea, bilateral crackles, and pink frothy sputum. Which condition is MOST consistent with these findings?',
-    options: ['Pneumonia', 'Pulmonary edema', 'Pulmonary embolism', 'Chronic bronchitis'],
-    answer: 'Pulmonary edema' },
-
-  { q: 'A client is diagnosed with a large pleural effusion. The nurse prepares the client for which procedure to remove the accumulated fluid?',
-    options: ['Thoracentesis', 'Chest tube insertion', 'Bronchoscopy', 'Needle decompression'],
-    answer: 'Thoracentesis' },
-
-  { q: 'A client with an acute asthma exacerbation is receiving oxygen and bronchodilator therapy. Which intervention should the nurse implement to evaluate the effectiveness of treatment?',
-    options: ['Monitor peak expiratory flow rate', 'Obtain a chest X-ray', 'Administer a corticosteroid', 'Encourage oral fluid intake'],
-    answer: 'Monitor peak expiratory flow rate' },
-
-  { q: 'A client with emphysema is being taught about breathing techniques. Which instruction should the nurse include to promote effective breathing?',
-    options: ['Breathe rapidly through the mouth', 'Use pursed-lip breathing during exhalation', 'Lie flat during episodes of dyspnea', 'Increase respiratory rate to improve oxygenation'],
-    answer: 'Use pursed-lip breathing during exhalation' },
-
-  { q: 'The nurse is caring for a client with a chest tube after a pneumothorax. Which finding requires IMMEDIATE intervention?',
-    options: ['Bubbling in the water seal chamber', 'Sudden cessation of bubbling with increased dyspnea', 'Serous drainage at the insertion site', 'Pain at the chest tube insertion site'],
-    answer: 'Sudden cessation of bubbling with increased dyspnea' },
-
-  { q: 'A client with a tension pneumothorax is showing signs of tracheal deviation and hypotension. The nurse should prepare for which IMMEDIATE intervention?',
-    options: ['Administration of broad-spectrum antibiotics', 'Needle decompression', 'Insertion of a urinary catheter', 'Administration of IV diuretics'],
-    answer: 'Needle decompression' },
-
-  { q: 'A client with tuberculosis is admitted to the unit. Which nursing action is PRIORITY to prevent transmission?',
-    options: ['Place the client in a negative-pressure room with airborne precautions', 'Initiate contact precautions with gown and gloves', 'Administer the prescribed antitubercular medications', 'Encourage the client to wear a surgical mask when ambulating'],
-    answer: 'Place the client in a negative-pressure room with airborne precautions' },
-
-  { q: 'A nurse is caring for a client with a pulmonary embolism who is receiving anticoagulant therapy. Which finding requires IMMEDIATE notification of the healthcare provider?',
-    options: ['Heart rate of 98 beats/min', 'Respiratory rate of 22 breaths/min', 'Sudden onset of confusion and restlessness', 'Blood pressure of 118/76 mmHg'],
-    answer: 'Sudden onset of confusion and restlessness' },
-
-  { q: 'A client with pneumonia has been receiving antibiotics and oxygen therapy for 48 hours. Which finding indicates that the treatment is EFFECTIVE?',
-    options: ['SpO₂ of 94% on room air', 'Temperature of 38.5°C (101.3°F)', 'Respiratory rate of 28 breaths/min', 'Persistent crackles at the right base'],
-    answer: 'SpO₂ of 94% on room air' },
-
-  { q: 'A client with asthma has been treated with bronchodilators and corticosteroids. The nurse evaluates the response to therapy. Which finding indicates IMPROVEMENT?',
-    options: ['Increased use of accessory muscles', 'Prolonged expiratory phase', 'Decreased wheezing and improved peak flow', 'Respiratory rate of 32 breaths/min'],
-    answer: 'Decreased wheezing and improved peak flow' },
-
-  { q: 'A nurse is providing discharge teaching to a client with chronic obstructive pulmonary disease (COPD). Which statement by the client indicates CORRECT understanding of home oxygen therapy?',
-    options: ['I will increase my oxygen flow rate when I feel short of breath', 'I will use my oxygen only during periods of activity', 'I will keep my oxygen flow rate at the prescribed level', 'I will turn off my oxygen when I sleep to prevent dependence'],
-    answer: 'I will keep my oxygen flow rate at the prescribed level' },
-
-  { q: 'A client is scheduled for a thoracentesis. Which nursing action is MOST important to implement immediately AFTER the procedure?',
-    options: ['Position the client supine to prevent dizziness', 'Auscultate breath sounds and monitor for complications', 'Encourage the client to perform deep breathing exercises', 'Administer the prescribed analgesic for pain'],
-    answer: 'Auscultate breath sounds and monitor for complications' },
-
-  { q: 'A client with acute respiratory failure is showing signs of severe hypoxemia, confusion, and cyanosis. Which nursing action should be implemented FIRST?',
-    options: ['Obtain arterial blood gas samples', 'Assess the airway and administer oxygen as ordered', 'Position the client in high Fowler\'s position', 'Notify the healthcare provider'],
-    answer: 'Assess the airway and administer oxygen as ordered' },
-
-  { q: 'The nurse is assessing a client with suspected pulmonary embolism. Which set of findings is MOST consistent with this diagnosis?',
-    options: ['Fever, productive cough, and dull percussion', 'Sudden dyspnea, tachycardia, and normal breath sounds', 'Barrel chest, hyperresonance, and diminished breath sounds', 'Productive cough, rhonchi, and prolonged expiration'],
-    answer: 'Sudden dyspnea, tachycardia, and normal breath sounds' },
-
-  { q: 'A nurse is delegating care to a nursing assistant. Which task is APPROPRIATE for the nurse to delegate?',
-    options: ['Assessing a client\'s respiratory status', 'Administering oxygen therapy', 'Obtaining a sputum specimen for culture', 'Teaching a client how to use an incentive spirometer'],
-    answer: 'Obtaining a sputum specimen for culture' },
-
-  { q: 'A nurse is reviewing the plan of care for a client with pneumonia. Which nursing diagnosis is the HIGHEST priority?',
-    options: ['Activity intolerance related to hypoxia', 'Impaired gas exchange related to alveolar consolidation', 'Ineffective airway clearance related to retained secretions', 'Risk for fluid volume deficit related to fever'],
-    answer: 'Impaired gas exchange related to alveolar consolidation' },
-
-  { q: 'A nurse is preparing to care for a client with tuberculosis. Which personal protective equipment (PPE) is REQUIRED when entering the client\'s room?',
-    options: ['Surgical mask and gloves', 'N95 respirator and gloves', 'Gown and gloves only', 'N95 respirator, gown, and gloves'],
-    answer: 'N95 respirator and gloves' },
-
-  { q: 'A client with an active upper respiratory infection is being admitted. Which action by the nurse demonstrates CORRECT infection control practice?',
-    options: ['Place the client in a room with another client who has a similar infection', 'Wear a surgical mask when providing direct care within 3 feet of the client', 'Wear gloves only when handling respiratory secretions', 'Discontinue standard precautions if the client is afebrile'],
-    answer: 'Wear a surgical mask when providing direct care within 3 feet of the client' },
-
-  { q: 'A nurse is teaching a community group about prevention of respiratory infections. Which instruction should the nurse include as the MOST effective preventive measure?',
-    options: ['Avoid all public gatherings during flu season', 'Perform hand hygiene frequently and avoid touching the face', 'Take prophylactic antibiotics during winter months', 'Increase vitamin C intake during periods of stress'],
-    answer: 'Perform hand hygiene frequently and avoid touching the face' },
-
-  { q: 'A client with a history of smoking asks the nurse about lung cancer screening. Which recommendation is MOST appropriate?',
-    options: ['Annual chest X-ray for all smokers over age 50', 'Low-dose CT scan for eligible high-risk individuals', 'Sputum cytology every 6 months', 'PET scan for all current and former smokers'],
-    answer: 'Low-dose CT scan for eligible high-risk individuals' },
-
-  { q: 'A client is prescribed albuterol via metered-dose inhaler for acute bronchospasm. Which instruction should the nurse include when teaching the client about this medication?',
-    options: ['Use the inhaler at the first sign of breathing difficulty', 'Rinse the mouth after each use to prevent fungal infection', 'Take the medication at the same time each day regardless of symptoms', 'Expect relief that lasts for 12 hours'],
-    answer: 'Use the inhaler at the first sign of breathing difficulty' },
-
-  { q: 'A nurse is preparing to administer oxygen to a client with COPD. Which principle should guide the nurse\'s practice?',
-    options: ['Administer oxygen at the highest flow rate to correct hypoxemia rapidly', 'Maintain a low oxygen flow rate to prevent carbon dioxide retention', 'Maintain oxygen saturation at 100% to prevent tissue damage', 'Administer oxygen continuously regardless of saturation levels'],
-    answer: 'Maintain a low oxygen flow rate to prevent carbon dioxide retention' },
-
-  { q: 'A client with pneumonia is experiencing pleuritic chest pain. Which nursing intervention is MOST appropriate to promote comfort?',
-    options: ['Encourage the client to lie flat to reduce lung expansion', 'Apply a heating pad to the affected area', 'Administer prescribed analgesics before activities', 'Restrict fluid intake to reduce coughing'],
-    answer: 'Administer prescribed analgesics before activities' },
-
-  { q: 'A nurse is positioning a client with acute respiratory distress to maximize ventilation. Which position is MOST appropriate?',
-    options: ['Supine with the head elevated 15 degrees', 'High Fowler\'s position', 'Left lateral position', 'Prone position'],
-    answer: 'High Fowler\'s position' },
-
-  { q: 'A nurse is caring for four clients on a medical-surgical unit. Which client should the nurse assess FIRST?',
-    options: ['A client with pneumonia who is scheduled for discharge today', 'A client with COPD who reports increased shortness of breath', 'A client with a pleural effusion who is awaiting thoracentesis', 'A client with bronchitis who is requesting pain medication'],
-    answer: 'A client with COPD who reports increased shortness of breath' }
+  { q: 'A nurse is assessing a client 4 hours after abdominal surgery. Which finding requires IMMEDIATE action?',
+    options: ['RR 24 with shallow breathing','Incisional pain 5/10','Serosanguineous drainage','BP 110/70'], answer: 'RR 24 with shallow breathing' },
+  { q: 'A client with asthma has absent wheezing and nearly inaudible breath sounds. PRIORITY action?',
+    options: ['Administer PRN bronchodilator, reassess 15 min','Activate rapid response, prepare emergency airway','Document and continue monitoring','Encourage pursed-lip breathing'], answer: 'Activate rapid response, prepare emergency airway' },
+  { q: 'A pneumonia client — which finding indicates DETERIORATION?',
+    options: ['Temp 38.2°C','Productive cough yellow sputum','SpO₂ 88% on room air with increasing effort','Crackles right base'], answer: 'SpO₂ 88% on room air with increasing effort' },
+  { q: 'Sudden unilateral chest pain, absent breath sounds right, hyperresonance. Suspect FIRST?',
+    options: ['Pneumonia','Pneumothorax','Pleural effusion','Pulmonary embolism'], answer: 'Pneumothorax' },
+  { q: 'Post-op client: low-grade fever, productive cough, crackles right base, ↑ fremitus. Suspect?',
+    options: ['Atelectasis','Pneumonia','Pulmonary embolism','Pleural effusion'], answer: 'Pneumonia' },
+  { q: 'HF client: severe dyspnea, orthopnea, bilateral crackles, pink frothy sputum?',
+    options: ['Pneumonia','Pulmonary edema','Pulmonary embolism','Chronic bronchitis'], answer: 'Pulmonary edema' },
+  { q: 'Large pleural effusion — which procedure removes accumulated fluid?',
+    options: ['Thoracentesis','Chest tube insertion','Bronchoscopy','Needle decompression'], answer: 'Thoracentesis' },
+  { q: 'Asthma exacerbation on O2 + bronchodilator. Intervention to evaluate effectiveness?',
+    options: ['Monitor peak expiratory flow rate','Obtain chest X-ray','Administer corticosteroid','Encourage oral fluids'], answer: 'Monitor peak expiratory flow rate' },
+  { q: 'Emphysema client — which instruction promotes effective breathing?',
+    options: ['Breathe rapidly through mouth','Use pursed-lip breathing during exhalation','Lie flat during dyspnea','Increase respiratory rate'], answer: 'Use pursed-lip breathing during exhalation' },
+  { q: 'Chest tube after pneumothorax — which finding requires IMMEDIATE intervention?',
+    options: ['Bubbling in water seal','Sudden cessation of bubbling with increased dyspnea','Serous drainage at site','Pain at insertion site'], answer: 'Sudden cessation of bubbling with increased dyspnea' },
+  { q: 'Tension pneumothorax with tracheal deviation + hypotension. IMMEDIATE intervention?',
+    options: ['Broad-spectrum antibiotics','Needle decompression','Urinary catheter','IV diuretics'], answer: 'Needle decompression' },
+  { q: 'TB client admitted — PRIORITY nursing action to prevent transmission?',
+    options: ['Negative-pressure room with airborne precautions','Contact precautions with gown/gloves','Administer antitubercular meds','Encourage surgical mask when ambulating'], answer: 'Negative-pressure room with airborne precautions' },
+  { q: 'PE client on anticoagulants. Which finding requires IMMEDIATE notification?',
+    options: ['HR 98','RR 22','Sudden confusion and restlessness','BP 118/76'], answer: 'Sudden confusion and restlessness' },
+  { q: 'Pneumonia client on antibiotics + O2 for 48h. Which finding indicates EFFECTIVE treatment?',
+    options: ['SpO₂ 94% on room air','Temp 38.5°C','RR 28','Persistent crackles right base'], answer: 'SpO₂ 94% on room air' },
+  { q: 'Asthma on bronchodilators + corticosteroids. Which finding indicates IMPROVEMENT?',
+    options: ['Increased accessory muscle use','Prolonged expiratory phase','Decreased wheezing and improved peak flow','RR 32'], answer: 'Decreased wheezing and improved peak flow' },
+  { q: 'COPD discharge teaching on home O2. Which statement shows CORRECT understanding?',
+    options: ['I will increase flow when short of breath','I will use O2 only during activity','I will keep flow at prescribed level','I will turn off O2 when sleeping'], answer: 'I will keep flow at prescribed level' },
+  { q: 'Post-thoracentesis — which nursing action is MOST important immediately after?',
+    options: ['Position supine','Auscultate breath sounds, monitor for complications','Encourage deep breathing','Administer prescribed analgesic'], answer: 'Auscultate breath sounds, monitor for complications' },
+  { q: 'Acute respiratory failure with severe hypoxemia, confusion, cyanosis. FIRST action?',
+    options: ['Obtain ABG','Assess airway, administer O2 as ordered','High Fowler\'s position','Notify provider'], answer: 'Assess airway, administer O2 as ordered' },
+  { q: 'Suspected PE — which set of findings is MOST consistent?',
+    options: ['Fever, productive cough, dull percussion','Sudden dyspnea, tachycardia, normal breath sounds','Barrel chest, hyperresonance, diminished sounds','Productive cough, rhonchi, prolonged expiration'], answer: 'Sudden dyspnea, tachycardia, normal breath sounds' },
+  { q: 'Which task is APPROPRIATE to delegate to a nursing assistant?',
+    options: ['Assessing respiratory status','Administering O2 therapy','Obtaining sputum specimen for culture','Teaching incentive spirometry'], answer: 'Obtaining sputum specimen for culture' },
+  { q: 'Pneumonia plan of care — HIGHEST priority nursing diagnosis?',
+    options: ['Activity intolerance','Impaired gas exchange related to alveolar consolidation','Ineffective airway clearance','Risk for fluid deficit'], answer: 'Impaired gas exchange related to alveolar consolidation' },
+  { q: 'TB client — PPE REQUIRED when entering the room?',
+    options: ['Surgical mask + gloves','N95 respirator + gloves','Gown + gloves only','N95 + gown + gloves'], answer: 'N95 respirator + gloves' },
+  { q: 'Active upper respiratory infection admitted. CORRECT infection control practice?',
+    options: ['Room with similar-infection client','Wear surgical mask within 3 feet','Gloves only for secretions','Discontinue precautions if afebrile'], answer: 'Wear surgical mask within 3 feet' },
+  { q: 'Community teaching — MOST effective preventive measure?',
+    options: ['Avoid all public gatherings','Hand hygiene, avoid touching face','Prophylactic antibiotics in winter','Increase vitamin C'], answer: 'Hand hygiene, avoid touching face' },
+  { q: 'Smoking history — MOST appropriate lung cancer screening recommendation?',
+    options: ['Annual chest X-ray >50','Low-dose CT for eligible high-risk','Sputum cytology q6mo','PET scan all smokers'], answer: 'Low-dose CT for eligible high-risk' },
+  { q: 'Albuterol MDI teaching. Which instruction is correct?',
+    options: ['Use at the first sign of breathing difficulty','Rinse mouth after each use to prevent fungal infection','Take at same time daily regardless of symptoms','Expect 12 hours of relief'], answer: 'Use at the first sign of breathing difficulty' },
+  { q: 'COPD oxygen administration — guiding principle?',
+    options: ['Highest flow to correct rapidly','Low flow to prevent CO₂ retention','Maintain SpO2 100%','Continuous regardless of saturation'], answer: 'Low flow to prevent CO₂ retention' },
+  { q: 'Pneumonia pleuritic chest pain — MOST appropriate comfort intervention?',
+    options: ['Lie flat to reduce expansion','Heating pad to affected area','Prescribed analgesics before activities','Restrict fluid intake'], answer: 'Prescribed analgesics before activities' },
+  { q: 'Acute respiratory distress — MOST appropriate position?',
+    options: ['Supine head 15°','High Fowler\'s','Left lateral','Prone'], answer: 'High Fowler\'s' },
+  { q: 'Four clients — which to assess FIRST?',
+    options: ['Pneumonia scheduled for discharge','COPD with increased shortness of breath','Pleural effusion awaiting thoracentesis','Bronchitis requesting pain medication'], answer: 'COPD with increased shortness of breath' },
+  { q: 'Terminal lung cancer with living will — family insists on intubation. PRIORITY action?',
+    options: ['Follow family wishes','Advocate for documented wishes, support family','Refuse participation','Contact ethics committee without discussion'], answer: 'Advocate for documented wishes, support family' }
 ];
 
-/* ---------- EXAM ROUTING ---------- */
 function renderExam(main) {
-  if (APP.state.exam && APP.state.exam.submitted && APP.state.retakeAllowed && !APP.state.retakeUsed) {
-    return renderRetakeEntry(main);
-  }
+  if (APP.state.exam && APP.state.exam.submitted && APP.state.retakeAllowed && !APP.state.retakeUsed) return renderRetakeEntry(main);
   if (APP.state.exam && APP.state.exam.submitted) return renderExamResult(main);
   if (!isExamUnlocked()) return renderExamLocked(main);
   return renderExamStart(main);
 }
-
 function renderRetakeEntry(main) {
   main.innerHTML = '<div class="card fade-in text-center"><div style="font-size:4rem;margin-bottom:1rem;">🔓</div>' +
-    '<h2 style="color:var(--purple);">Retake Available</h2>' +
-    '<p>Enter your 8-character retake code below.</p></div>' +
+    '<h2 style="color:var(--purple);">Retake Available</h2><p>Enter your 8-character retake code.</p></div>' +
     '<div class="card"><div class="form-group"><label>Retake Code</label>' +
     '<input type="text" id="retakeCodeInput" placeholder="XXXXXXXX" maxlength="8" style="text-transform:uppercase;font-size:1.5rem;letter-spacing:5px;text-align:center;font-weight:700;font-family:monospace;" /></div>' +
     '<div id="retakeCodeMessage"></div>' +
@@ -1922,172 +1742,115 @@ function renderRetakeEntry(main) {
 function submitRetakeCode() {
   var code = (document.getElementById('retakeCodeInput').value || '').trim().toUpperCase();
   var msgEl = document.getElementById('retakeCodeMessage');
-  if (code !== APP.state.retakeCode) {
-    msgEl.innerHTML = '<div class="callout callout-danger">❌ Invalid retake code</div>';
-    return;
-  }
+  if (code !== APP.state.retakeCode) { msgEl.innerHTML = '<div class="callout callout-danger">❌ Invalid retake code</div>'; return; }
   APP.state.examHistory = APP.state.examHistory || [];
   if (APP.state.exam) APP.state.examHistory.push(Object.assign({}, APP.state.exam, { archivedAt: new Date().toISOString() }));
-  APP.state.exam = null;
-  APP.state.retakeUsed = true;
-  saveState();
+  APP.state.exam = null; APP.state.retakeUsed = true; saveState();
   toast('Retake unlocked!', 'success');
   setTimeout(function() { navigate('exam'); }, 500);
 }
-
 function renderExamLocked(main) {
   var units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
   var games = ['blitz','tree','sound','redflag','matrix'];
-  var html = '<div class="card fade-in text-center" style="padding:3rem 1.5rem;">';
-  html += '<div style="font-size:5rem;margin-bottom:1rem;">🔒</div>';
-  html += '<h2>Capstone Exam — Locked</h2>';
-  html += '<p>Complete all requirements to unlock the exam</p></div>';
+  var html = '<div class="card fade-in text-center" style="padding:3rem 1.5rem;"><div style="font-size:5rem;margin-bottom:1rem;">🔒</div>';
+  html += '<h2>Capstone Exam — Locked</h2><p>Complete all requirements to unlock.</p></div>';
   html += '<div class="card"><div class="card-header"><div class="card-title">📋 Requirements Checklist</div></div>';
   units.forEach(function(u, i) {
-    var done = isUnitComplete(u);
-    var best = getUnitBestScore(u);
-    var pass = done && best >= 90;
+    var done = isUnitComplete(u); var best = getUnitBestScore(u); var pass = done && best >= 90;
     html += '<div style="display:flex;justify-content:space-between;padding:0.65rem 0;border-bottom:1px solid var(--gray-light);font-size:0.88rem;">';
     html += '<span>' + (pass ? '✅' : done ? '⚠️' : '⬜') + ' Unit ' + (i+1) + '</span>';
     html += '<span style="color:' + (pass ? 'var(--success)' : 'var(--gray)') + ';font-weight:600;">' + (done ? best + '%' : 'Not taken') + '</span></div>';
   });
   games.forEach(function(g, i) {
-    var best = getGameBestScore(g);
-    var pass = best >= 90;
+    var best = getGameBestScore(g); var pass = best >= 90;
     html += '<div style="display:flex;justify-content:space-between;padding:0.65rem 0;border-bottom:1px solid var(--gray-light);font-size:0.88rem;">';
     html += '<span>' + (pass ? '✅' : best > 0 ? '⚠️' : '⬜') + ' Game ' + (i+1) + ' (' + GAME_DATA[g].name + ')</span>';
     html += '<span style="color:' + (pass ? 'var(--success)' : 'var(--gray)') + ';font-weight:600;">' + (best > 0 ? best + '%' : 'Not played') + '</span></div>';
   });
-  html += '</div>';
-  html += '<button class="btn btn-primary btn-lg btn-block" onclick="navigate(\'home\')">← Back to Home</button>';
+  html += '</div><button class="btn btn-primary btn-lg btn-block" onclick="navigate(\'home\')">← Back to Home</button>';
   main.innerHTML = html;
 }
-
 function renderExamStart(main) {
-  main.innerHTML = '<div class="exam-hero fade-in" style="padding:2rem;">' +
-    '<div class="exam-hero-content">' +
-    '<h3>📝 Capstone Comprehensive Exam — NLE-Aligned</h3>' +
-    '<p>This exam tests clinical judgment and competency-based application of respiratory assessment principles.</p></div></div>' +
+  main.innerHTML = '<div class="exam-hero fade-in" style="padding:2rem;"><div class="exam-hero-content">' +
+    '<h3>📝 Capstone Comprehensive Exam</h3><p>NLE-aligned, competency-based assessment.</p></div></div>' +
     '<div class="card"><div class="stat-grid" style="margin-bottom:0;">' +
-    '<div class="stat-tile"><div class="stat-icon green">📝</div><div class="stat-value">30</div><div class="stat-label">Total Items</div></div>' +
+    '<div class="stat-tile"><div class="stat-icon green">📝</div><div class="stat-value">30</div><div class="stat-label">Items</div></div>' +
     '<div class="stat-tile"><div class="stat-icon blue">⏱️</div><div class="stat-value">60</div><div class="stat-label">Minutes</div></div>' +
-    '<div class="stat-tile"><div class="stat-icon orange">🎯</div><div class="stat-value">15</div><div class="stat-label">Passing Score</div></div>' +
-    '<div class="stat-tile"><div class="stat-icon pink">🔢</div><div class="stat-value">1</div><div class="stat-label">Attempt Only</div></div>' +
+    '<div class="stat-tile"><div class="stat-icon orange">🎯</div><div class="stat-value">15</div><div class="stat-label">Passing</div></div>' +
+    '<div class="stat-tile"><div class="stat-icon pink">🔢</div><div class="stat-value">1</div><div class="stat-label">Attempt</div></div>' +
     '</div></div>' +
-    '<div class="card"><div class="callout callout-danger"><strong>🔴 ONE ATTEMPT ONLY</strong><br>You may take this exam only once. After submission, it will be locked permanently.</div>' +
-    '<div class="callout callout-warning"><strong>📱 Recommendations:</strong><br>Use a stable internet connection, a fully charged device, and find a quiet place without distractions.</div>' +
-    '<button class="btn btn-primary btn-lg btn-block mt-2" onclick="openExamConfirm()">📝 Start Capstone Exam</button>' +
+    '<div class="card"><div class="callout callout-danger"><strong>🔴 ONE ATTEMPT ONLY</strong><br>After submission, exam locks permanently.</div>' +
+    '<div class="callout callout-warning"><strong>📱 Recommendations:</strong> Stable internet, charged device, quiet place.</div>' +
+    '<button class="btn btn-primary btn-lg btn-block mt-2" onclick="openExamConfirm()">📝 Start Exam</button>' +
     '<button class="btn btn-outline btn-block mt-2" onclick="navigate(\'home\')">Cancel</button></div>';
 }
-
 function openExamConfirm() { document.getElementById('examConfirmModal').classList.add('show'); }
 function closeExamConfirm() { document.getElementById('examConfirmModal').classList.remove('show'); }
-
 function beginExam() {
   closeExamConfirm();
   var shuffled = EXAM_BANK.slice().sort(function() { return Math.random() - 0.5; });
   APP.state.exam = {
-    score: 0,
-    total: shuffled.length,
-    percentage: 0,
-    passed: false,
-    submitted: false,
+    score: 0, total: shuffled.length, percentage: 0, passed: false, submitted: false,
     takenAt: new Date().toISOString(),
     questions: shuffled.map(function(q) {
       var opts = q.options.slice().sort(function() { return Math.random() - 0.5; });
       return { q: q.q, options: opts, answer: q.answer };
     }),
-    answers: {},
-    current: 0
+    answers: {}, current: 0
   };
-  saveState();
-  renderExamQuestion();
+  saveState(); renderExamQuestion();
 }
-
 function renderExamQuestion() {
   var exam = APP.state.exam;
-  if (!exam || !exam.questions) {
-    toast('Exam session lost. Please start again.', 'error');
-    navigate('exam');
-    return;
-  }
+  if (!exam || !exam.questions) { toast('Exam session lost.', 'error'); navigate('exam'); return; }
   var main = document.getElementById('mainContent');
   var q = exam.questions[exam.current];
   var total = exam.questions.length;
-
-  var html = '<div class="card fade-in">';
-  html += '<div class="card-header"><div><div class="card-title">📝 Capstone Exam</div>';
+  var html = '<div class="card fade-in"><div class="card-header"><div><div class="card-title">📝 Capstone Exam</div>';
   html += '<div class="card-subtitle">Question ' + (exam.current + 1) + ' of ' + total + '</div></div></div>';
-
   var pct = Math.round((exam.current / total) * 100);
   html += '<div style="height:8px;background:var(--gray-light);border-radius:99px;overflow:hidden;margin-bottom:1.25rem;">';
   html += '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--primary),var(--secondary));transition:width 0.3s;"></div></div>';
-
   html += '<p style="font-weight:600;font-size:1rem;line-height:1.6;margin-bottom:1.25rem;">' + (exam.current + 1) + '. ' + escapeHtml(q.q) + '</p>';
   html += '<div id="examOpts">';
-
   q.options.forEach(function(o, idx) {
     var selected = exam.answers[exam.current] === idx;
-    var btnStyle = 'display:block;width:100%;text-align:left;padding:0.85rem 1rem;border:2px solid ' + (selected ? 'var(--secondary)' : 'var(--gray-light)') + ';border-radius:10px;background:' + (selected ? 'var(--secondary-light)' : '#fff') + ';margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.9rem;transition:all 0.15s;font-weight:' + (selected ? '600' : '400') + ';';
+    var btnStyle = 'display:block;width:100%;text-align:left;padding:0.85rem 1rem;border:2px solid ' + (selected ? 'var(--secondary)' : 'var(--gray-light)') + ';border-radius:10px;background:' + (selected ? 'var(--secondary-light)' : '#fff') + ';margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-body);font-size:0.9rem;font-weight:' + (selected ? '600' : '400') + ';';
     html += '<button class="quiz-opt" onclick="selectExamOption(' + idx + ')" data-idx="' + idx + '" style="' + btnStyle + '">' + escapeHtml(o) + '</button>';
   });
-
-  html += '</div>';
-  html += '<div style="display:flex;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap;">';
+  html += '</div><div style="display:flex;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap;">';
   if (exam.current > 0) html += '<button class="btn btn-outline" onclick="prevExamQuestion()">← Previous</button>';
-  if (exam.current < total - 1) {
-    html += '<button class="btn btn-primary" style="margin-left:auto;" onclick="nextExamQuestion()">Next →</button>';
-  } else {
-    html += '<button class="btn btn-success" style="margin-left:auto;" onclick="finishExam()">✅ Submit Exam</button>';
-  }
+  if (exam.current < total - 1) html += '<button class="btn btn-primary" style="margin-left:auto;" onclick="nextExamQuestion()">Next →</button>';
+  else html += '<button class="btn btn-success" style="margin-left:auto;" onclick="finishExam()">✅ Submit Exam</button>';
   html += '</div></div>';
-
   main.innerHTML = html;
 }
-
 function selectExamOption(idx) {
   var exam = APP.state.exam;
   if (!exam) return;
   exam.answers[exam.current] = idx;
-
   var container = document.getElementById('examOpts');
-  if (!container) return;
   var siblings = container.querySelectorAll('.quiz-opt');
-  siblings.forEach(function(s) {
-    s.style.borderColor = 'var(--gray-light)';
-    s.style.background = '#fff';
-    s.style.fontWeight = '400';
-  });
+  siblings.forEach(function(s) { s.style.borderColor = 'var(--gray-light)'; s.style.background = '#fff'; s.style.fontWeight = '400'; });
   var btn = container.querySelector('.quiz-opt[data-idx="' + idx + '"]');
-  if (btn) {
-    btn.style.borderColor = 'var(--secondary)';
-    btn.style.background = 'var(--secondary-light)';
-    btn.style.fontWeight = '600';
-  }
+  if (btn) { btn.style.borderColor = 'var(--secondary)'; btn.style.background = 'var(--secondary-light)'; btn.style.fontWeight = '600'; }
   saveState();
 }
-
 function nextExamQuestion() {
   var exam = APP.state.exam;
   if (exam.answers[exam.current] === undefined) return toast('Please select an answer', 'warning');
-  exam.current++;
-  saveState();
-  renderExamQuestion();
+  exam.current++; saveState(); renderExamQuestion();
 }
-
 function prevExamQuestion() {
   var exam = APP.state.exam;
   if (exam.current > 0) { exam.current--; saveState(); renderExamQuestion(); }
 }
-
 function finishExam() {
   var exam = APP.state.exam;
   if (exam.answers[exam.current] === undefined) return toast('Please select an answer', 'warning');
   var unanswered = exam.questions.length - Object.keys(exam.answers).length;
-  if (unanswered > 0 && !confirm('You have ' + unanswered + ' unanswered question(s). Submit anyway?')) return;
-
-  var correct = 0;
-  var review = [];
+  if (unanswered > 0 && !confirm(unanswered + ' unanswered question(s). Submit anyway?')) return;
+  var correct = 0; var review = [];
   exam.questions.forEach(function(q, i) {
     var userIdx = exam.answers[i];
     var userAns = (userIdx !== undefined && q.options[userIdx]) ? q.options[userIdx] : '(no answer)';
@@ -2096,49 +1859,33 @@ function finishExam() {
     review.push({ q: q.q, userAnswer: userAns, correctAnswer: q.answer, correct: isCorrect });
   });
   var pct = Math.round((correct / exam.questions.length) * 100);
-  exam.score = correct;
-  exam.percentage = pct;
-  exam.passed = pct >= 50;
-  exam.submitted = true;
-  exam.review = review;
-  exam.submittedAt = new Date().toISOString();
-  if (!APP.state.examHistory) APP.state.examHistory = [];
+  exam.score = correct; exam.percentage = pct; exam.passed = pct >= 50;
+  exam.submitted = true; exam.review = review; exam.submittedAt = new Date().toISOString();
   saveState();
   if (APP.state.student) registerSavedSession(buildStudentRecord());
   toast(exam.passed ? '🎉 Exam passed!' : 'Exam submitted', exam.passed ? 'success' : 'warning');
   renderExamResult(document.getElementById('mainContent'));
 }
-
 function renderExamResult(main) {
   var exam = APP.state.exam;
   var retakePending = APP.state.retakeAllowed && !APP.state.retakeUsed;
   var html = '<div class="card fade-in" style="text-align:center;padding:2.5rem 1.5rem;">';
   html += '<div style="font-size:5rem;margin-bottom:1rem;">' + (exam.passed ? '🏆' : '📋') + '</div>';
-  html += '<h1 style="color:' + (exam.passed ? 'var(--success)' : 'var(--accent)') + ';margin-bottom:0.5rem;">';
-  html += (exam.passed ? 'Exam PASSED!' : 'Exam NOT PASSED') + '</h1>';
+  html += '<h1 style="color:' + (exam.passed ? 'var(--success)' : 'var(--accent)') + ';">' + (exam.passed ? 'Exam PASSED!' : 'Exam NOT PASSED') + '</h1>';
   html += '<p style="font-size:1.5rem;font-weight:800;color:var(--primary);margin:1rem 0;">' + exam.score + '/' + exam.total + '</p>';
   html += '<p style="color:var(--gray);">(' + exam.percentage + '%)</p>';
-  if (!exam.passed && !retakePending) {
-    html += '<div class="callout callout-danger mt-2"><strong>⚠️ This was your one attempt.</strong><br>Contact your instructor if you have a valid reason for a retake.</div>';
-  }
-  if (retakePending) {
-    html += '<div class="callout callout-warning mt-2"><strong>🔓 Retake granted!</strong></div>';
-  }
+  if (!exam.passed && !retakePending) html += '<div class="callout callout-danger mt-2"><strong>⚠️ This was your one attempt.</strong></div>';
+  if (retakePending) html += '<div class="callout callout-warning mt-2"><strong>🔓 Retake granted!</strong></div>';
   html += '</div>';
-  if (retakePending) {
-    html += '<div class="card"><button class="btn btn-primary btn-block" onclick="navigate(\'exam\')">🔓 Go to Retake Entry</button></div>';
-  }
+  if (retakePending) html += '<div class="card"><button class="btn btn-primary btn-block" onclick="navigate(\'exam\')">🔓 Retake Entry</button></div>';
   html += '<div class="card"><button class="btn btn-primary btn-block" onclick="navigate(\'handoff\')">📤 Submit to Instructor</button></div>';
   main.innerHTML = html;
 }
 
-/* ---------- CERTIFICATE ---------- */
 function renderCertificate(main) {
   if (!isCertificateUnlocked()) {
-    main.innerHTML = '<div class="card fade-in text-center" style="padding:3rem 1.5rem;">' +
-      '<div style="font-size:5rem;margin-bottom:1rem;">🔒</div>' +
-      '<h2>Certificate — Locked</h2>' +
-      '<p>Pass the Capstone Exam to unlock your Certificate.</p>' +
+    main.innerHTML = '<div class="card fade-in text-center" style="padding:3rem 1.5rem;"><div style="font-size:5rem;margin-bottom:1rem;">🔒</div>' +
+      '<h2>Certificate — Locked</h2><p>Pass the Capstone Exam to unlock.</p>' +
       '<button class="btn btn-primary mt-2" onclick="navigate(\'home\')">← Back</button></div>';
     return;
   }
@@ -2149,6 +1896,7 @@ function renderCertificate(main) {
     '<p>This certifies that</p>' +
     '<div class="name">' + escapeHtml(s.fullName) + '</div>' +
     '<p style="font-size:0.85rem;color:var(--gray);">' + escapeHtml(s.studentNo) + ' — ' + escapeHtml(s.section) + ' — ' + escapeHtml(s.group || '') + '</p>' +
+    '<p style="font-size:0.85rem;color:var(--gray);">' + escapeHtml(s.schoolYear || '') + ' • ' + escapeHtml(s.semester || '') + '</p>' +
     '<p>has successfully completed the</p>' +
     '<h3 style="color:var(--primary);margin:0.75rem 0;">RESPIRATORY HEALTH ASSESSMENT MASTERY MODULE</h3>' +
     '<p class="score">Comprehensive Score: ' + averageScore() + '%</p>' +
@@ -2156,11 +1904,9 @@ function renderCertificate(main) {
     '<p style="margin-top:1.5rem;">Date: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + '</p>' +
     '<p style="margin-top:2rem;"><strong>JEMUEL C. MARI, MAN, RN, LPT</strong></p>' +
     '<p style="font-size:0.82rem;color:var(--gray);">Clinical Instructor | Tarlac State University</p>' +
-    '</div>' +
-    '<button class="btn btn-primary btn-block mt-2" onclick="window.print()">📥 Print / Save as PDF</button></div>';
+    '</div><button class="btn btn-primary btn-block mt-2" onclick="window.print()">📥 Print / Save as PDF</button></div>';
 }
 
-/* ---------- HANDOFF ---------- */
 function renderHandoff(main) {
   var s = APP.state.student;
   var pct = getProgressPercent();
@@ -2184,6 +1930,8 @@ function renderHandoff(main) {
   html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Student No</td><td style="font-weight:600;">' + escapeHtml(s.studentNo) + '</td></tr>';
   html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Section</td><td style="font-weight:600;">' + escapeHtml(s.section) + '</td></tr>';
   html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Group</td><td style="font-weight:600;">' + escapeHtml(s.group || '—') + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">School Year</td><td style="font-weight:600;">' + escapeHtml(s.schoolYear || '—') + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Semester</td><td style="font-weight:600;">' + escapeHtml(s.semester || '—') + '</td></tr>';
   html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Email</td><td style="font-weight:600;">' + escapeHtml(s.email) + '</td></tr>';
   html += '</tbody></table></div>';
   html += '<div class="stat-grid fade-in">' +
@@ -2213,6 +1961,8 @@ async function submitToBackend() {
   params.append('section', s.section || '');
   params.append('group', s.group || '');
   params.append('email', s.email || '');
+  params.append('schoolYear', s.schoolYear || CURRENT_SY);
+  params.append('semester', s.semester || CURRENT_SEM);
   params.append('unitsCompleted', getProgressPercent());
   params.append('unitAvg', averageScore());
   params.append('examScore', exam ? exam.score : '');
@@ -2238,7 +1988,7 @@ async function submitToBackend() {
       statusEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(result.error || 'Submission failed') + '</div>';
     }
   } catch (err) {
-    statusEl.innerHTML = '<div class="callout callout-danger">❌ Connection error: ' + escapeHtml(err.message) + '</div>';
+    statusEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
   }
   if (btn) btn.disabled = false;
 }
@@ -2248,8 +1998,7 @@ function copySubmissionCode() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(code).then(function() { toast('Code copied!', 'success'); });
   } else {
-    var ta = document.createElement('textarea');
-    ta.value = code; document.body.appendChild(ta); ta.select();
+    var ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta); ta.select();
     try { document.execCommand('copy'); toast('Code copied!', 'success'); } catch (e) {}
     document.body.removeChild(ta);
   }
@@ -2263,6 +2012,8 @@ function buildStudentRecord() {
     student: {
       firstName: s.firstName, lastName: s.lastName, fullName: s.fullName,
       studentNo: s.studentNo, section: s.section, group: s.group, email: s.email,
+      schoolYear: s.schoolYear || CURRENT_SY,
+      semester: s.semester || CURRENT_SEM,
       registeredAt: s.registeredAt, lastActive: s.lastActive
     },
     progress: APP.state.progress,
@@ -2279,7 +2030,6 @@ function buildStudentRecord() {
   };
 }
 
-/* ---------- FEEDBACK ---------- */
 var currentRating = 0;
 function renderFeedback(main) {
   main.innerHTML = '<div class="card fade-in"><div class="card-header"><div>';
@@ -2289,12 +2039,11 @@ function renderFeedback(main) {
   main.innerHTML += '<p style="font-weight:600;margin-bottom:1rem;">How would you rate this app?</p>';
   main.innerHTML += '<div style="display:flex;gap:0.5rem;justify-content:center;font-size:2.5rem;margin-bottom:1rem;" id="starRow">';
   [1,2,3,4,5].forEach(function(n) {
-    main.innerHTML += '<span data-rating="' + n + '" onclick="setRating(' + n + ')" style="cursor:pointer;transition:transform 0.15s;">⭐</span>';
+    main.innerHTML += '<span data-rating="' + n + '" onclick="setRating(' + n + ')" style="cursor:pointer;">⭐</span>';
   });
-  main.innerHTML += '</div>';
-  main.innerHTML += '<p style="color:var(--gray);font-size:0.85rem;" id="ratingText">Tap to rate</p></div></div>';
+  main.innerHTML += '</div><p style="color:var(--gray);font-size:0.85rem;" id="ratingText">Tap to rate</p></div></div>';
   main.innerHTML += '<div class="card"><div class="form-group"><label>Category</label>';
-  main.innerHTML += '<select id="feedbackCategory"><option value="suggestion">💡 Suggestion / Idea</option>';
+  main.innerHTML += '<select id="feedbackCategory"><option value="suggestion">💡 Suggestion</option>';
   main.innerHTML += '<option value="bug">🐛 Bug Report</option>';
   main.innerHTML += '<option value="content">📚 Content Feedback</option>';
   main.innerHTML += '<option value="design">🎨 Design / UX</option>';
@@ -2316,7 +2065,7 @@ async function submitFeedback() {
   var msg = document.getElementById('feedbackMessage').value.trim();
   var cat = document.getElementById('feedbackCategory').value;
   if (!msg) return toast('Please enter a message', 'warning');
-  if (currentRating === 0) return toast('Please rate the app first', 'warning');
+  if (currentRating === 0) return toast('Please rate first', 'warning');
   var s = APP.state.student;
   try {
     var params = new URLSearchParams();
@@ -2324,6 +2073,8 @@ async function submitFeedback() {
     params.append('studentName', s.fullName);
     params.append('section', s.section);
     params.append('group', s.group);
+    params.append('schoolYear', s.schoolYear || CURRENT_SY);
+    params.append('semester', s.semester || CURRENT_SEM);
     params.append('anonymous', 'false');
     params.append('rating', currentRating);
     params.append('category', cat);
@@ -2340,7 +2091,6 @@ async function submitFeedback() {
   }
 }
 
-/* ---------- QUIZZES ---------- */
 var QUIZZES = {
   unit1: [
     { q: 'Normal respiratory rate for an adult?', options: ['8-12','12-20','20-30','30-40'], answer: '12-20' },
@@ -2455,10 +2205,10 @@ var QUIZZES = {
   ]
 };
 
-/* ---------- INIT ---------- */
 function init() {
   loadState();
-  document.querySelectorAll('.nav-item').forEach(function(n) {
+  populateSYSemDropdowns();
+  document.querySelectorAll('.nav-item[data-view]').forEach(function(n) {
     n.addEventListener('click', function() { navigate(n.dataset.view); });
   });
   document.getElementById('menuToggle').addEventListener('click', function() {
