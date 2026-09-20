@@ -8,71 +8,117 @@
 <title>Instructor Dashboard — v2.1</title>
 <style>
 :root{--primary:#0D7377;--primary-dark:#095456;--secondary:#1E88E5;--accent:#E53935;--success:#43A047;--warning:#FB8C00;--purple:#8E24AA;--dark:#1A2027;--light:#F7F9FB;--white:#FFF;--gray:#718096;--gray-light:#E2E8F0;--radius:12px;--radius-sm:8px;--shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 12px 32px rgba(0,0,0,.12);--font-head:'Inter','Montserrat',sans-serif;--font-body:'Inter','Open Sans',sans-serif}
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:var(--font-body);background:var(--light);color:var(--dark);line-height:1.5;font-size:14px}
-h1,h2,h3,h4{font-family:var(--font-head);font-weight:700;line-height:1.25}h1{font-size:1.6rem;font-weight:800}h2{font-size:1.2rem}h3{font-size:1rem}p{margin-bottom:.5rem}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-body);background:var(--light);color:var(--dark);line-height:1.5;font-size:14px}
+h1,h2,h3,h4{font-family:var(--font-head);font-weight:700;line-height:1.25}
+h1{font-size:1.6rem;font-weight:800}h2{font-size:1.2rem}h3{font-size:1rem}p{margin-bottom:.5rem}
 .app-container{display:flex;min-height:100vh}
 .sidebar{width:260px;background:var(--dark);color:#fff;padding:1.25rem .85rem;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
 .sidebar-header{display:flex;align-items:center;gap:.7rem;padding:.5rem .5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:1rem}
 .sidebar-header .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-.sidebar-header h1{font-size:.95rem;color:#fff}.sidebar-header small{display:block;font-size:.68rem;color:rgba(255,255,255,.55);font-weight:400;margin-top:.15rem}
-.nav-section{margin-bottom:1rem}.nav-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.4);margin-bottom:.4rem;padding:0 .6rem;font-weight:600}
+.sidebar-header h1{font-size:.95rem;color:#fff}
+.sidebar-header small{display:block;font-size:.68rem;color:rgba(255,255,255,.55);font-weight:400;margin-top:.15rem}
+.nav-section{margin-bottom:1rem}
+.nav-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.4);margin-bottom:.4rem;padding:0 .6rem;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:.65rem;padding:.55rem .7rem;border-radius:var(--radius-sm);color:rgba(255,255,255,.75);cursor:pointer;font-size:.85rem;border:none;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}.nav-item.active{background:rgba(13,115,119,.35);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--primary)}
-.nav-item .icon{font-size:1rem;width:1.4rem;text-align:center}.nav-item .nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;min-width:20px;text-align:center}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(13,115,119,.35);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--primary)}
+.nav-item .icon{font-size:1rem;width:1.4rem;text-align:center}
 .sidebar-footer{margin-top:auto;padding:1rem .5rem .5rem;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;line-height:1.55;color:rgba(255,255,255,.55)}
-.sidebar-footer .dev-name{font-weight:700;color:#fff;font-size:.72rem}.sidebar-footer .app-version{margin-top:.5rem;padding-top:.5rem;border-top:1px dashed rgba(255,255,255,.1);font-size:.65rem;display:flex;align-items:center;gap:.3rem}
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gray)}.status-dot.online{background:var(--success);box-shadow:0 0 8px var(--success)}.status-dot.offline{background:var(--accent)}
+.sidebar-footer .dev-name{font-weight:700;color:#fff;font-size:.72rem}
+.sidebar-footer .app-version{margin-top:.5rem;padding-top:.5rem;border-top:1px dashed rgba(255,255,255,.1);font-size:.65rem;display:flex;align-items:center;gap:.3rem}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gray)}
+.status-dot.online{background:var(--success);box-shadow:0 0 8px var(--success)}
+.status-dot.offline{background:var(--accent)}
 .main-content{margin-left:260px;flex:1;padding:1.5rem 2rem 3rem;max-width:1500px}
 .menu-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--dark);color:#fff;border:none;border-radius:10px;width:42px;height:42px;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow)}
 @media(max-width:900px){.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0;padding:1rem;padding-top:4.5rem}.menu-toggle{display:flex;align-items:center;justify-content:center}}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
-.topbar-left h1{font-size:1.5rem;color:var(--dark)}.topbar-left p{font-size:.85rem;color:var(--gray);margin:0}
+.topbar-left h1{font-size:1.5rem;color:var(--dark)}
+.topbar-left p{font-size:.85rem;color:var(--gray);margin:0}
 .topbar-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.filter-bar{display:flex;gap:.5rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid var(--gray-light)}
+.filter-select{padding:.5rem .7rem;border:1.5px solid var(--gray-light);border-radius:8px;font-size:.82rem;font-family:var(--font-head);font-weight:600;background:#fff;cursor:pointer;color:var(--dark)}
+.filter-select:focus{outline:none;border-color:var(--primary)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1rem;border-radius:var(--radius-sm);border:none;cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:.82rem;transition:all .15s;text-decoration:none;white-space:nowrap}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}.btn-secondary{background:var(--secondary);color:#fff}.btn-outline{background:#fff;color:var(--dark);border:1.5px solid var(--gray-light)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}.btn-danger{background:var(--accent);color:#fff}.btn-sm{padding:.4rem .75rem;font-size:.78rem}.btn-lg{padding:.75rem 1.5rem;font-size:.9rem}.btn-block{width:100%}.btn-ghost{background:transparent;color:var(--gray)}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:var(--secondary);color:#fff}
+.btn-outline{background:#fff;color:var(--dark);border:1.5px solid var(--gray-light)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--accent);color:#fff}
+.btn-sm{padding:.4rem .75rem;font-size:.78rem}
+.btn-lg{padding:.75rem 1.5rem;font-size:.9rem}
+.btn-block{width:100%}
+.btn-ghost{background:transparent;color:var(--gray)}
 .card{background:#fff;border-radius:var(--radius);padding:1.35rem;box-shadow:var(--shadow-sm);border:1px solid var(--gray-light);margin-bottom:1.25rem}
 .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
-.card-title{font-size:1.05rem;font-weight:700;margin:0}.card-subtitle{font-size:.8rem;color:var(--gray);margin:.15rem 0 0}
+.card-title{font-size:1.05rem;font-weight:700;margin:0}
+.card-subtitle{font-size:.8rem;color:var(--gray);margin:.15rem 0 0}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.5rem}
 .stat-card{background:#fff;border-radius:var(--radius);padding:1.15rem;border:1px solid var(--gray-light);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--primary)}
-.stat-card.success::before{background:var(--success)}.stat-card.warning::before{background:var(--warning)}.stat-card.alert::before{background:var(--accent)}.stat-card.purple::before{background:var(--purple)}
+.stat-card.success::before{background:var(--success)}
+.stat-card.warning::before{background:var(--warning)}
+.stat-card.alert::before{background:var(--accent)}
+.stat-card.purple::before{background:var(--purple)}
 .stat-card .stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--gray);font-weight:600;margin-bottom:.35rem}
 .stat-card .stat-value{font-size:1.9rem;font-weight:800;color:var(--dark);font-family:var(--font-head);line-height:1}
 .table-wrap{overflow-x:auto;margin:0 -1.35rem;padding:0 1.35rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{background:var(--light);color:var(--gray);padding:.7rem .75rem;text-align:left;font-family:var(--font-head);font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;border-bottom:2px solid var(--gray-light)}
-td{padding:.7rem .75rem;border-bottom:1px solid var(--gray-light);vertical-align:middle}tr:hover td{background:#E0F2F1}tr.alert-row td{background:#FFEBEE}
+td{padding:.7rem .75rem;border-bottom:1px solid var(--gray-light);vertical-align:middle}
+tr:hover td{background:#E0F2F1}
+tr.alert-row td{background:#FFEBEE}
 .pill{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:999px;font-size:.72rem;font-weight:600;font-family:var(--font-head);white-space:nowrap}
-.pill-success{background:#E8F5E9;color:#2E7D32}.pill-warning{background:#FFF3E0;color:#E65100}.pill-danger{background:#FFEBEE;color:#C62828}.pill-info{background:#E3F2FD;color:#1565C0}.pill-gray{background:#ECEFF1;color:#455A64}.pill-purple{background:#F3E5F5;color:#6A1B9A}.pill-primary{background:#E0F2F1;color:#095456}
+.pill-success{background:#E8F5E9;color:#2E7D32}
+.pill-warning{background:#FFF3E0;color:#E65100}
+.pill-danger{background:#FFEBEE;color:#C62828}
+.pill-info{background:#E3F2FD;color:#1565C0}
+.pill-gray{background:#ECEFF1;color:#455A64}
+.pill-purple{background:#F3E5F5;color:#6A1B9A}
+.pill-primary{background:#E0F2F1;color:#095456}
 .progress-bar{height:6px;background:var(--gray-light);border-radius:999px;overflow:hidden;min-width:80px}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--success),var(--primary));border-radius:999px;transition:width .4s}
-.progress-fill.warn{background:linear-gradient(90deg,var(--warning),var(--accent))}.progress-fill.danger{background:var(--accent)}
+.progress-fill.warn{background:linear-gradient(90deg,var(--warning),var(--accent))}
+.progress-fill.danger{background:var(--accent)}
 .callout{padding:.85rem 1.1rem;border-radius:var(--radius-sm);margin:.75rem 0;border-left:4px solid;font-size:.85rem}
-.callout-info{background:#E3F2FD;border-color:var(--secondary)}.callout-success{background:#E8F5E9;border-color:var(--success)}.callout-warning{background:#FFF3E0;border-color:var(--warning)}.callout-danger{background:#FFEBEE;border-color:var(--accent)}.callout strong{font-family:var(--font-head);font-weight:700}
+.callout-info{background:#E3F2FD;border-color:var(--secondary)}
+.callout-success{background:#E8F5E9;border-color:var(--success)}
+.callout-warning{background:#FFF3E0;border-color:var(--warning)}
+.callout-danger{background:#FFEBEE;border-color:var(--accent)}
+.callout strong{font-family:var(--font-head);font-weight:700}
 .code-input-hero{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;color:#fff;margin-bottom:1.5rem}
-.code-input-hero h2{color:#fff;font-size:1.5rem;margin-bottom:.5rem}.code-input-hero p{color:rgba(255,255,255,.85);font-size:.9rem;margin-bottom:1.5rem}
+.code-input-hero h2{color:#fff;font-size:1.5rem;margin-bottom:.5rem}
+.code-input-hero p{color:rgba(255,255,255,.85);font-size:.9rem;margin-bottom:1.5rem}
 .code-input-box{display:flex;gap:.5rem;max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:.35rem;box-shadow:var(--shadow-lg)}
 .code-input-box input{flex:1;border:none;padding:.75rem 1rem;font-size:1.1rem;font-family:'Courier New',monospace;font-weight:700;text-transform:uppercase;letter-spacing:3px;background:transparent;color:var(--dark)}
-.code-input-box input:focus{outline:none}.code-input-box .btn{padding:.75rem 1.5rem}
+.code-input-box input:focus{outline:none}
+.code-input-box .btn{padding:.75rem 1.5rem}
 .code-chip{font-family:'Courier New',monospace;font-weight:700;background:#E0F2F1;color:#095456;padding:.3rem .7rem;border-radius:6px;letter-spacing:1px;font-size:.85rem;display:inline-flex;align-items:center;gap:.35rem;border:1.5px dashed var(--primary);cursor:pointer}
-.form-group{margin-bottom:1rem}.form-group label{display:block;font-weight:600;margin-bottom:.35rem;font-size:.8rem;font-family:var(--font-head)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:600;margin-bottom:.35rem;font-size:.8rem;font-family:var(--font-head)}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .85rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.88rem}
 .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,115,119,.1)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.search-box{position:relative}.search-box input{width:100%;padding:.6rem .9rem .6rem 2.4rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.85rem}
+.search-box{position:relative}
+.search-box input{width:100%;padding:.6rem .9rem .6rem 2.4rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.85rem}
 .search-box::before{content:'🔍';position:absolute;left:.85rem;top:50%;transform:translateY(-50%);font-size:.9rem;opacity:.5}
-.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--gray)}.empty-state .icon{font-size:3rem;margin-bottom:.75rem;opacity:.4}.empty-state h3{color:var(--dark);font-size:1rem;margin-bottom:.25rem}
+.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--gray)}
+.empty-state .icon{font-size:3rem;margin-bottom:.75rem;opacity:.4}
+.empty-state h3{color:var(--dark);font-size:1rem;margin-bottom:.25rem}
 .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0}
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--dark);color:#fff;padding:.85rem 1.25rem;border-radius:10px;box-shadow:var(--shadow-lg);z-index:999;transform:translateY(200%);transition:transform .3s;max-width:380px;font-size:.85rem}
-.toast.show{transform:translateY(0)}.toast.success{background:var(--success)}.toast.error{background:var(--accent)}.toast.warning{background:var(--warning)}
+.toast.show{transform:translateY(0)}
+.toast.success{background:var(--success)}.toast.error{background:var(--accent)}.toast.warning{background:var(--warning)}
 .modal-overlay{position:fixed;inset:0;background:rgba(26,32,39,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
-.modal-overlay.show{display:flex}.modal{background:#fff;border-radius:var(--radius);max-width:800px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);max-width:800px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
 .modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-light);position:sticky;top:0;background:#fff;z-index:3}
-.modal-header h2{font-size:1.15rem}.modal-close{background:var(--light);border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.modal-header h2{font-size:1.15rem}
+.modal-close{background:var(--light);border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
 .modal-body{padding:1.5rem}
 .hidden{display:none!important}.flex{display:flex}.items-center{align-items:center}.gap-1{gap:.5rem}.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.flex-wrap{flex-wrap:wrap}
-.mt-2{margin-top:1rem}.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}.text-xs{font-size:.72rem}
+.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}.text-xs{font-size:.72rem}
 pre{background:var(--light);padding:1rem;border-radius:8px;overflow:auto;font-size:.75rem;max-height:400px;border:1px solid var(--gray-light)}
 </style>
 </head>
@@ -82,7 +128,7 @@ pre{background:var(--light);padding:1rem;border-radius:8px;overflow:auto;font-si
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo">👨‍🏫</div>
-      <div><h1>Instructor Panel</h1><small>Respiratory Mastery</small></div>
+      <div><h1>Instructor Panel</h1><small>Respiratory Mastery v2.1</small></div>
     </div>
     <nav id="navMenu">
       <div class="nav-section"><div class="nav-section-title">Main</div>
@@ -122,9 +168,20 @@ pre{background:var(--light);padding:1rem;border-radius:8px;overflow:auto;font-si
 <script>
 var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
 
+var SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033'];
+var SEMESTERS = ['1st Semester', '2nd Semester'];
+var CURRENT_SY = '2026-2027';
+var CURRENT_SEM = '1st Semester';
+
 var DB = {
   localKey: 'respMastery_instructor_v2',
-  state: { students: [], settings: { instructorName: 'JEMUEL C. MARI, MAN, RN, LPT', courseName: 'NCM 101B Lab' }, lastSync: null }
+  state: {
+    students: [],
+    settings: { instructorName: 'JEMUEL C. MARI, MAN, RN, LPT', courseName: 'NCM 101B Lab' },
+    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM },
+    lastSync: null
+  },
+  currentView: 'overview'
 };
 
 function loadLocal() {
@@ -134,6 +191,7 @@ function loadLocal() {
       var p = JSON.parse(raw);
       DB.state.students = p.students || [];
       DB.state.settings = Object.assign(DB.state.settings, p.settings || {});
+      if (p.filters) DB.state.filters = p.filters;
       DB.state.lastSync = p.lastSync || null;
     }
   } catch (e) {}
@@ -180,17 +238,57 @@ function getExamScore(s) { return s.examScore || null; }
 function getExamTotal(s) { return s.examTotal || 30; }
 function getExamPercent(s) { return s.examPercentage || null; }
 function isExamPassed(s) { return s.examPassed === 'PASSED' || s.examPassed === true; }
-function findExisting(no, em) {
+function findExisting(no, em, sy, sem) {
   return DB.state.students.find(function(x) {
-    return (no && x.studentNo && String(x.studentNo).trim() === String(no).trim()) ||
-           (em && x.email && String(x.email).trim().toLowerCase() === String(em).trim().toLowerCase());
+    var matchPerson = (no && x.studentNo && String(x.studentNo).trim() === String(no).trim()) ||
+                      (em && x.email && String(x.email).trim().toLowerCase() === String(em).trim().toLowerCase());
+    var matchTerm = (x.schoolYear || '') === (sy || '') && (x.semester || '') === (sem || '');
+    return matchPerson && matchTerm;
   });
+}
+function filterBySY(students) {
+  var f = DB.state.filters;
+  return students.filter(function(s) {
+    if (f.schoolYear && (s.schoolYear || '') !== f.schoolYear) return false;
+    if (f.semester && (s.semester || '') !== f.semester) return false;
+    return true;
+  });
+}
+function validateStudentDash(s) {
+  var issues = [];
+  if (!s.name || s.name.length < 3) issues.push('Name');
+  if (!s.studentNo) issues.push('Student No');
+  if (!s.section) issues.push('Section');
+  if (!s.email || s.email.indexOf('@') < 0) issues.push('Email');
+  if (!s.schoolYear) issues.push('SY');
+  if (!s.semester) issues.push('Sem');
+  return issues;
 }
 
 function navigate(view) {
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.toggle('active', n.dataset.view === view); });
+  DB.currentView = view;
+  document.querySelectorAll('.nav-item[data-view]').forEach(function(n) { n.classList.toggle('active', n.dataset.view === view); });
   renderView(view);
   document.getElementById('sidebar').classList.remove('open');
+}
+function onDashFilterChange() {
+  DB.state.filters.schoolYear = document.getElementById('dashFilterSY').value;
+  DB.state.filters.semester = document.getElementById('dashFilterSem').value;
+  saveLocal();
+  renderView(DB.currentView || 'overview');
+}
+function renderFilterBar() {
+  var f = DB.state.filters;
+  return '<div class="filter-bar">' +
+    '<strong style="font-size:.82rem;">Filter:</strong>' +
+    '<select class="filter-select" id="dashFilterSY" onchange="onDashFilterChange()">' +
+      SCHOOL_YEARS.map(function(sy) { return '<option value="' + sy + '"' + (sy === f.schoolYear ? ' selected' : '') + '>' + sy + '</option>'; }).join('') +
+    '</select>' +
+    '<select class="filter-select" id="dashFilterSem" onchange="onDashFilterChange()">' +
+      SEMESTERS.map(function(sm) { return '<option value="' + sm + '"' + (sm === f.semester ? ' selected' : '') + '>' + sm + '</option>'; }).join('') +
+    '</select>' +
+    '<button class="btn btn-outline btn-sm" onclick="openNormalizeModal()">🧹 Normalize</button>' +
+    '</div>';
 }
 
 function renderView(view) {
@@ -210,7 +308,7 @@ function renderView(view) {
 }
 
 function renderOverview(main) {
-  var students = DB.state.students;
+  var students = filterBySY(DB.state.students);
   var mastered = students.filter(function(s) { return getStudentPercent(s) === 100 && isExamPassed(s); }).length;
   var html = '<div class="topbar"><div class="topbar-left"><h1>📊 Overview</h1><p>Class snapshot</p></div>';
   html += '<div class="topbar-actions">';
@@ -218,16 +316,15 @@ function renderOverview(main) {
   html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'sync\')">🔄 Sync</button>';
   html += '<button class="btn btn-primary btn-sm" onclick="navigate(\'import\')">📥 Import</button>';
   html += '</div></div>';
-
+  html += renderFilterBar();
   html += '<div class="stats-grid">';
   html += '<div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value">' + students.length + '</div></div>';
   html += '<div class="stat-card success"><div class="stat-label">Mastered</div><div class="stat-value">' + mastered + '</div></div>';
   html += '<div class="stat-card warning"><div class="stat-label">In Progress</div><div class="stat-value">' + students.filter(function(s) { return getStudentPercent(s) > 0 && getStudentPercent(s) < 100; }).length + '</div></div>';
   html += '<div class="stat-card alert"><div class="stat-label">Exam Failed</div><div class="stat-value">' + students.filter(function(s) { return s.examTakenAt && !isExamPassed(s); }).length + '</div></div>';
   html += '</div>';
-
   html += '<div class="card"><div class="card-header"><div><h2 class="card-title">Students</h2>';
-  html += '<p class="card-subtitle">' + students.length + ' in roster</p></div>';
+  html += '<p class="card-subtitle">' + students.length + ' in current filter</p></div>';
   html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'roster\')">View All →</button></div>';
   if (students.length === 0) {
     html += '<div class="empty-state"><div class="icon">📭</div><h3>No students yet</h3>';
@@ -243,6 +340,7 @@ function renderImport(main) {
   var html = '<div class="topbar"><div class="topbar-left"><h1>📥 Import Students</h1>';
   html += '<p>Enter the code from the student</p></div>';
   html += '<div class="topbar-actions"><button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button></div></div>';
+  html += renderFilterBar();
   html += '<div class="code-input-hero"><h2>🎯 Enter Student Code</h2>';
   html += '<p>Format: <code style="background:rgba(255,255,255,.2);color:#fff;padding:.15rem .5rem;border-radius:4px;">RA-XXXX-XXXX</code></p>';
   html += '<div class="code-input-box">';
@@ -275,9 +373,10 @@ async function submitCode() {
 
 function renderPreview(rec, container) {
   var payload = rec.payload || {};
-  var s = (payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email };
-  var existing = findExisting(s.studentNo, s.email);
-
+  var s = (payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
+  var sy = s.schoolYear || rec.schoolYear || CURRENT_SY;
+  var sem = s.semester || rec.semester || CURRENT_SEM;
+  var existing = findExisting(s.studentNo, s.email, sy, sem);
   var html = '<div class="card" style="background:#E8F5E9;border:2px solid var(--success);">';
   html += '<div class="card-header"><div><h2 class="card-title" style="color:var(--success);">✅ Student Found</h2></div></div>';
   html += '<table><tbody>';
@@ -285,15 +384,16 @@ function renderPreview(rec, container) {
   html += '<tr><td><strong>Student No</strong></td><td>' + escapeHtml(s.studentNo || '—') + '</td></tr>';
   html += '<tr><td><strong>Section</strong></td><td>' + escapeHtml(s.section || '—') + '</td></tr>';
   html += '<tr><td><strong>Group</strong></td><td>' + escapeHtml(s.group || '—') + '</td></tr>';
+  html += '<tr><td><strong>School Year</strong></td><td>' + escapeHtml(sy) + '</td></tr>';
+  html += '<tr><td><strong>Semester</strong></td><td>' + escapeHtml(sem) + '</td></tr>';
   html += '<tr><td><strong>Email</strong></td><td>' + escapeHtml(s.email || '—') + '</td></tr>';
   html += '<tr><td><strong>Units</strong></td><td>' + escapeHtml(rec.unitsCompleted || '—') + '</td></tr>';
   html += '<tr><td><strong>Unit Avg</strong></td><td>' + escapeHtml(rec.unitAvg || '—') + '</td></tr>';
   html += '<tr><td><strong>Exam</strong></td><td>' + (rec.examScore ? rec.examScore + '/' + rec.examTotal + ' (' + rec.examPercentage + '%) — ' + rec.examPassed : 'Not taken') + '</td></tr>';
   html += '<tr><td><strong>Code</strong></td><td><span class="code-chip" onclick="copyText(\'' + escapeHtml(rec.code) + '\')">' + escapeHtml(rec.code) + ' 📋</span></td></tr>';
   html += '</tbody></table>';
-
   if (existing) {
-    html += '<div class="callout callout-warning mt-2">⚠️ Already in roster: ' + escapeHtml(existing.name) + '</div>';
+    html += '<div class="callout callout-warning mt-2">⚠️ Already in roster for this SY/Sem: ' + escapeHtml(existing.name) + '</div>';
     html += '<div class="flex gap-1 flex-wrap mt-2">';
     html += '<button class="btn btn-primary" onclick=\'confirmImport("' + escapeHtml(rec.code) + '", "update", "' + existing.id + '")\'>🔄 Update</button>';
     html += '<button class="btn btn-outline" onclick=\'confirmImport("' + escapeHtml(rec.code) + '", "new", null)\'>➕ New</button>';
@@ -311,10 +411,12 @@ async function confirmImport(code, mode, existingId) {
   if (!r.success) return toast('Fetch failed.', 'error');
   var rec = r.record;
   var payload = rec.payload || {};
-  var s = payload.student || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email };
+  var s = payload.student || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
+  var sy = s.schoolYear || rec.schoolYear || CURRENT_SY;
+  var sem = s.semester || rec.semester || CURRENT_SEM;
 
   if (mode === 'new') {
-    var dup = findExisting(s.studentNo, s.email);
+    var dup = findExisting(s.studentNo, s.email, sy, sem);
     if (dup) {
       if (!confirm('Duplicate found: ' + dup.name + '\n\nUpdate existing?')) return;
       mode = 'update';
@@ -325,6 +427,7 @@ async function confirmImport(code, mode, existingId) {
   var newRecord = {
     id: existing ? existing.id : 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     name: s.fullName, studentNo: s.studentNo || '', section: s.section || '', group: s.group || '', email: s.email || '',
+    schoolYear: sy, semester: sem,
     unitsCompleted: rec.unitsCompleted || '0%', unitAvg: rec.unitAvg || '0%',
     examScore: rec.examScore, examTotal: rec.examTotal, examPercentage: rec.examPercentage, examPassed: rec.examPassed,
     examTakenAt: rec.timestamp, submissionCode: rec.code,
@@ -346,13 +449,14 @@ async function confirmImport(code, mode, existingId) {
 }
 
 function renderRoster(main) {
-  var students = DB.state.students;
+  var students = filterBySY(DB.state.students);
   var html = '<div class="topbar"><div class="topbar-left"><h1>👥 Roster</h1><p>' + students.length + ' students</p></div>';
   html += '<div class="topbar-actions">';
   html += '<button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button>';
   html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'sync\')">🔄 Sync</button>';
   html += '<button class="btn btn-outline btn-sm" onclick="exportCSV()">📤 Export CSV</button>';
   html += '</div></div>';
+  html += renderFilterBar();
   html += '<div class="card" style="padding:1rem;"><div class="search-box"><input type="text" id="searchInput" placeholder="Search..." oninput="filterTable()"></div></div>';
   html += '<div class="card" style="padding:1rem 0;">';
   if (students.length === 0) {
@@ -366,30 +470,32 @@ function renderRoster(main) {
 
 function renderStudentTable(students) {
   var html = '<div class="table-wrap"><table id="studentTable"><thead><tr>';
-  html += '<th>Student</th><th>Section</th><th>Progress</th><th>Unit Avg</th><th>Exam</th><th>Status</th><th>Actions</th>';
+  html += '<th>Student</th><th>Section</th><th>SY / Sem</th><th>Progress</th><th>Unit Avg</th><th>Exam</th><th>Status</th><th>Validation</th><th>Actions</th>';
   html += '</tr></thead><tbody>';
   students.forEach(function(s) {
     var pct = getStudentPercent(s);
     var examTaken = s.examTakenAt;
     var examPass = isExamPassed(s);
-    var status = '';
-    var statusCls = '';
+    var status = '', statusCls = '';
     if (pct === 100 && examPass) { status = 'Mastered'; statusCls = 'pill-success'; }
     else if (examTaken && !examPass) { status = 'Exam Failed'; statusCls = 'pill-danger'; }
     else if (pct >= 50) { status = 'In Progress'; statusCls = 'pill-info'; }
     else if (pct > 0) { status = 'At Risk'; statusCls = 'pill-warning'; }
     else { status = 'Not Started'; statusCls = 'pill-gray'; }
+    var issues = validateStudentDash(s);
 
     html += '<tr>';
     html += '<td><div class="flex items-center gap-1"><div class="avatar">' + initialsOf(s.name) + '</div>';
     html += '<div><div style="font-weight:700;font-size:.88rem;">' + escapeHtml(s.name) + '</div>';
     html += '<div class="text-xs text-gray">' + escapeHtml(s.studentNo || '') + '</div></div></div></td>';
     html += '<td class="text-sm">' + escapeHtml(s.section || '—') + '</td>';
+    html += '<td class="text-sm">' + escapeHtml(s.schoolYear || '—') + '<br><span class="text-xs text-gray">' + escapeHtml(s.semester || '') + '</span></td>';
     html += '<td><div class="progress-bar"><div class="progress-fill ' + (pct >= 75 ? '' : pct >= 50 ? 'warn' : 'danger') + '" style="width:' + pct + '%"></div></div>';
     html += '<div class="text-xs text-gray mt-1">' + pct + '%</div></td>';
     html += '<td><strong>' + getUnitAvg(s) + '%</strong></td>';
     html += '<td>' + (examTaken ? '<span class="pill ' + (examPass ? 'pill-success' : 'pill-danger') + '">' + getExamScore(s) + '/' + getExamTotal(s) + '</span>' : '<span class="pill pill-gray">Not taken</span>') + '</td>';
     html += '<td><span class="pill ' + statusCls + '">' + status + '</span></td>';
+    html += '<td>' + (issues.length ? '<span class="pill pill-warning" title="' + escapeHtml(issues.join(', ')) + '">⚠️ ' + issues.length + ' issue(s)</span>' : '<span class="pill pill-success">✅ OK</span>') + '</td>';
     html += '<td><button class="btn btn-primary btn-sm" onclick="viewStudent(\'' + s.id + '\')">View</button></td>';
     html += '</tr>';
   });
@@ -416,6 +522,8 @@ function viewStudent(id) {
   html += '<p><strong>Student No:</strong> ' + escapeHtml(s.studentNo) + '</p>';
   html += '<p><strong>Section:</strong> ' + escapeHtml(s.section) + '</p>';
   html += '<p><strong>Group:</strong> ' + escapeHtml(s.group) + '</p>';
+  html += '<p><strong>School Year:</strong> ' + escapeHtml(s.schoolYear || '—') + '</p>';
+  html += '<p><strong>Semester:</strong> ' + escapeHtml(s.semester || '—') + '</p>';
   html += '<p><strong>Email:</strong> ' + escapeHtml(s.email) + '</p>';
   html += '<p><strong>Code:</strong> <span class="code-chip">' + escapeHtml(s.submissionCode || '—') + '</span></p>';
   html += '<div class="flex gap-1 flex-wrap mt-2">';
@@ -459,8 +567,9 @@ function renderSync(main) {
   var html = '<div class="topbar"><div class="topbar-left"><h1>☁️ Sync from Google Sheets</h1>';
   html += '<p>Bulk import all submissions</p></div>';
   html += '<div class="topbar-actions"><button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button></div></div>';
+  html += renderFilterBar();
   html += '<div class="card">';
-  html += '<div class="callout callout-info"><strong>ℹ️ How it works:</strong> This fetches ALL submissions from your Google Sheet and imports them. Existing students are updated.</div>';
+  html += '<div class="callout callout-info"><strong>ℹ️ How it works:</strong> This fetches ALL submissions from your Google Sheet. Existing students (same person + SY + Sem) are updated.</div>';
   html += '<button class="btn btn-primary btn-lg btn-block mt-2" onclick="doSync()">🔄 Sync Now</button>';
   html += '<div id="syncResult" class="mt-2"></div></div>';
   main.innerHTML = html;
@@ -471,19 +580,19 @@ async function doSync() {
   resultEl.innerHTML = '<div class="callout callout-info">⏳ Syncing...</div>';
   try {
     var r = await backendGet({ action: 'listAll' });
-    if (!r.success) {
-      resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(r.error || 'Failed') + '</div>';
-      return;
-    }
+    if (!r.success) { resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(r.error || 'Failed') + '</div>'; return; }
     var added = 0, updated = 0;
     r.records.forEach(function(rec) {
       var payload = null;
       try { payload = JSON.parse(rec.dataJson); } catch (e) {}
-      var s = (payload && payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email };
-      var existing = findExisting(s.studentNo, s.email);
+      var s = (payload && payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
+      var sy = s.schoolYear || rec.schoolYear || '';
+      var sem = s.semester || rec.semester || '';
+      var existing = findExisting(s.studentNo, s.email, sy, sem);
       var newRecord = {
         id: existing ? existing.id : 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         name: s.fullName, studentNo: s.studentNo || '', section: s.section || '', group: s.group || '', email: s.email || '',
+        schoolYear: sy, semester: sem,
         unitsCompleted: rec.unitsCompleted || '0%', unitAvg: rec.unitAvg || '0%',
         examScore: rec.examScore, examTotal: rec.examTotal, examPercentage: rec.examPercentage, examPassed: rec.examPassed,
         examTakenAt: rec.timestamp, submissionCode: rec.code,
@@ -522,28 +631,58 @@ function renderSettings(main) {
   main.innerHTML += '<button class="btn btn-danger btn-sm" onclick="if(confirm(\'Clear ALL local data?\')){localStorage.removeItem(DB.localKey);location.reload()}">🗑️ Clear All Local Data</button></div>';
 }
 
+function openNormalizeModal() {
+  document.getElementById('modalTitle').textContent = '🧹 Normalize Data';
+  document.getElementById('modalBody').innerHTML =
+    '<p style="font-size:.88rem;color:var(--gray);margin-bottom:1rem;">Fixes common data issues in the Submissions sheet: trim whitespace, proper-case names, standardize SY/Sem/group/section.</p>' +
+    '<div class="callout callout-warning"><strong>⚠️ This updates the Google Sheet directly.</strong></div>' +
+    '<div class="flex gap-1" style="flex-wrap:wrap;">' +
+    '<button class="btn btn-primary" onclick="runNormalize()">🧹 Run Normalize Now</button>' +
+    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>' +
+    '<div id="normalizeResult" class="mt-2"></div>';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+async function runNormalize() {
+  var el = document.getElementById('normalizeResult');
+  el.innerHTML = '<div class="callout callout-info">⏳ Running...</div>';
+  try {
+    var params = new URLSearchParams();
+    params.append('action', 'normalizeAll');
+    params.append('sheetName', 'Submissions');
+    var r = await fetch(BACKEND_URL, { method: 'POST', body: params });
+    var d = await r.json();
+    if (d.success) {
+      el.innerHTML = '<div class="callout callout-success">✅ Normalized ' + d.fixed + ' row(s). Syncing...</div>';
+      setTimeout(function() { closeModal(); doSync(); }, 800);
+    } else {
+      el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(d.error || 'Failed') + '</div>';
+    }
+  } catch (err) {
+    el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
 function exportCSV() {
-  var students = DB.state.students;
+  var students = filterBySY(DB.state.students);
   if (!students.length) return toast('No data.', 'warning');
-  var headers = ['Name','Student No','Section','Group','Email','Units %','Unit Avg','Exam Score','Exam Total','Exam %','Exam Result','Submission Code'];
+  var headers = ['Name','Student No','Section','Group','School Year','Semester','Email','Units %','Unit Avg','Exam Score','Exam Total','Exam %','Exam Result','Submission Code'];
   var rows = students.map(function(s) {
-    return [s.name, s.studentNo||'', s.section||'', s.group||'', s.email||'', getStudentPercent(s)+'%', getUnitAvg(s)+'%',
-            getExamScore(s)||'', getExamTotal(s)||'', getExamPercent(s)||'', s.examPassed||'NOT TAKEN', s.submissionCode||''];
+    return [s.name, s.studentNo||'', s.section||'', s.group||'', s.schoolYear||'', s.semester||'', s.email||'',
+            getStudentPercent(s)+'%', getUnitAvg(s)+'%', getExamScore(s)||'', getExamTotal(s)||'', getExamPercent(s)||'',
+            s.examPassed||'NOT TAKEN', s.submissionCode||''];
   });
   var csv = [headers].concat(rows).map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
   var blob = new Blob([csv], { type: 'text/csv' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url; a.download = 'roster-' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = 'roster-' + DB.state.filters.schoolYear + '-' + DB.state.filters.semester.replace(/\s+/g,'') + '.csv';
+  a.click(); URL.revokeObjectURL(url);
   toast('✅ CSV exported.', 'success');
 }
 
 function copyText(txt) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(function() { toast('✅ Copied!', 'success'); });
-  } else {
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function() { toast('✅ Copied!', 'success'); });
+  else {
     var ta = document.createElement('textarea'); ta.value = txt;
     document.body.appendChild(ta); ta.select();
     try { document.execCommand('copy'); toast('✅ Copied!', 'success'); } catch (e) {}
