@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0D7377" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <title>🫁 Respiratory Mastery v3.1</title>
+  <link rel="manifest" href="manifest.json" />
+  <title>🫁 Respiratory Mastery v3.2</title>
   <style>
     :root {
       --primary: #0D7377; --primary-dark: #095456; --primary-light: #E0F2F1;
@@ -101,18 +102,20 @@
       font-size: 0.72rem; color: rgba(255,255,255,0.65);
       line-height: 1.5; margin-bottom: 0.75rem;
     }
-    .student-card .chip-actions { display: flex; gap: 0.4rem; }
+    .student-card .chip-actions { display: flex; gap: 0.35rem; }
     .student-card .chip-btn {
       flex: 1; background: rgba(255,255,255,0.12);
       border: 1px solid rgba(255,255,255,0.15);
-      color: var(--white); padding: 0.45rem 0.5rem;
-      border-radius: 8px; font-size: 0.72rem;
+      color: var(--white); padding: 0.45rem 0.35rem;
+      border-radius: 8px; font-size: 0.7rem;
       font-family: var(--font-head); font-weight: 600;
       transition: all 0.15s;
     }
     .student-card .chip-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
     .student-card .chip-btn.danger { background: rgba(229,57,53,0.25); border-color: rgba(229,57,53,0.4); }
     .student-card .chip-btn.danger:hover { background: rgba(229,57,53,0.4); }
+    .student-card .chip-btn.success { background: rgba(67,160,71,0.3); border-color: rgba(67,160,71,0.5); }
+    .student-card .chip-btn.success:hover { background: rgba(67,160,71,0.5); }
     .nav-section { margin-bottom: 1.25rem; position: relative; z-index: 1; }
     .nav-section-title {
       font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.2px;
@@ -413,7 +416,7 @@
       <div class="auth-logo">🫁</div>
       <h1>Respiratory Assessment Mastery</h1>
       <p class="auth-subtitle" id="authSubtitle">NCM 101B Lab — Please register to begin</p>
-      <span class="auth-version">Version 3.1</span>
+      <span class="auth-version">Version 3.2</span>
     </div>
     <div class="auth-tabs" id="authTabs">
       <button class="auth-tab active" data-tab="register" onclick="switchAuthTab('register')">📝 Register</button>
@@ -471,7 +474,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo-wrap">🫁</div>
-      <div><h1>Respiratory Mastery</h1><small>NCM 101B Lab — v3.1</small></div>
+      <div><h1>Respiratory Mastery</h1><small>NCM 101B Lab — v3.2</small></div>
     </div>
     <div class="student-card">
       <div class="avatar" id="chipAvatar">—</div>
@@ -479,6 +482,7 @@
       <div class="meta" id="chipMeta">—</div>
       <div class="chip-actions">
         <button class="chip-btn" onclick="openEditProfile()">✏️ Edit</button>
+        <button class="chip-btn success" onclick="quickSubmit()">📤 Submit</button>
         <button class="chip-btn danger" onclick="openLogoutModal()">🚪 Logout</button>
       </div>
     </div>
@@ -519,7 +523,7 @@
       <div>Clinical Instructor</div>
       <div>Teacher II — DepEd</div>
       <div>Tarlac State University</div>
-      <div class="version-tag">v3.1</div>
+      <div class="version-tag">v3.2</div>
     </div>
   </aside>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open'); this.style.display='none'"></div>
@@ -578,6 +582,22 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="submitModal">
+  <div class="modal">
+    <div class="modal-content">
+      <div class="modal-icon" style="background:var(--success-light);">📤</div>
+      <h2>Submit Progress to Instructor</h2>
+      <p>Your progress will be sent to your instructor's gradebook.</p>
+      <div id="submitModalStatus" style="text-align:center;font-size:0.9rem;margin-bottom:1rem;"></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="closeSubmitModal()">
+          <div style="flex:1;text-align:center;font-family:var(--font-head);font-weight:700;">Close</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -589,7 +609,7 @@ var CURRENT_SY = '2026-2027';
 var CURRENT_SEM = '1st Semester';
 
 var APP = {
-  version: '3.1',
+  version: '3.2',
   storageKey: 'respMastery_v1',
   savedSessionsKey: 'respMastery_savedSessions',
   state: {
@@ -1085,7 +1105,7 @@ function renderHome(main) {
   html += '<div class="card fade-in"><div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>';
   html += '<div class="flex flex-wrap gap-1">';
   html += '<button class="btn btn-primary" onclick="navigate(\'' + nextUnit() + '\')">📚 Continue Learning</button>';
-  html += '<button class="btn btn-secondary" onclick="navigate(\'handoff\')">📤 Submit Progress</button>';
+  html += '<button class="btn btn-secondary" onclick="quickSubmit()">📤 Submit Progress</button>';
   html += '<button class="btn btn-outline" onclick="navigate(\'feedback\')">💬 Send Feedback</button>';
   html += '</div></div>';
 
@@ -1907,51 +1927,34 @@ function renderCertificate(main) {
     '</div><button class="btn btn-primary btn-block mt-2" onclick="window.print()">📥 Print / Save as PDF</button></div>';
 }
 
-function renderHandoff(main) {
-  var s = APP.state.student;
-  var pct = getProgressPercent();
-  var avg = averageScore();
-  var exam = APP.state.exam;
-  var existingCode = APP.state.submissionCode;
-  var html = '<div class="card fade-in"><div class="card-header"><div>';
-  html += '<div class="card-title">📤 Submit Progress to Instructor</div>';
-  html += '<div class="card-subtitle">Send your progress and receive a unique code</div></div></div></div>';
-  if (existingCode) {
-    html += '<div class="card fade-in" style="background:linear-gradient(135deg,var(--success-light),#A5D6A7);border:2px solid var(--success);">';
-    html += '<h3 style="text-align:center;color:var(--success);margin-bottom:0.75rem;">Already Submitted</h3>';
-    html += '<div class="code-display"><div class="code-label">Your Submission Code</div>';
-    html += '<div class="code-value">' + escapeHtml(existingCode) + '</div>';
-    html += '<button class="btn btn-primary" onclick="copySubmissionCode()">📋 Copy Code</button></div>';
-    html += '<button class="btn btn-outline btn-block mt-2" onclick="submitToBackend()">🔄 Resubmit</button></div>';
-  }
-  html += '<div class="card fade-in"><div class="card-header"><div class="card-title">👤 Your Profile</div></div>';
-  html += '<table style="font-size:0.88rem;"><tbody>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Name</td><td style="font-weight:600;">' + escapeHtml(s.fullName) + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Student No</td><td style="font-weight:600;">' + escapeHtml(s.studentNo) + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Section</td><td style="font-weight:600;">' + escapeHtml(s.section) + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Group</td><td style="font-weight:600;">' + escapeHtml(s.group || '—') + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">School Year</td><td style="font-weight:600;">' + escapeHtml(s.schoolYear || '—') + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Semester</td><td style="font-weight:600;">' + escapeHtml(s.semester || '—') + '</td></tr>';
-  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Email</td><td style="font-weight:600;">' + escapeHtml(s.email) + '</td></tr>';
-  html += '</tbody></table></div>';
-  html += '<div class="stat-grid fade-in">' +
-    '<div class="stat-tile"><div class="stat-icon green">📚</div><div class="stat-value">' + pct + '%</div><div class="stat-label">Units Complete</div></div>' +
-    '<div class="stat-tile"><div class="stat-icon blue">🎯</div><div class="stat-value">' + avg + '%</div><div class="stat-label">Unit Average</div></div>' +
-    '<div class="stat-tile"><div class="stat-icon purple">📝</div><div class="stat-value">' + (exam ? exam.score + '/' + exam.total : '—') + '</div><div class="stat-label">Capstone Exam</div></div>' +
-    '</div>';
-  html += '<div class="card fade-in">';
-  html += '<button class="btn btn-primary btn-lg btn-block" onclick="submitToBackend()" id="submitBtn">';
-  html += '🚀 ' + (existingCode ? 'Update Submission' : 'Submit to Instructor') + '</button>';
-  html += '<div id="submitStatus" class="mt-2"></div></div>';
-  main.innerHTML = html;
+/* ---------- SUBMIT (RENAL-STYLE AUTO-SUBMIT) ---------- */
+function quickSubmit() {
+  var statusEl = document.getElementById('submitModalStatus');
+  document.getElementById('submitModal').classList.add('show');
+  statusEl.innerHTML = '<div class="loader" style="padding:2rem;"><div class="spinner"></div><div>Sending to gradebook…</div></div>';
+  submitToBackend(function(success, result) {
+    if (success) {
+      statusEl.innerHTML = '<div style="color:var(--success);font-size:1rem;font-weight:700;">✅ Success!</div>' +
+        '<p style="margin-top:0.5rem;color:var(--gray);">' + (result.isUpdate ? 'Progress updated.' : 'Submitted to gradebook.') + '</p>' +
+        '<div class="code-display" style="margin-top:1rem;"><div class="code-label">Your Submission Code</div>' +
+        '<div class="code-value" style="font-size:1.5rem;">' + escapeHtml(result.code) + '</div>' +
+        '<button class="btn btn-primary btn-sm" onclick="copySubmissionCode()">📋 Copy Code</button></div>';
+      toast('✅ Progress submitted!', 'success');
+      if (APP.state.currentView === 'home') renderHome(document.getElementById('mainContent'));
+    } else {
+      statusEl.innerHTML = '<div style="color:var(--accent);font-size:1rem;font-weight:700;">❌ Submission failed</div>' +
+        '<p style="margin-top:0.5rem;color:var(--gray);">' + escapeHtml(result.error || 'Try again later.') + '</p>' +
+        '<p style="margin-top:0.5rem;font-size:0.8rem;color:var(--gray);">Your progress is still saved on this device.</p>';
+    }
+  });
+}
+function closeSubmitModal() {
+  document.getElementById('submitModal').classList.remove('show');
 }
 
-async function submitToBackend() {
-  var statusEl = document.getElementById('submitStatus');
-  var btn = document.getElementById('submitBtn');
-  if (btn) btn.disabled = true;
-  statusEl.innerHTML = '<div class="callout callout-info">⏳ Submitting...</div>';
+async function submitToBackend(callback) {
   var s = APP.state.student;
+  if (!s) { if (callback) callback(false, { error: 'No student logged in' }); return; }
   var exam = APP.state.exam;
   var fullData = buildStudentRecord();
   var params = new URLSearchParams();
@@ -1979,19 +1982,15 @@ async function submitToBackend() {
       APP.state.submissionCode = result.code;
       saveState();
       if (APP.state.student) registerSavedSession(buildStudentRecord());
-      statusEl.innerHTML = '<div class="callout callout-success"><strong>✅ ' + (result.isUpdate ? 'Updated!' : 'Submitted!') + '</strong>' +
-        '<div class="code-display" style="margin-top:0.75rem;"><div class="code-label">Your Code</div>' +
-        '<div class="code-value">' + escapeHtml(result.code) + '</div>' +
-        '<button class="btn btn-primary btn-sm" onclick="copySubmissionCode()">📋 Copy</button></div></div>';
-      toast('Submitted! Code: ' + result.code, 'success');
+      if (callback) callback(true, result);
     } else {
-      statusEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(result.error || 'Submission failed') + '</div>';
+      if (callback) callback(false, { error: result.error || 'Submission failed' });
     }
   } catch (err) {
-    statusEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
+    if (callback) callback(false, { error: err.message });
   }
-  if (btn) btn.disabled = false;
 }
+
 function copySubmissionCode() {
   var code = APP.state.submissionCode;
   if (!code) return toast('No code yet', 'warning');
@@ -2003,6 +2002,48 @@ function copySubmissionCode() {
     document.body.removeChild(ta);
   }
 }
+
+function renderHandoff(main) {
+  var s = APP.state.student;
+  var pct = getProgressPercent();
+  var avg = averageScore();
+  var exam = APP.state.exam;
+  var existingCode = APP.state.submissionCode;
+  var html = '<div class="card fade-in"><div class="card-header"><div>';
+  html += '<div class="card-title">📤 Submit Progress to Instructor</div>';
+  html += '<div class="card-subtitle">Your progress is submitted automatically — no codes needed from you</div></div></div></div>';
+  if (existingCode) {
+    html += '<div class="card fade-in" style="background:linear-gradient(135deg,var(--success-light),#A5D6A7);border:2px solid var(--success);">';
+    html += '<h3 style="text-align:center;color:var(--success);margin-bottom:0.75rem;">Already Submitted</h3>';
+    html += '<div class="code-display"><div class="code-label">Your Submission Code</div>';
+    html += '<div class="code-value">' + escapeHtml(existingCode) + '</div>';
+    html += '<button class="btn btn-primary" onclick="copySubmissionCode()">📋 Copy Code</button></div>';
+    html += '<p style="text-align:center;margin-top:1rem;color:var(--gray);font-size:0.85rem;">Show this code to your instructor if needed.</p>';
+    html += '</div>';
+  }
+  html += '<div class="card fade-in"><div class="card-header"><div class="card-title">👤 Your Profile</div></div>';
+  html += '<table style="font-size:0.88rem;"><tbody>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Name</td><td style="font-weight:600;">' + escapeHtml(s.fullName) + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Student No</td><td style="font-weight:600;">' + escapeHtml(s.studentNo) + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Section</td><td style="font-weight:600;">' + escapeHtml(s.section) + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Group</td><td style="font-weight:600;">' + escapeHtml(s.group || '—') + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">School Year</td><td style="font-weight:600;">' + escapeHtml(s.schoolYear || '—') + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Semester</td><td style="font-weight:600;">' + escapeHtml(s.semester || '—') + '</td></tr>';
+  html += '<tr><td style="color:var(--gray);padding:0.5rem 0;">Email</td><td style="font-weight:600;">' + escapeHtml(s.email) + '</td></tr>';
+  html += '</tbody></table></div>';
+  html += '<div class="stat-grid fade-in">' +
+    '<div class="stat-tile"><div class="stat-icon green">📚</div><div class="stat-value">' + pct + '%</div><div class="stat-label">Units Complete</div></div>' +
+    '<div class="stat-tile"><div class="stat-icon blue">🎯</div><div class="stat-value">' + avg + '%</div><div class="stat-label">Unit Average</div></div>' +
+    '<div class="stat-tile"><div class="stat-icon purple">📝</div><div class="stat-value">' + (exam ? exam.score + '/' + exam.total : '—') + '</div><div class="stat-label">Capstone Exam</div></div>' +
+    '</div>';
+  html += '<div class="card fade-in">';
+  html += '<button class="btn btn-primary btn-lg btn-block" onclick="quickSubmit()">';
+  html += '🚀 ' + (existingCode ? 'Update Submission' : 'Submit to Instructor') + '</button>';
+  html += '<p style="text-align:center;margin-top:0.75rem;color:var(--gray);font-size:0.82rem;">Your instructor will generate a code automatically.</p>';
+  html += '</div>';
+  main.innerHTML = html;
+}
+
 function buildStudentRecord() {
   var s = APP.state.student;
   return {
@@ -2220,6 +2261,9 @@ function init() {
   });
   document.getElementById('examConfirmModal').addEventListener('click', function(e) {
     if (e.target.id === 'examConfirmModal') closeExamConfirm();
+  });
+  document.getElementById('submitModal').addEventListener('click', function(e) {
+    if (e.target.id === 'submitModal') closeSubmitModal();
   });
   if (APP.state.student && APP.state.student.fullName) {
     showApp();
