@@ -12,7 +12,7 @@
             or to '3.2.0' for a new feature.
    ============================================================ */
 
-const APP_VERSION = '3.1.0';
+const APP_VERSION = '3.2.0';
 
 const CACHE_NAME   = `resp-mastery-v${APP_VERSION}`;
 const RUNTIME_CACHE = `resp-mastery-runtime-v${APP_VERSION}`;
