@@ -17,12 +17,12 @@
     body { font-family: var(--font-main); background: var(--light); color: var(--dark); display: flex; min-height: 100vh; }
     
     /* Sidebar */
-    .sidebar { width: 260px; background: var(--dark); color: var(--white); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; padding: 1.5rem 1rem; }
+    .sidebar { width: 260px; background: var(--dark); color: var(--white); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; padding: 1.5rem 1rem; z-index: 10; }
     .sidebar-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
     .sidebar-header .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
     .sidebar-header h2 { font-size: 1rem; font-weight: 700; }
     .sidebar-header small { font-size: 0.7rem; color: var(--gray); }
-    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.25rem; transition: 0.2s; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.25rem; transition: 0.2s; cursor: pointer; }
     .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
     .nav-item.active { font-weight: 600; background: linear-gradient(90deg, rgba(13,115,119,0.8), transparent); }
     .nav-section { font-size: 0.65rem; text-transform: uppercase; color: var(--gray); margin: 1.5rem 0 0.5rem 0.75rem; letter-spacing: 1px; font-weight: 700; }
@@ -31,8 +31,10 @@
 
     /* Main Content */
     .main-content { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1400px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .header h1 { font-size: 1.5rem; }
+    .header-controls { display: flex; gap: 1rem; align-items: center; }
+    .search-box { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 250px; }
     
     /* Stat Grid */
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -71,12 +73,35 @@
     .badge-neutral { background: var(--border); color: var(--gray); }
 
     .btn-view { padding: 0.4rem 0.8rem; border: 1px solid var(--border); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--dark); transition: 0.2s; }
-    .btn-view:hover { background: var(--light); border-color: var(--gray); }
+    .btn-view:hover { background: var(--primary); color: var(--white); border-color: var(--primary); }
 
     /* Loader */
     .loader { display: flex; justify-content: center; align-items: center; height: 50vh; flex-direction: column; gap: 1rem; color: var(--gray); }
     .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,32,39,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 48px rgba(0,0,0,0.2); animation: slideUp 0.3s; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+    .modal-header h2 { font-size: 1.25rem; color: var(--dark); }
+    .modal-header p { font-size: 0.85rem; color: var(--gray); margin-top: 0.25rem; }
+    .modal-close { background: var(--light); border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; color: var(--gray); }
+    .modal-close:hover { background: var(--danger-light); color: var(--danger); }
+    .modal-body { padding: 1.5rem; }
+    
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    .detail-item { background: var(--light); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .detail-label { font-size: 0.7rem; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 0.25rem; }
+    .detail-value { font-size: 1.1rem; font-weight: 700; color: var(--dark); }
+    
+    .progress-list { list-style: none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .progress-list li { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .progress-list li:last-child { border-bottom: none; }
+    .progress-list li span:first-child { font-weight: 600; color: var(--gray); }
+    .progress-list li span:last-child { font-weight: 700; color: var(--dark); }
   </style>
 </head>
 <body>
@@ -117,8 +142,14 @@
   <!-- MAIN CONTENT -->
   <main class="main-content">
     <div class="header">
-      <h1>Dashboard Overview</h1>
-      <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
+      <div>
+        <h1>Dashboard Overview</h1>
+        <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Monitor student progress and exam status</p>
+      </div>
+      <div class="header-controls">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderDashboard()">
+        <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
+      </div>
     </div>
 
     <!-- STATS -->
@@ -133,7 +164,6 @@
           <h2>Students</h2>
           <p id="studentCount">Loading students...</p>
         </div>
-        <button class="btn-view">View All →</button>
       </div>
       <table>
         <thead>
@@ -156,6 +186,22 @@
     </div>
   </main>
 
+  <!-- MODAL -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalName">Student Name</h2>
+          <p id="modalDetails">Student No — Section</p>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
   <script>
     const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
     const STORAGE_KEY = 'respMastery_instructor_v2';
@@ -164,8 +210,27 @@
     // Helper: Parse percentage strings safely
     function parsePct(val) {
       if (val === null || val === undefined || val === '') return 0;
-      if (typeof val === 'string') return parseFloat(val.replace('%', '')) || 0;
+      if (typeof val === 'string') {
+        if (val.includes('/')) {
+          // Handle fractions like "15/30"
+          const parts = val.split('/');
+          return (parseFloat(parts[0]) / parseFloat(parts[1])) * 100 || 0;
+        }
+        return parseFloat(val.replace('%', '')) || 0;
+      }
       return Number(val) || 0;
+    }
+
+    // Helper: Calculate real progress from nested payload
+    function calcProgress(payload, rawVal) {
+      if (payload && payload.progress) {
+        const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+        let done = 0;
+        units.forEach(u => { if (payload.progress[u] && payload.progress[u].completed) done++; });
+        if (done > 0) return Math.round((done / 7) * 100);
+      }
+      // Fallback to raw value if nested data is missing
+      return parsePct(rawVal);
     }
 
     // 1. Fetch from Backend
@@ -194,9 +259,22 @@
           const student = payload.student || {};
           
           // Extract metrics safely
-          const unitsCompletedRaw = rec.unitsCompleted || payload.progress?.unitsCompleted || 0;
-          const unitAvgRaw = rec.unitAvg || payload.quizAttempts?.unitAvg || 0;
-          const examScore = rec.examScore !== undefined ? rec.examScore : (payload.exam?.score || null);
+          const unitsCompleted = calcProgress(payload, rec.unitsCompleted);
+          
+          // If Unit Avg is 1% (default), try to recalculate from quizAttempts
+          let unitAvg = parsePct(rec.unitAvg);
+          if (unitAvg <= 1 && payload.quizAttempts) {
+             const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+             let scores = [];
+             units.forEach(u => {
+               if (payload.quizAttempts[u] && payload.quizAttempts[u].length) {
+                 scores.push(Math.max(...payload.quizAttempts[u]));
+               }
+             });
+             if (scores.length) unitAvg = scores.reduce((a,b)=>a+b,0) / scores.length;
+          }
+
+          const examScore = rec.examScore !== undefined && rec.examScore !== '' ? rec.examScore : (payload.exam?.score || null);
           const examTotal = rec.examTotal || payload.exam?.total || 30;
           const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
           const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
@@ -206,15 +284,17 @@
             name: rec.fullName || student.fullName || 'Unknown',
             studentNo: rec.studentNo || student.studentNo || '—',
             section: rec.section || student.section || '—',
+            group: rec.group || student.group || '—',
             schoolYear: rec.schoolYear || student.schoolYear || '—',
             semester: rec.semester || student.semester || '—',
-            unitsCompleted: parsePct(unitsCompletedRaw),
-            unitAvg: parsePct(unitAvgRaw),
+            unitsCompleted: unitsCompleted,
+            unitAvg: Math.round(unitAvg),
             examScore: examScore,
             examTotal: examTotal,
             examPct: examPct,
             examPassed: examPassed,
-            examTaken: examScore !== null
+            examTaken: examScore !== null && examScore !== 'null',
+            rawPayload: payload // Store for modal view
           });
         });
 
@@ -246,13 +326,13 @@
 
     // 3. Render UI
     function renderDashboard() {
-      if (!allStudents.length) {
-        document.getElementById('studentCount').textContent = '0 students';
-        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found. Click Sync to pull data.</td></tr>';
-        return;
-      }
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allStudents.filter(s => 
+        s.name.toLowerCase().includes(search) || 
+        s.studentNo.toLowerCase().includes(search)
+      );
 
-      // Calculate Stats
+      // Calculate Stats (on all students, not filtered)
       const total = allStudents.length;
       const passedExam = allStudents.filter(s => s.examPassed).length;
       const atRisk = allStudents.filter(s => s.examTaken && !s.examPassed).length;
@@ -265,16 +345,19 @@
         <div class="stat-card red"><h3>Not Taken</h3><div class="value">${notTaken}</div></div>
       `;
 
-      document.getElementById('studentCount').textContent = `${total} in current filter`;
+      document.getElementById('studentCount').textContent = `${filtered.length} students in view`;
+
+      if (!filtered.length) {
+        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found matching your search.</td></tr>';
+        return;
+      }
 
       // Render Rows
       const tbody = document.getElementById('studentTableBody');
-      tbody.innerHTML = allStudents.map(s => {
-        // Initials
+      tbody.innerHTML = filtered.map(s => {
         const parts = s.name.trim().split(/\s+/);
         const initials = ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
 
-        // Exam display
         let examDisplay = '—';
         let statusBadge = '<span class="badge badge-neutral">Pending</span>';
         
@@ -283,7 +366,7 @@
           statusBadge = s.examPassed 
             ? '<span class="badge badge-success">Passed</span>' 
             : '<span class="badge badge-danger">Failed</span>';
-        } else if (s.unitAvg > 0) {
+        } else if (s.unitAvg > 0 || s.unitsCompleted > 0) {
           statusBadge = '<span class="badge badge-warning">In Progress</span>';
         }
 
@@ -311,11 +394,68 @@
             <td>${examDisplay}</td>
             <td>${statusBadge}</td>
             <td><span style="color:var(--success); font-weight:600; font-size:0.8rem;">✅ OK</span></td>
-            <td><button class="btn-view">View</button></td>
+            <td><button class="btn-view" onclick="openStudentModal('${s.id}')">View</button></td>
           </tr>
         `;
       }).join('');
     }
+
+    // 4. Open Modal with specific student details
+    function openStudentModal(id) {
+      const student = allStudents.find(s => s.id === id);
+      if (!student) return;
+
+      document.getElementById('modalName').textContent = student.name;
+      document.getElementById('modalDetails').textContent = `${student.studentNo} — ${student.section} (${student.group})`;
+
+      // Build Modal Body
+      let html = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Units Completed</div>
+            <div class="detail-value">${Math.round(student.unitsCompleted)}%</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Unit Average</div>
+            <div class="detail-value" style="color:${student.unitAvg >= 75 ? 'var(--success)' : 'var(--danger)'}">${student.unitAvg}%</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Capstone Exam</div>
+            <div class="detail-value">${student.examTaken ? `${student.examScore}/${student.examTotal} (${student.examPct}%)` : 'Not Taken'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Exam Status</div>
+            <div class="detail-value" style="color:${student.examPassed ? 'var(--success)' : (student.examTaken ? 'var(--danger)' : 'var(--gray)')}">
+              ${student.examPassed ? 'PASSED' : (student.examTaken ? 'FAILED' : '—')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Detailed Unit Breakdown (if payload exists)
+      if (student.rawPayload && student.rawPayload.quizAttempts) {
+        html += `<h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Unit Quiz Scores (Best)</h4><ul class="progress-list">`;
+        const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+        units.forEach(u => {
+          const attempts = student.rawPayload.quizAttempts[u];
+          const best = attempts && attempts.length ? Math.max(...attempts) : null;
+          html += `<li><span>Unit ${u.replace('unit','')}</span><span>${best !== null ? best + '%' : '—'}</span></li>`;
+        });
+        html += `</ul>`;
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('studentModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('studentModal').classList.remove('show');
+    }
+
+    // Close modal on overlay click
+    document.getElementById('studentModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
 
     document.addEventListener('DOMContentLoaded', loadLocal);
   </script>
