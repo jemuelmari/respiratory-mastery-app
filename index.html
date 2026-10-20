@@ -486,6 +486,16 @@
     </form>
     <div id="loginForm" class="hidden">
       <div class="saved-students" id="savedStudentsArea"></div>
+      
+      <!-- NEW RESTORE BUTTON ON LOGIN SCREEN -->
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--gray-light);">
+        <input type="file" id="restoreFileInputLogin" accept=".json,application/json" style="display:none;" onchange="handleRestoreFileLogin(event)" />
+        <button class="btn btn-outline btn-block" onclick="document.getElementById('restoreFileInputLogin').click()">
+          📤 Restore from Backup File
+        </button>
+        <div id="restoreStatusLogin" class="mt-2"></div>
+      </div>
+      
     </div>
     <div style="text-align:center;margin-top:1.75rem;font-size:0.75rem;color:var(--gray);line-height:1.7;">
       Developed by <strong style="color:var(--primary);">JEMUEL C. MARI, MAN, RN, LPT</strong><br>
@@ -2495,6 +2505,74 @@ function confirmRestore(dataJson) {
     setTimeout(function() { showApp(); }, 1200);
   } catch (err) {
     document.getElementById('restoreStatus').innerHTML =
+      '<div class="callout callout-danger">❌ Restore failed: ' + escapeHtml(err.message) + '</div>';
+  }
+}
+
+/* NEW LOGIN RESTORE FUNCTION */
+function handleRestoreFileLogin(event) {
+  var file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  var statusEl = document.getElementById('restoreStatusLogin');
+  statusEl.innerHTML = '<div class="callout callout-info">⏳ Reading file...</div>';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+
+      if (!data || data.schema !== 'respiratory-mastery-backup-v1') {
+        statusEl.innerHTML = '<div class="callout callout-danger">❌ Invalid backup file.</div>';
+        return;
+      }
+      if (!data.student || !data.student.fullName) {
+        statusEl.innerHTML = '<div class="callout callout-danger">❌ Backup file is missing student info.</div>';
+        return;
+      }
+
+      // Directly confirm restore
+      var preview = '<div class="callout callout-warning" style="margin-top:1rem;">' +
+        'Restore <strong>' + escapeHtml(data.student.fullName) + '</strong> (' + calcProgressPct(data.progress) + '%)?<br><br>' +
+        '<button class="btn btn-primary btn-sm" onclick="confirmRestoreLogin(' + JSON.stringify(JSON.stringify(data)).replace(/"/g, '&quot;') + ')">✅ Yes, Restore</button> ' +
+        '<button class="btn btn-outline btn-sm" onclick="document.getElementById(\'restoreStatusLogin\').innerHTML=\'\'">❌ Cancel</button>' +
+        '</div>';
+      statusEl.innerHTML = preview;
+    } catch (err) {
+      statusEl.innerHTML = '<div class="callout callout-danger">❌ Corrupted file.</div>';
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function confirmRestoreLogin(dataJson) {
+  try {
+    var data = JSON.parse(dataJson);
+
+    APP.state = {
+      currentView: 'home',
+      student: data.student,
+      progress: data.progress || {},
+      quizAttempts: data.quizAttempts || {},
+      games: data.games || {},
+      badges: data.badges || {},
+      exam: data.exam || null,
+      examHistory: data.examHistory || [],
+      feedback: data.feedback || [],
+      retakeAllowed: data.retakeAllowed || false,
+      retakeCode: data.retakeCode || null,
+      retakeUsed: data.retakeUsed || false,
+      submissionCode: data.submissionCode || null
+    };
+
+    saveState();
+    registerSavedSession(buildStudentRecord());
+    showApp();
+    toast('Backup restored successfully!', 'success');
+
+  } catch (err) {
+    document.getElementById('restoreStatusLogin').innerHTML =
       '<div class="callout callout-danger">❌ Restore failed: ' + escapeHtml(err.message) + '</div>';
   }
 }
