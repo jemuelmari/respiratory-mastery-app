@@ -35,6 +35,7 @@ p{margin-bottom:.5rem}button{font-family:inherit}input,select{font-family:inheri
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .filter-select{padding:.5rem .7rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.82rem;font-family:var(--font-head);font-weight:600;background:#fff;cursor:pointer;color:var(--dark)}
 .filter-select:focus{outline:none;border-color:var(--primary)}
+.filter-select.active-filter{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
 .info-banner{background:var(--white);border-radius:var(--radius);padding:1.15rem 1.35rem;box-shadow:var(--shadow-sm);border:1px solid var(--gray-light);border-left:5px solid var(--primary);margin-bottom:1.25rem}
 .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem}
 .info-grid .info-item{font-size:.85rem}
@@ -170,7 +171,7 @@ var GB = {
       gamesWeight: 20,
       capstoneWeight: 20
     },
-    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM },
+    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM, group: 'All' },
     lastSync: null
   }
 };
@@ -187,7 +188,13 @@ function loadLocal() {
       var parsed = JSON.parse(raw);
       GB.state.students = parsed.students || [];
       GB.state.settings = Object.assign({}, GB.state.settings, parsed.settings || {});
-      if (parsed.filters) GB.state.filters = parsed.filters;
+      if (parsed.filters) {
+        GB.state.filters = {
+          schoolYear: parsed.filters.schoolYear || CURRENT_SY,
+          semester: parsed.filters.semester || CURRENT_SEM,
+          group: parsed.filters.group || 'All'
+        };
+      }
       GB.state.lastSync = parsed.lastSync || null;
     }
   } catch (e) { console.warn('Local load failed', e); }
@@ -390,16 +397,46 @@ function finalGradeClass(g) {
 }
 function cell(val) { return (val === null || val === undefined) ? '<span style="color:#B0BEC5;">—</span>' : val; }
 
+/* ---------- GROUP FILTER HELPERS ---------- */
+function allGroupOptions() {
+  var groups = {};
+  GB.state.students.forEach(function(s) {
+    var g = String(s.group || '').trim();
+    if (g) groups[g] = (groups[g] || 0) + 1;
+  });
+  return Object.keys(groups).sort(function(a, b) {
+    return (parseInt(a.replace(/\D/g, ''), 10) || 0) - (parseInt(b.replace(/\D/g, ''), 10) || 0);
+  }).map(function(g) { return { value: g, count: groups[g] }; });
+}
+function buildGroupOptions(groups) {
+  var html = '<option value="All">All Groups</option>';
+  groups.forEach(function(g) {
+    var selected = GB.state.filters.group === g.value ? ' selected' : '';
+    html += '<option value="' + escapeHtml(g.value) + '"' + selected + '>' +
+      escapeHtml(g.value) + ' (' + g.count + ')</option>';
+  });
+  return html;
+}
+function clearGroupFilter() {
+  GB.state.filters.group = 'All';
+  saveLocal();
+  render();
+  toast('Group filter cleared', 'info');
+}
+
 function filterStudents(students, f) {
   return students.filter(function(s) {
     if (f.schoolYear && (s.schoolYear || '') !== f.schoolYear) return false;
     if (f.semester && (s.semester || '') !== f.semester) return false;
+    if (f.group && f.group !== 'All' && String(s.group || '').trim() !== f.group) return false;
     return true;
   });
 }
 function onFilterChange() {
   GB.state.filters.schoolYear = document.getElementById('filterSY').value;
   GB.state.filters.semester = document.getElementById('filterSem').value;
+  var gEl = document.getElementById('filterGroup');
+  if (gEl) GB.state.filters.group = gEl.value;
   saveLocal();
   render();
 }
@@ -420,12 +457,16 @@ function render() {
   var students = filterStudents(allStudents, GB.state.filters);
 
   if (!students.length) {
+    var f = GB.state.filters;
+    var filterDesc = f.schoolYear + ' — ' + f.semester;
+    if (f.group && f.group !== 'All') filterDesc += ' — ' + f.group;
     app.innerHTML = renderToolbar() +
       '<div class="empty-state">' +
       '<div class="icon">📋</div>' +
-      '<h2>No students for ' + escapeHtml(GB.state.filters.schoolYear) + ' — ' + escapeHtml(GB.state.filters.semester) + '</h2>' +
-      '<p>Try another School Year / Semester, or click "Sync from Sheet" to fetch data.</p>' +
+      '<h2>No students for ' + escapeHtml(filterDesc) + '</h2>' +
+      '<p>Try another filter, or click "Sync from Sheet" to fetch data.</p>' +
       '<div class="flex gap-1" style="justify-content:center;">' +
+      '<button class="btn btn-outline" onclick="clearGroupFilter()">↺ Clear Group Filter</button>' +
       '<button class="btn btn-primary" onclick="syncFromBackend()">🔄 Sync from Sheet</button></div></div>' +
       renderDeveloperFooter();
     return;
@@ -447,11 +488,13 @@ function renderToolbar() {
   var lastSync = GB.state.lastSync;
   var curSY = GB.state.filters.schoolYear;
   var curSem = GB.state.filters.semester;
+  var curGroup = GB.state.filters.group || 'All';
+  var groupActive = curGroup !== 'All';
   return '<div class="toolbar no-print">' +
     '<div class="toolbar-left">' +
     '<div class="logo">📊</div>' +
     '<div><h1>Class Record — Gradebook</h1>' +
-    '<small>' + escapeHtml(GB.state.settings.courseName) + ' — v2.1</small></div>' +
+    '<small>' + escapeHtml(GB.state.settings.courseName) + ' — v3.1</small></div>' +
     '</div>' +
     '<div class="toolbar-right">' +
     '<select id="filterSY" onchange="onFilterChange()" class="filter-select" title="School Year">' +
@@ -459,6 +502,9 @@ function renderToolbar() {
     '</select>' +
     '<select id="filterSem" onchange="onFilterChange()" class="filter-select" title="Semester">' +
       SEMESTERS.map(function(sm) { return '<option value="' + sm + '"' + (sm === curSem ? ' selected' : '') + '>' + sm + '</option>'; }).join('') +
+    '</select>' +
+    '<select id="filterGroup" onchange="onFilterChange()" class="filter-select' + (groupActive ? ' active-filter' : '') + '" title="Group">' +
+      buildGroupOptions(allGroupOptions()) +
     '</select>' +
     '<button class="btn btn-outline btn-sm" onclick="openNormalizeModal()">🧹 Normalize</button>' +
     '<button class="btn btn-outline btn-sm" onclick="window.location.href=\'instructor-dashboard.html\'">👨‍🏫 Dashboard</button>' +
@@ -473,11 +519,13 @@ function renderToolbar() {
 function renderInfoBanner(count) {
   var s = GB.state.settings;
   var f = GB.state.filters;
+  var groupInfo = (f.group && f.group !== 'All') ? infoItem('Group Filter', f.group) : '';
   return '<div class="info-banner no-print"><div class="info-grid">' +
     infoItem('Course', s.courseName) +
     infoItem('Instructor', s.instructorName) +
     infoItem('School Year', f.schoolYear) +
     infoItem('Semester', f.semester) +
+    groupInfo +
     infoItem('Students in View', count) +
     infoItem('Generated', todayLong()) +
     '</div></div>';
@@ -489,12 +537,13 @@ function infoItem(label, value) {
 function renderSheetHeader() {
   var s = GB.state.settings;
   var f = GB.state.filters;
+  var groupLine = (f.group && f.group !== 'All') ? ' &nbsp;|&nbsp; Group: ' + escapeHtml(f.group) : '';
   return '<div class="sheet-header">' +
     '<h1>' + escapeHtml(s.courseName) + '</h1>' +
     '<h2>Class Record — Respiratory Assessment Mastery</h2>' +
-    '<p>School Year ' + escapeHtml(f.schoolYear) + ' &nbsp;|&nbsp; ' + escapeHtml(f.semester) + ' &nbsp;|&nbsp; Instructor: ' + escapeHtml(s.instructorName) + '</p>' +
+    '<p>School Year ' + escapeHtml(f.schoolYear) + ' &nbsp;|&nbsp; ' + escapeHtml(f.semester) + groupLine + ' &nbsp;|&nbsp; Instructor: ' + escapeHtml(s.instructorName) + '</p>' +
     '<p>' + todayLong() + '</p>' +
-    '<span class="version-tag">App Version 2.1</span>' +
+    '<span class="version-tag">App Version 3.1</span>' +
     '</div>';
 }
 
@@ -664,7 +713,7 @@ function renderDeveloperFooter() {
     '<div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>' +
     '<div>Clinical Instructor | Teacher II — Department of Education</div>' +
     '<div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>' +
-    '<div style="margin-top:.5rem;font-size:.7rem;">Version 2.1 — © ' + new Date().getFullYear() + '</div>' +
+    '<div style="margin-top:.5rem;font-size:.7rem;">Version 3.1 — © ' + new Date().getFullYear() + '</div>' +
     '</div>';
 }
 
@@ -742,8 +791,9 @@ function exportCSV() {
       completion + '%', raw !== null ? raw : '', formatGrade(g), getRemarks(g),
       s.retakeActive || 'NO', s.submissionCode || '', s.lastActive || ''];
   });
+  var groupSuffix = (GB.state.filters.group && GB.state.filters.group !== 'All') ? '-' + GB.state.filters.group.replace(/\s+/g, '') : '';
   var csv = [headers].concat(rows).map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
-  downloadFile(csv, 'class-record-' + GB.state.filters.schoolYear + '-' + GB.state.filters.semester.replace(/\s+/g,'') + '-' + todayISO() + '.csv', 'text/csv');
+  downloadFile(csv, 'class-record-' + GB.state.filters.schoolYear + '-' + GB.state.filters.semester.replace(/\s+/g,'') + groupSuffix + '-' + todayISO() + '.csv', 'text/csv');
   toast('✅ CSV exported.', 'success');
 }
 
