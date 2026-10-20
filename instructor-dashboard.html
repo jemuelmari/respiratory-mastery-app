@@ -22,7 +22,7 @@
     .sidebar-header .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
     .sidebar-header h2 { font-size: 1rem; font-weight: 700; }
     .sidebar-header small { font-size: 0.7rem; color: var(--gray); }
-    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.25rem; transition: 0.2s; cursor: pointer; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.25rem; transition: 0.2s; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; }
     .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
     .nav-item.active { font-weight: 600; background: linear-gradient(90deg, rgba(13,115,119,0.8), transparent); }
     .nav-section { font-size: 0.65rem; text-transform: uppercase; color: var(--gray); margin: 1.5rem 0 0.5rem 0.75rem; letter-spacing: 1px; font-weight: 700; }
@@ -31,6 +31,10 @@
 
     /* Main Content */
     .main-content { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1400px; }
+    .view-section { display: none; animation: fadeIn 0.3s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .header h1 { font-size: 1.5rem; }
     .header-controls { display: flex; gap: 1rem; align-items: center; }
@@ -74,6 +78,19 @@
 
     .btn-view { padding: 0.4rem 0.8rem; border: 1px solid var(--border); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--dark); transition: 0.2s; }
     .btn-view:hover { background: var(--primary); color: var(--white); border-color: var(--primary); }
+    .btn-primary { padding: 0.75rem 1.5rem; background: var(--primary); color: var(--white); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    /* Forms & Cards */
+    .card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 0.85rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; border-left: 4px solid; }
+    .alert-info { background: #E3F2FD; border-color: #1E88E5; color: #0D47A1; }
+    .alert-success { background: var(--success-light); border-color: var(--success); color: #1B5E20; }
+    .alert-danger { background: var(--danger-light); border-color: var(--danger); color: #B71C1C; }
 
     /* Loader */
     .loader { display: flex; justify-content: center; align-items: center; height: 50vh; flex-direction: column; gap: 1rem; color: var(--gray); }
@@ -117,20 +134,20 @@
     </div>
 
     <div class="nav-section">Main</div>
-    <a href="#" class="nav-item active">📊 Overview</a>
-    <a href="#" class="nav-item">📥 Import Students</a>
-    <a href="#" class="nav-item">👥 Roster</a>
+    <button class="nav-item active" onclick="switchView('overview', this)">📊 Overview</button>
+    <button class="nav-item" onclick="switchView('import', this)">📥 Import Students</button>
+    <button class="nav-item" onclick="switchView('roster', this)">👥 Roster</button>
 
     <div class="nav-section">Data</div>
-    <a href="#" class="nav-item" onclick="syncData()">🔄 Sync from Sheet</a>
-    <a href="#" class="nav-item">📄 Raw Data</a>
+    <button class="nav-item" onclick="syncData(); switchView('overview', this)">🔄 Sync from Sheet</button>
+    <button class="nav-item">📄 Raw Data</button>
 
     <div class="nav-section">Quick Links</div>
     <a href="gradebook.html" class="nav-item">📖 Open Gradebook</a>
     <a href="index.html" class="nav-item" target="_blank">📱 Student App</a>
 
     <div class="nav-section">Tools</div>
-    <a href="#" class="nav-item">⚙️ Settings</a>
+    <button class="nav-item">⚙️ Settings</button>
 
     <div class="sidebar-footer">
       <strong>JEMUEL C. MARI, MAN, RN, LPT</strong>
@@ -141,49 +158,88 @@
 
   <!-- MAIN CONTENT -->
   <main class="main-content">
-    <div class="header">
-      <div>
-        <h1>Dashboard Overview</h1>
-        <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Monitor student progress and exam status</p>
-      </div>
-      <div class="header-controls">
-        <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderDashboard()">
-        <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stat-grid" id="statGrid">
-      <!-- Populated by JS -->
-    </div>
-
-    <!-- STUDENT TABLE -->
-    <div class="table-container">
-      <div class="table-header">
+    
+    <!-- VIEW: OVERVIEW -->
+    <div id="view-overview" class="view-section active">
+      <div class="header">
         <div>
-          <h2>Students</h2>
-          <p id="studentCount">Loading students...</p>
+          <h1>Dashboard Overview</h1>
+          <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Monitor student progress and exam status</p>
+        </div>
+        <div class="header-controls">
+          <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
+          <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Section</th>
-            <th>SY / Sem</th>
-            <th>Progress</th>
-            <th>Unit Avg</th>
-            <th>Exam</th>
-            <th>Status</th>
-            <th>Validation</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="studentTableBody">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
+
+      <div class="stat-grid" id="statGrid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <div>
+            <h2>Students</h2>
+            <p id="studentCount">Loading students...</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Section</th>
+              <th>SY / Sem</th>
+              <th>Progress</th>
+              <th>Unit Avg</th>
+              <th>Exam</th>
+              <th>Status</th>
+              <th>Validation</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
+
+    <!-- VIEW: IMPORT STUDENTS -->
+    <div id="view-import" class="view-section">
+      <div class="header">
+        <div>
+          <h1>Import Student by Code</h1>
+          <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Paste the unique code generated by the Student App to fetch their record.</p>
+        </div>
+      </div>
+
+      <div class="card" style="max-width: 600px;">
+        <div class="alert alert-info">
+          <strong>💡 How it works:</strong><br>
+          Ask the student for their <strong>Submission Code</strong> (e.g., <code>RA-1234-5678</code>). Paste it below to instantly pull their data from the Google Sheet without doing a full sync.
+        </div>
+        
+        <div class="form-group">
+          <label>Student Submission Code</label>
+          <input type="text" id="importCodeInput" class="form-control" placeholder="e.g., RA-1234-5678" style="text-transform: uppercase;">
+        </div>
+        
+        <button class="btn-primary" onclick="importByCode()" id="btnImport">📥 Fetch Record</button>
+        
+        <div id="importResult" style="margin-top: 1rem;"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: ROSTER (Placeholder) -->
+    <div id="view-roster" class="view-section">
+      <div class="header">
+        <h1>Master Roster</h1>
+      </div>
+      <div class="card">
+        <p>Full student roster view goes here.</p>
+      </div>
+    </div>
+
   </main>
 
   <!-- MODAL -->
@@ -207,12 +263,22 @@
     const STORAGE_KEY = 'respMastery_instructor_v2';
     let allStudents = [];
 
-    // Helper: Parse percentage strings safely
+    // --- NAVIGATION ---
+    function switchView(viewId, btnEl) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      
+      if (btnEl) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        btnEl.classList.add('active');
+      }
+    }
+
+    // --- HELPERS ---
     function parsePct(val) {
       if (val === null || val === undefined || val === '') return 0;
       if (typeof val === 'string') {
         if (val.includes('/')) {
-          // Handle fractions like "15/30"
           const parts = val.split('/');
           return (parseFloat(parts[0]) / parseFloat(parts[1])) * 100 || 0;
         }
@@ -221,7 +287,6 @@
       return Number(val) || 0;
     }
 
-    // Helper: Calculate real progress from nested payload
     function calcProgress(payload, rawVal) {
       if (payload && payload.progress) {
         const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
@@ -229,73 +294,72 @@
         units.forEach(u => { if (payload.progress[u] && payload.progress[u].completed) done++; });
         if (done > 0) return Math.round((done / 7) * 100);
       }
-      // Fallback to raw value if nested data is missing
       return parsePct(rawVal);
     }
 
-    // 1. Fetch from Backend
+    function processRecord(rec, existingStudents) {
+      let payload = {};
+      try { payload = JSON.parse(rec.dataJson || '{}'); } catch (e) {}
+      
+      const student = payload.student || {};
+      const unitsCompleted = calcProgress(payload, rec.unitsCompleted);
+      
+      let unitAvg = parsePct(rec.unitAvg);
+      if (unitAvg <= 1 && payload.quizAttempts) {
+         const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
+         let scores = [];
+         units.forEach(u => {
+           if (payload.quizAttempts[u] && payload.quizAttempts[u].length) {
+             scores.push(Math.max(...payload.quizAttempts[u]));
+           }
+         });
+         if (scores.length) unitAvg = scores.reduce((a,b)=>a+b,0) / scores.length;
+      }
+
+      const examScore = rec.examScore !== undefined && rec.examScore !== '' ? rec.examScore : (payload.exam?.score || null);
+      const examTotal = rec.examTotal || payload.exam?.total || 30;
+      const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
+      const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
+
+      return {
+        id: rec.studentNo || student.studentNo || rec.email,
+        name: rec.fullName || student.fullName || 'Unknown',
+        studentNo: rec.studentNo || student.studentNo || '—',
+        section: rec.section || student.section || '—',
+        group: rec.group || student.group || '—',
+        schoolYear: rec.schoolYear || student.schoolYear || '—',
+        semester: rec.semester || student.semester || '—',
+        unitsCompleted: unitsCompleted,
+        unitAvg: Math.round(unitAvg),
+        examScore: examScore,
+        examTotal: examTotal,
+        examPct: examPct,
+        examPassed: examPassed,
+        examTaken: examScore !== null && examScore !== 'null',
+        rawPayload: payload
+      };
+    }
+
+    // --- DATA SYNC ---
     async function syncData() {
       document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9"><div class="loader"><div class="spinner"></div>Syncing...</div></td></tr>';
       
       try {
         const res = await fetch(`${BACKEND_URL}?action=listAll`);
         const data = await res.json();
-        
         if (!data.success) throw new Error(data.error || 'Sync failed');
         
-        // Save to localStorage
-        const state = { students: [], settings: {}, lastSync: new Date().toISOString() };
-        const existingRaw = localStorage.getItem(STORAGE_KEY);
-        if (existingRaw) {
-          const parsed = JSON.parse(existingRaw);
-          state.settings = parsed.settings || {};
-        }
-
-        // Process Records
+        const state = { students: [], lastSync: new Date().toISOString() };
+        
         data.records.forEach(rec => {
-          let payload = {};
-          try { payload = JSON.parse(rec.dataJson || '{}'); } catch (e) {}
-          
-          const student = payload.student || {};
-          
-          // Extract metrics safely
-          const unitsCompleted = calcProgress(payload, rec.unitsCompleted);
-          
-          // If Unit Avg is 1% (default), try to recalculate from quizAttempts
-          let unitAvg = parsePct(rec.unitAvg);
-          if (unitAvg <= 1 && payload.quizAttempts) {
-             const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
-             let scores = [];
-             units.forEach(u => {
-               if (payload.quizAttempts[u] && payload.quizAttempts[u].length) {
-                 scores.push(Math.max(...payload.quizAttempts[u]));
-               }
-             });
-             if (scores.length) unitAvg = scores.reduce((a,b)=>a+b,0) / scores.length;
+          const studentRecord = processRecord(rec, state.students);
+          // De-duplicate logic
+          const existingIdx = state.students.findIndex(x => x.id === studentRecord.id);
+          if (existingIdx >= 0) {
+            state.students[existingIdx] = studentRecord;
+          } else {
+            state.students.push(studentRecord);
           }
-
-          const examScore = rec.examScore !== undefined && rec.examScore !== '' ? rec.examScore : (payload.exam?.score || null);
-          const examTotal = rec.examTotal || payload.exam?.total || 30;
-          const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
-          const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
-
-          state.students.push({
-            id: rec.studentNo || student.studentNo || rec.email,
-            name: rec.fullName || student.fullName || 'Unknown',
-            studentNo: rec.studentNo || student.studentNo || '—',
-            section: rec.section || student.section || '—',
-            group: rec.group || student.group || '—',
-            schoolYear: rec.schoolYear || student.schoolYear || '—',
-            semester: rec.semester || student.semester || '—',
-            unitsCompleted: unitsCompleted,
-            unitAvg: Math.round(unitAvg),
-            examScore: examScore,
-            examTotal: examTotal,
-            examPct: examPct,
-            examPassed: examPassed,
-            examTaken: examScore !== null && examScore !== 'null',
-            rawPayload: payload // Store for modal view
-          });
         });
 
         state.students.sort((a, b) => a.name.localeCompare(b.name));
@@ -310,7 +374,77 @@
       }
     }
 
-    // 2. Load from LocalStorage (Initial)
+    // --- IMPORT BY CODE ---
+    async function importByCode() {
+      const codeInput = document.getElementById('importCodeInput');
+      const btn = document.getElementById('btnImport');
+      const resultEl = document.getElementById('importResult');
+      const code = codeInput.value.trim().toUpperCase();
+
+      if (!code) {
+        resultEl.innerHTML = '<div class="alert alert-danger">Please enter a code.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Fetching...';
+      resultEl.innerHTML = '';
+
+      try {
+        // We use the same listAll endpoint but filter on the client side by code.
+        const res = await fetch(`${BACKEND_URL}?action=listAll`);
+        const data = await res.json();
+        
+        if (!data.success) throw new Error('Failed to connect to backend');
+
+        // Find the record matching the code
+        const record = data.records.find(r => r.code === code);
+
+        if (!record) {
+          throw new Error('Student code not found in the database. Please check the code and try again.');
+        }
+
+        // Process the found record
+        const newStudent = processRecord(record, allStudents);
+
+        // Update Global State & Local Storage
+        const existingIdx = allStudents.findIndex(s => s.id === newStudent.id);
+        if (existingIdx >= 0) {
+          allStudents[existingIdx] = newStudent; // Update
+        } else {
+          allStudents.push(newStudent); // Add new
+        }
+        
+        allStudents.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Save to storage
+        const state = { students: allStudents, lastSync: new Date().toISOString() };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        
+        // Show success & redirect
+        resultEl.innerHTML = `
+          <div class="alert alert-success">
+            <strong>✅ Success!</strong> Imported record for <strong>${newStudent.name}</strong>.<br>
+            Redirecting to overview...
+          </div>
+        `;
+        
+        setTimeout(() => {
+          codeInput.value = '';
+          resultEl.innerHTML = '';
+          switchView('overview', document.querySelector('.nav-item')); // Go back to overview
+          renderDashboard();
+        }, 1500);
+
+      } catch (err) {
+        resultEl.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📥 Fetch Record';
+      }
+    }
+
+    // --- RENDER ---
     function loadLocal() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
@@ -320,19 +454,13 @@
           renderDashboard();
         } catch (e) { console.error('Parse error', e); }
       } else {
-        syncData(); // Auto-sync if no cache
+        syncData(); 
       }
     }
 
-    // 3. Render UI
     function renderDashboard() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allStudents.filter(s => 
-        s.name.toLowerCase().includes(search) || 
-        s.studentNo.toLowerCase().includes(search)
-      );
-
-      // Calculate Stats (on all students, not filtered)
+      renderTable();
+      
       const total = allStudents.length;
       const passedExam = allStudents.filter(s => s.examPassed).length;
       const atRisk = allStudents.filter(s => s.examTaken && !s.examPassed).length;
@@ -344,6 +472,14 @@
         <div class="stat-card orange"><h3>At Risk (Failed)</h3><div class="value">${atRisk}</div></div>
         <div class="stat-card red"><h3>Not Taken</h3><div class="value">${notTaken}</div></div>
       `;
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allStudents.filter(s => 
+        s.name.toLowerCase().includes(search) || 
+        s.studentNo.toLowerCase().includes(search)
+      );
 
       document.getElementById('studentCount').textContent = `${filtered.length} students in view`;
 
@@ -352,7 +488,6 @@
         return;
       }
 
-      // Render Rows
       const tbody = document.getElementById('studentTableBody');
       tbody.innerHTML = filtered.map(s => {
         const parts = s.name.trim().split(/\s+/);
@@ -400,7 +535,7 @@
       }).join('');
     }
 
-    // 4. Open Modal with specific student details
+    // --- MODAL ---
     function openStudentModal(id) {
       const student = allStudents.find(s => s.id === id);
       if (!student) return;
@@ -408,7 +543,6 @@
       document.getElementById('modalName').textContent = student.name;
       document.getElementById('modalDetails').textContent = `${student.studentNo} — ${student.section} (${student.group})`;
 
-      // Build Modal Body
       let html = `
         <div class="detail-grid">
           <div class="detail-item">
@@ -432,7 +566,6 @@
         </div>
       `;
 
-      // Detailed Unit Breakdown (if payload exists)
       if (student.rawPayload && student.rawPayload.quizAttempts) {
         html += `<h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Unit Quiz Scores (Best)</h4><ul class="progress-list">`;
         const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
@@ -452,7 +585,6 @@
       document.getElementById('studentModal').classList.remove('show');
     }
 
-    // Close modal on overlay click
     document.getElementById('studentModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal();
     });
