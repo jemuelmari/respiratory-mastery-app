@@ -1,712 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="theme-color" content="#0D7377"/>
-<link rel="icon" href="icon.svg" type="image/svg+xml"/>
-<title>Instructor Dashboard — v3.1</title>
-<style>
-:root{--primary:#0D7377;--primary-dark:#095456;--secondary:#1E88E5;--accent:#E53935;--success:#43A047;--warning:#FB8C00;--purple:#8E24AA;--dark:#1A2027;--light:#F7F9FB;--white:#FFF;--gray:#718096;--gray-light:#E2E8F0;--radius:12px;--radius-sm:8px;--shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 12px 32px rgba(0,0,0,.12);--font-head:'Inter','Montserrat',sans-serif;--font-body:'Inter','Open Sans',sans-serif}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font-body);background:var(--light);color:var(--dark);line-height:1.5;font-size:14px}
-h1,h2,h3,h4{font-family:var(--font-head);font-weight:700;line-height:1.25}
-h1{font-size:1.6rem;font-weight:800}h2{font-size:1.2rem}h3{font-size:1rem}p{margin-bottom:.5rem}
-.app-container{display:flex;min-height:100vh}
-.sidebar{width:260px;background:var(--dark);color:#fff;padding:1.25rem .85rem;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
-.sidebar-header{display:flex;align-items:center;gap:.7rem;padding:.5rem .5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:1rem}
-.sidebar-header .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-.sidebar-header h1{font-size:.95rem;color:#fff}
-.sidebar-header small{display:block;font-size:.68rem;color:rgba(255,255,255,.55);font-weight:400;margin-top:.15rem}
-.nav-section{margin-bottom:1rem}
-.nav-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.4);margin-bottom:.4rem;padding:0 .6rem;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:.65rem;padding:.55rem .7rem;border-radius:var(--radius-sm);color:rgba(255,255,255,.75);cursor:pointer;font-size:.85rem;border:none;background:none;width:100%;text-align:left;font-family:var(--font-body);font-weight:500}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:rgba(13,115,119,.35);color:#fff;font-weight:600;box-shadow:inset 3px 0 0 var(--primary)}
-.nav-item .icon{font-size:1rem;width:1.4rem;text-align:center}
-.sidebar-footer{margin-top:auto;padding:1rem .5rem .5rem;border-top:1px solid rgba(255,255,255,.08);font-size:.7rem;line-height:1.55;color:rgba(255,255,255,.55)}
-.sidebar-footer .dev-name{font-weight:700;color:#fff;font-size:.72rem}
-.sidebar-footer .app-version{margin-top:.5rem;padding-top:.5rem;border-top:1px dashed rgba(255,255,255,.1);font-size:.65rem;display:flex;align-items:center;gap:.3rem}
-.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gray)}
-.status-dot.online{background:var(--success);box-shadow:0 0 8px var(--success)}
-.status-dot.offline{background:var(--accent)}
-.main-content{margin-left:260px;flex:1;padding:1.5rem 2rem 3rem;max-width:1500px}
-.menu-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--dark);color:#fff;border:none;border-radius:10px;width:42px;height:42px;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow)}
-@media(max-width:900px){.sidebar{transform:translateX(-100%);transition:transform .3s}.sidebar.open{transform:translateX(0)}.main-content{margin-left:0;padding:1rem;padding-top:4.5rem}.menu-toggle{display:flex;align-items:center;justify-content:center}}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
-.topbar-left h1{font-size:1.5rem;color:var(--dark)}
-.topbar-left p{font-size:.85rem;color:var(--gray);margin:0}
-.topbar-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.filter-bar{display:flex;gap:.5rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;background:#fff;padding:.75rem 1rem;border-radius:12px;border:1px solid var(--gray-light)}
-.filter-select{padding:.5rem .7rem;border:1.5px solid var(--gray-light);border-radius:8px;font-size:.82rem;font-family:var(--font-head);font-weight:600;background:#fff;cursor:pointer;color:var(--dark)}
-.filter-select:focus{outline:none;border-color:var(--primary)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1rem;border-radius:var(--radius-sm);border:none;cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:.82rem;transition:all .15s;text-decoration:none;white-space:nowrap}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
-.btn-secondary{background:var(--secondary);color:#fff}
-.btn-outline{background:#fff;color:var(--dark);border:1.5px solid var(--gray-light)}
-.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.btn-danger{background:var(--accent);color:#fff}
-.btn-sm{padding:.4rem .75rem;font-size:.78rem}
-.btn-lg{padding:.75rem 1.5rem;font-size:.9rem}
-.btn-block{width:100%}
-.btn-ghost{background:transparent;color:var(--gray)}
-.card{background:#fff;border-radius:var(--radius);padding:1.35rem;box-shadow:var(--shadow-sm);border:1px solid var(--gray-light);margin-bottom:1.25rem}
-.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
-.card-title{font-size:1.05rem;font-weight:700;margin:0}
-.card-subtitle{font-size:.8rem;color:var(--gray);margin:.15rem 0 0}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:#fff;border-radius:var(--radius);padding:1.15rem;border:1px solid var(--gray-light);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--primary)}
-.stat-card.success::before{background:var(--success)}
-.stat-card.warning::before{background:var(--warning)}
-.stat-card.alert::before{background:var(--accent)}
-.stat-card.purple::before{background:var(--purple)}
-.stat-card .stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--gray);font-weight:600;margin-bottom:.35rem}
-.stat-card .stat-value{font-size:1.9rem;font-weight:800;color:var(--dark);font-family:var(--font-head);line-height:1}
-.table-wrap{overflow-x:auto;margin:0 -1.35rem;padding:0 1.35rem}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{background:var(--light);color:var(--gray);padding:.7rem .75rem;text-align:left;font-family:var(--font-head);font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;font-weight:700;border-bottom:2px solid var(--gray-light)}
-td{padding:.7rem .75rem;border-bottom:1px solid var(--gray-light);vertical-align:middle}
-tr:hover td{background:#E0F2F1}
-tr.alert-row td{background:#FFEBEE}
-.pill{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:999px;font-size:.72rem;font-weight:600;font-family:var(--font-head);white-space:nowrap}
-.pill-success{background:#E8F5E9;color:#2E7D32}
-.pill-warning{background:#FFF3E0;color:#E65100}
-.pill-danger{background:#FFEBEE;color:#C62828}
-.pill-info{background:#E3F2FD;color:#1565C0}
-.pill-gray{background:#ECEFF1;color:#455A64}
-.pill-purple{background:#F3E5F5;color:#6A1B9A}
-.pill-primary{background:#E0F2F1;color:#095456}
-.progress-bar{height:6px;background:var(--gray-light);border-radius:999px;overflow:hidden;min-width:80px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--success),var(--primary));border-radius:999px;transition:width .4s}
-.progress-fill.warn{background:linear-gradient(90deg,var(--warning),var(--accent))}
-.progress-fill.danger{background:var(--accent)}
-.callout{padding:.85rem 1.1rem;border-radius:var(--radius-sm);margin:.75rem 0;border-left:4px solid;font-size:.85rem}
-.callout-info{background:#E3F2FD;border-color:var(--secondary)}
-.callout-success{background:#E8F5E9;border-color:var(--success)}
-.callout-warning{background:#FFF3E0;border-color:var(--warning)}
-.callout-danger{background:#FFEBEE;border-color:var(--accent)}
-.callout strong{font-family:var(--font-head);font-weight:700}
-.code-input-hero{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;color:#fff;margin-bottom:1.5rem}
-.code-input-hero h2{color:#fff;font-size:1.5rem;margin-bottom:.5rem}
-.code-input-hero p{color:rgba(255,255,255,.85);font-size:.9rem;margin-bottom:1.5rem}
-.code-input-box{display:flex;gap:.5rem;max-width:520px;margin:0 auto;background:#fff;border-radius:12px;padding:.35rem;box-shadow:var(--shadow-lg)}
-.code-input-box input{flex:1;border:none;padding:.75rem 1rem;font-size:1.1rem;font-family:'Courier New',monospace;font-weight:700;text-transform:uppercase;letter-spacing:3px;background:transparent;color:var(--dark)}
-.code-input-box input:focus{outline:none}
-.code-input-box .btn{padding:.75rem 1.5rem}
-.code-chip{font-family:'Courier New',monospace;font-weight:700;background:#E0F2F1;color:#095456;padding:.3rem .7rem;border-radius:6px;letter-spacing:1px;font-size:.85rem;display:inline-flex;align-items:center;gap:.35rem;border:1.5px dashed var(--primary);cursor:pointer}
-.form-group{margin-bottom:1rem}
-.form-group label{display:block;font-weight:600;margin-bottom:.35rem;font-size:.8rem;font-family:var(--font-head)}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:.6rem .85rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.88rem}
-.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,115,119,.1)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.search-box{position:relative}
-.search-box input{width:100%;padding:.6rem .9rem .6rem 2.4rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.85rem}
-.search-box::before{content:'🔍';position:absolute;left:.85rem;top:50%;transform:translateY(-50%);font-size:.9rem;opacity:.5}
-.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--gray)}
-.empty-state .icon{font-size:3rem;margin-bottom:.75rem;opacity:.4}
-.empty-state h3{color:var(--dark);font-size:1rem;margin-bottom:.25rem}
-.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--dark);color:#fff;padding:.85rem 1.25rem;border-radius:10px;box-shadow:var(--shadow-lg);z-index:999;transform:translateY(200%);transition:transform .3s;max-width:380px;font-size:.85rem}
-.toast.show{transform:translateY(0)}
-.toast.success{background:var(--success)}.toast.error{background:var(--accent)}.toast.warning{background:var(--warning)}
-.modal-overlay{position:fixed;inset:0;background:rgba(26,32,39,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
-.modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:var(--radius);max-width:800px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 1.5rem;border-bottom:1px solid var(--gray-light);position:sticky;top:0;background:#fff;z-index:3}
-.modal-header h2{font-size:1.15rem}
-.modal-close{background:var(--light);border:none;font-size:1.2rem;cursor:pointer;color:var(--gray);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.modal-body{padding:1.5rem}
-.hidden{display:none!important}.flex{display:flex}.items-center{align-items:center}.gap-1{gap:.5rem}.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.flex-wrap{flex-wrap:wrap}
-.text-gray{color:var(--gray)}.text-sm{font-size:.82rem}.text-xs{font-size:.72rem}
-pre{background:var(--light);padding:1rem;border-radius:8px;overflow:auto;font-size:.75rem;max-height:400px;border:1px solid var(--gray-light)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instructor Dashboard — Respiratory Mastery</title>
+  <style>
+    :root {
+      --primary: #0D7377; --primary-light: #E0F2F1; --secondary: #1E88E5;
+      --success: #43A047; --success-light: #E8F5E9; --warning: #FB8C00;
+      --warning-light: #FFF3E0; --danger: #E53935; --danger-light: #FFEBEE;
+      --dark: #0F2027; --dark-2: #203A43; --light: #F7F9FC; --white: #FFFFFF;
+      --gray: #718096; --border: #E2E8F0;
+      --font-main: 'Inter', -apple-system, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: var(--font-main); background: var(--light); color: var(--dark); display: flex; min-height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--dark); color: var(--white); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; padding: 1.5rem 1rem; }
+    .sidebar-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
+    .sidebar-header .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .sidebar-header h2 { font-size: 1rem; font-weight: 700; }
+    .sidebar-header small { font-size: 0.7rem; color: var(--gray); }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.25rem; transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
+    .nav-item.active { font-weight: 600; background: linear-gradient(90deg, rgba(13,115,119,0.8), transparent); }
+    .nav-section { font-size: 0.65rem; text-transform: uppercase; color: var(--gray); margin: 1.5rem 0 0.5rem 0.75rem; letter-spacing: 1px; font-weight: 700; }
+    .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; }
+    .sidebar-footer strong { display: block; color: var(--white); }
+
+    /* Main Content */
+    .main-content { margin-left: 260px; flex: 1; padding: 2rem; max-width: 1400px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .header h1 { font-size: 1.5rem; }
+    
+    /* Stat Grid */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--white); padding: 1.25rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+    .stat-card h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--gray); margin-bottom: 0.5rem; }
+    .stat-card .value { font-size: 1.75rem; font-weight: 800; color: var(--dark); }
+    .stat-card.green { border-left-color: var(--success); }
+    .stat-card.orange { border-left-color: var(--warning); }
+    .stat-card.red { border-left-color: var(--danger); }
+
+    /* Table */
+    .table-container { background: var(--white); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
+    .table-header { padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .table-header h2 { font-size: 1.1rem; }
+    .table-header p { font-size: 0.8rem; color: var(--gray); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: var(--light); padding: 1rem 1.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--gray); font-weight: 600; letter-spacing: 0.5px; }
+    td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFBFC; }
+
+    /* Table Elements */
+    .student-info { display: flex; align-items: center; gap: 0.75rem; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--secondary); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+    .student-name { font-weight: 600; color: var(--dark); line-height: 1.2; }
+    .student-id { font-size: 0.75rem; color: var(--gray); }
+    
+    .progress-bar { width: 80px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 0.5rem; }
+    .progress-fill { height: 100%; background: var(--success); border-radius: 99px; }
+    .progress-text { font-size: 0.75rem; color: var(--gray); font-weight: 600; }
+
+    .badge { padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-success { background: var(--success-light); color: var(--success); }
+    .badge-warning { background: var(--warning-light); color: var(--warning); }
+    .badge-danger { background: var(--danger-light); color: var(--danger); }
+    .badge-neutral { background: var(--border); color: var(--gray); }
+
+    .btn-view { padding: 0.4rem 0.8rem; border: 1px solid var(--border); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--dark); transition: 0.2s; }
+    .btn-view:hover { background: var(--light); border-color: var(--gray); }
+
+    /* Loader */
+    .loader { display: flex; justify-content: center; align-items: center; height: 50vh; flex-direction: column; gap: 1rem; color: var(--gray); }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-<button class="menu-toggle" id="menuToggle">☰</button>
-<div class="app-container">
-  <aside class="sidebar" id="sidebar">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
     <div class="sidebar-header">
-      <div class="logo">👨‍🏫</div>
-      <div><h1>Instructor Panel</h1><small>Respiratory Mastery v2.1</small></div>
+      <div class="logo">🫁</div>
+      <div>
+        <h2>Instructor Panel</h2>
+        <small>Respiratory Mastery v3.1</small>
+      </div>
     </div>
-    <nav id="navMenu">
-      <div class="nav-section"><div class="nav-section-title">Main</div>
-        <button class="nav-item active" data-view="overview"><span class="icon">📊</span> Overview</button>
-        <button class="nav-item" data-view="import"><span class="icon">📥</span> Import Students</button>
-        <button class="nav-item" data-view="roster"><span class="icon">👥</span> Roster</button>
-      </div>
-      <div class="nav-section"><div class="nav-section-title">Data</div>
-        <button class="nav-item" data-view="sync"><span class="icon">☁️</span> Sync from Sheet</button>
-        <button class="nav-item" data-view="raw"><span class="icon">📋</span> Raw Data</button>
-      </div>
-      <div class="nav-section"><div class="nav-section-title">Quick Links</div>
-        <button class="nav-item" onclick="window.open('gradebook.html','_blank')"><span class="icon">📊</span> Open Gradebook</button>
-        <button class="nav-item" onclick="window.open('index.html','_blank')"><span class="icon">🫁</span> Student App</button>
-      </div>
-      <div class="nav-section"><div class="nav-section-title">Tools</div>
-        <button class="nav-item" data-view="settings"><span class="icon">⚙️</span> Settings</button>
-      </div>
-    </nav>
+
+    <div class="nav-section">Main</div>
+    <a href="#" class="nav-item active">📊 Overview</a>
+    <a href="#" class="nav-item">📥 Import Students</a>
+    <a href="#" class="nav-item">👥 Roster</a>
+
+    <div class="nav-section">Data</div>
+    <a href="#" class="nav-item" onclick="syncData()">🔄 Sync from Sheet</a>
+    <a href="#" class="nav-item">📄 Raw Data</a>
+
+    <div class="nav-section">Quick Links</div>
+    <a href="gradebook.html" class="nav-item">📖 Open Gradebook</a>
+    <a href="index.html" class="nav-item" target="_blank">📱 Student App</a>
+
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-item">⚙️ Settings</a>
+
     <div class="sidebar-footer">
-      <div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>
-      <div>Tarlac State University</div>
-      <div class="app-version"><span class="status-dot" id="backendStatus"></span><span id="backendStatusText">Checking...</span></div>
+      <strong>JEMUEL C. MARI, MAN, RN, LPT</strong>
+      Tarlac State University<br>
+      <span style="color: var(--success);">● Online</span>
     </div>
   </aside>
-  <main class="main-content" id="mainContent"><div style="padding:3rem;text-align:center;color:var(--gray);">Loading...</div></main>
-</div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header"><h2 id="modalTitle">Modal</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="header">
+      <h1>Dashboard Overview</h1>
+      <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
+    </div>
 
-<script>
-var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
+    <!-- STATS -->
+    <div class="stat-grid" id="statGrid">
+      <!-- Populated by JS -->
+    </div>
 
-var SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033'];
-var SEMESTERS = ['1st Semester', '2nd Semester'];
-var CURRENT_SY = '2026-2027';
-var CURRENT_SEM = '1st Semester';
+    <!-- STUDENT TABLE -->
+    <div class="table-container">
+      <div class="table-header">
+        <div>
+          <h2>Students</h2>
+          <p id="studentCount">Loading students...</p>
+        </div>
+        <button class="btn-view">View All →</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Section</th>
+            <th>SY / Sem</th>
+            <th>Progress</th>
+            <th>Unit Avg</th>
+            <th>Exam</th>
+            <th>Status</th>
+            <th>Validation</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="studentTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
 
-var DB = {
-  localKey: 'respMastery_instructor_v2',
-  state: {
-    students: [],
-    settings: { instructorName: 'JEMUEL C. MARI, MAN, RN, LPT', courseName: 'NCM 101B Lab' },
-    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM },
-    lastSync: null
-  },
-  currentView: 'overview'
-};
+  <script>
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
+    const STORAGE_KEY = 'respMastery_instructor_v2';
+    let allStudents = [];
 
-function loadLocal() {
-  try {
-    var raw = localStorage.getItem(DB.localKey);
-    if (raw) {
-      var p = JSON.parse(raw);
-      DB.state.students = p.students || [];
-      DB.state.settings = Object.assign(DB.state.settings, p.settings || {});
-      if (p.filters) DB.state.filters = p.filters;
-      DB.state.lastSync = p.lastSync || null;
+    // Helper: Parse percentage strings safely
+    function parsePct(val) {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'string') return parseFloat(val.replace('%', '')) || 0;
+      return Number(val) || 0;
     }
-  } catch (e) {}
-}
-function saveLocal() { try { localStorage.setItem(DB.localKey, JSON.stringify(DB.state)); } catch (e) {} }
-function toast(msg, type) {
-  type = type || '';
-  var el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + type;
-  clearTimeout(el._t);
-  el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
-}
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]; }); }
-function initialsOf(name) { if (!name) return '?'; var p = name.split(/\s+/); return ((p[0]||'')[0] || '') + ((p[p.length-1]||'')[0] || ''); }
 
-async function checkBackend() {
-  var dot = document.getElementById('backendStatus'), text = document.getElementById('backendStatusText');
-  try {
-    var r = await fetch(BACKEND_URL + '?action=ping');
-    var d = await r.json();
-    if (d.success) { dot.className = 'status-dot online'; text.textContent = 'Online'; return true; }
-  } catch (e) {}
-  dot.className = 'status-dot offline'; text.textContent = 'Offline';
-  return false;
-}
-async function backendGet(params) {
-  var qs = new URLSearchParams(params).toString();
-  var r = await fetch(BACKEND_URL + '?' + qs);
-  return await r.json();
-}
+    // 1. Fetch from Backend
+    async function syncData() {
+      document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9"><div class="loader"><div class="spinner"></div>Syncing...</div></td></tr>';
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}?action=listAll`);
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error || 'Sync failed');
+        
+        // Save to localStorage
+        const state = { students: [], settings: {}, lastSync: new Date().toISOString() };
+        const existingRaw = localStorage.getItem(STORAGE_KEY);
+        if (existingRaw) {
+          const parsed = JSON.parse(existingRaw);
+          state.settings = parsed.settings || {};
+        }
 
-function getStudentPercent(s) {
-  if (typeof s.unitsCompleted === 'string') return parseInt(s.unitsCompleted, 10) || 0;
-  if (typeof s.unitsCompleted === 'number') return s.unitsCompleted;
-  return 0;
-}
-function getUnitAvg(s) {
-  if (typeof s.unitAvg === 'string') return parseInt(s.unitAvg, 10) || 0;
-  if (typeof s.unitAvg === 'number') return s.unitAvg;
-  return 0;
-}
-function getExamScore(s) { return s.examScore || null; }
-function getExamTotal(s) { return s.examTotal || 30; }
-function getExamPercent(s) { return s.examPercentage || null; }
-function isExamPassed(s) { return s.examPassed === 'PASSED' || s.examPassed === true; }
-function findExisting(no, em, sy, sem) {
-  return DB.state.students.find(function(x) {
-    var matchPerson = (no && x.studentNo && String(x.studentNo).trim() === String(no).trim()) ||
-                      (em && x.email && String(x.email).trim().toLowerCase() === String(em).trim().toLowerCase());
-    var matchTerm = (x.schoolYear || '') === (sy || '') && (x.semester || '') === (sem || '');
-    return matchPerson && matchTerm;
-  });
-}
-function filterBySY(students) {
-  var f = DB.state.filters;
-  return students.filter(function(s) {
-    if (f.schoolYear && (s.schoolYear || '') !== f.schoolYear) return false;
-    if (f.semester && (s.semester || '') !== f.semester) return false;
-    return true;
-  });
-}
-function validateStudentDash(s) {
-  var issues = [];
-  if (!s.name || s.name.length < 3) issues.push('Name');
-  if (!s.studentNo) issues.push('Student No');
-  if (!s.section) issues.push('Section');
-  if (!s.email || s.email.indexOf('@') < 0) issues.push('Email');
-  if (!s.schoolYear) issues.push('SY');
-  if (!s.semester) issues.push('Sem');
-  return issues;
-}
+        // Process Records
+        data.records.forEach(rec => {
+          let payload = {};
+          try { payload = JSON.parse(rec.dataJson || '{}'); } catch (e) {}
+          
+          const student = payload.student || {};
+          
+          // Extract metrics safely
+          const unitsCompletedRaw = rec.unitsCompleted || payload.progress?.unitsCompleted || 0;
+          const unitAvgRaw = rec.unitAvg || payload.quizAttempts?.unitAvg || 0;
+          const examScore = rec.examScore !== undefined ? rec.examScore : (payload.exam?.score || null);
+          const examTotal = rec.examTotal || payload.exam?.total || 30;
+          const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
+          const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
 
-function navigate(view) {
-  DB.currentView = view;
-  document.querySelectorAll('.nav-item[data-view]').forEach(function(n) { n.classList.toggle('active', n.dataset.view === view); });
-  renderView(view);
-  document.getElementById('sidebar').classList.remove('open');
-}
-function onDashFilterChange() {
-  DB.state.filters.schoolYear = document.getElementById('dashFilterSY').value;
-  DB.state.filters.semester = document.getElementById('dashFilterSem').value;
-  saveLocal();
-  renderView(DB.currentView || 'overview');
-}
-function renderFilterBar() {
-  var f = DB.state.filters;
-  return '<div class="filter-bar">' +
-    '<strong style="font-size:.82rem;">Filter:</strong>' +
-    '<select class="filter-select" id="dashFilterSY" onchange="onDashFilterChange()">' +
-      SCHOOL_YEARS.map(function(sy) { return '<option value="' + sy + '"' + (sy === f.schoolYear ? ' selected' : '') + '>' + sy + '</option>'; }).join('') +
-    '</select>' +
-    '<select class="filter-select" id="dashFilterSem" onchange="onDashFilterChange()">' +
-      SEMESTERS.map(function(sm) { return '<option value="' + sm + '"' + (sm === f.semester ? ' selected' : '') + '>' + sm + '</option>'; }).join('') +
-    '</select>' +
-    '<button class="btn btn-outline btn-sm" onclick="openNormalizeModal()">🧹 Normalize</button>' +
-    '</div>';
-}
+          state.students.push({
+            id: rec.studentNo || student.studentNo || rec.email,
+            name: rec.fullName || student.fullName || 'Unknown',
+            studentNo: rec.studentNo || student.studentNo || '—',
+            section: rec.section || student.section || '—',
+            schoolYear: rec.schoolYear || student.schoolYear || '—',
+            semester: rec.semester || student.semester || '—',
+            unitsCompleted: parsePct(unitsCompletedRaw),
+            unitAvg: parsePct(unitAvgRaw),
+            examScore: examScore,
+            examTotal: examTotal,
+            examPct: examPct,
+            examPassed: examPassed,
+            examTaken: examScore !== null
+          });
+        });
 
-function renderView(view) {
-  var main = document.getElementById('mainContent');
-  main.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--gray);">Loading...</div>';
-  setTimeout(function() {
-    switch (view) {
-      case 'overview': return renderOverview(main);
-      case 'import': return renderImport(main);
-      case 'roster': return renderRoster(main);
-      case 'sync': return renderSync(main);
-      case 'raw': return renderRaw(main);
-      case 'settings': return renderSettings(main);
-      default: return renderOverview(main);
-    }
-  }, 80);
-}
-
-function renderOverview(main) {
-  var students = filterBySY(DB.state.students);
-  var mastered = students.filter(function(s) { return getStudentPercent(s) === 100 && isExamPassed(s); }).length;
-  var html = '<div class="topbar"><div class="topbar-left"><h1>📊 Overview</h1><p>Class snapshot</p></div>';
-  html += '<div class="topbar-actions">';
-  html += '<button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button>';
-  html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'sync\')">🔄 Sync</button>';
-  html += '<button class="btn btn-primary btn-sm" onclick="navigate(\'import\')">📥 Import</button>';
-  html += '</div></div>';
-  html += renderFilterBar();
-  html += '<div class="stats-grid">';
-  html += '<div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value">' + students.length + '</div></div>';
-  html += '<div class="stat-card success"><div class="stat-label">Mastered</div><div class="stat-value">' + mastered + '</div></div>';
-  html += '<div class="stat-card warning"><div class="stat-label">In Progress</div><div class="stat-value">' + students.filter(function(s) { return getStudentPercent(s) > 0 && getStudentPercent(s) < 100; }).length + '</div></div>';
-  html += '<div class="stat-card alert"><div class="stat-label">Exam Failed</div><div class="stat-value">' + students.filter(function(s) { return s.examTakenAt && !isExamPassed(s); }).length + '</div></div>';
-  html += '</div>';
-  html += '<div class="card"><div class="card-header"><div><h2 class="card-title">Students</h2>';
-  html += '<p class="card-subtitle">' + students.length + ' in current filter</p></div>';
-  html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'roster\')">View All →</button></div>';
-  if (students.length === 0) {
-    html += '<div class="empty-state"><div class="icon">📭</div><h3>No students yet</h3>';
-    html += '<p>Click <strong>Import</strong> to add students by code or <strong>Sync</strong> from Google Sheets</p></div>';
-  } else {
-    html += renderStudentTable(students.slice(0, 10));
-  }
-  html += '</div>';
-  main.innerHTML = html;
-}
-
-function renderImport(main) {
-  var html = '<div class="topbar"><div class="topbar-left"><h1>📥 Import Students</h1>';
-  html += '<p>Enter the code from the student</p></div>';
-  html += '<div class="topbar-actions"><button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button></div></div>';
-  html += renderFilterBar();
-  html += '<div class="code-input-hero"><h2>🎯 Enter Student Code</h2>';
-  html += '<p>Format: <code style="background:rgba(255,255,255,.2);color:#fff;padding:.15rem .5rem;border-radius:4px;">RA-XXXX-XXXX</code></p>';
-  html += '<div class="code-input-box">';
-  html += '<input type="text" id="codeInput" placeholder="RA-0000-0000" maxlength="12" autocomplete="off" />';
-  html += '<button class="btn btn-primary" onclick="submitCode()">Import →</button></div></div>';
-  html += '<div id="importResult"></div>';
-  main.innerHTML = html;
-  var input = document.getElementById('codeInput');
-  input.addEventListener('input', function() { input.value = input.value.toUpperCase(); });
-  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitCode(); });
-  input.focus();
-}
-
-async function submitCode() {
-  var code = (document.getElementById('codeInput').value || '').trim().toUpperCase();
-  var resultEl = document.getElementById('importResult');
-  if (!code) return toast('Enter a code.', 'warning');
-  resultEl.innerHTML = '<div class="callout callout-info">⏳ Fetching...</div>';
-  try {
-    var r = await backendGet({ action: 'getByCode', code: code });
-    if (!r.success) {
-      resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(r.error || 'Not found') + '</div>';
-      return;
-    }
-    renderPreview(r.record, resultEl);
-  } catch (err) {
-    resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
-  }
-}
-
-function renderPreview(rec, container) {
-  var payload = rec.payload || {};
-  var s = (payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
-  var sy = s.schoolYear || rec.schoolYear || CURRENT_SY;
-  var sem = s.semester || rec.semester || CURRENT_SEM;
-  var existing = findExisting(s.studentNo, s.email, sy, sem);
-  var html = '<div class="card" style="background:#E8F5E9;border:2px solid var(--success);">';
-  html += '<div class="card-header"><div><h2 class="card-title" style="color:var(--success);">✅ Student Found</h2></div></div>';
-  html += '<table><tbody>';
-  html += '<tr><td><strong>Name</strong></td><td>' + escapeHtml(s.fullName) + '</td></tr>';
-  html += '<tr><td><strong>Student No</strong></td><td>' + escapeHtml(s.studentNo || '—') + '</td></tr>';
-  html += '<tr><td><strong>Section</strong></td><td>' + escapeHtml(s.section || '—') + '</td></tr>';
-  html += '<tr><td><strong>Group</strong></td><td>' + escapeHtml(s.group || '—') + '</td></tr>';
-  html += '<tr><td><strong>School Year</strong></td><td>' + escapeHtml(sy) + '</td></tr>';
-  html += '<tr><td><strong>Semester</strong></td><td>' + escapeHtml(sem) + '</td></tr>';
-  html += '<tr><td><strong>Email</strong></td><td>' + escapeHtml(s.email || '—') + '</td></tr>';
-  html += '<tr><td><strong>Units</strong></td><td>' + escapeHtml(rec.unitsCompleted || '—') + '</td></tr>';
-  html += '<tr><td><strong>Unit Avg</strong></td><td>' + escapeHtml(rec.unitAvg || '—') + '</td></tr>';
-  html += '<tr><td><strong>Exam</strong></td><td>' + (rec.examScore ? rec.examScore + '/' + rec.examTotal + ' (' + rec.examPercentage + '%) — ' + rec.examPassed : 'Not taken') + '</td></tr>';
-  html += '<tr><td><strong>Code</strong></td><td><span class="code-chip" onclick="copyText(\'' + escapeHtml(rec.code) + '\')">' + escapeHtml(rec.code) + ' 📋</span></td></tr>';
-  html += '</tbody></table>';
-  if (existing) {
-    html += '<div class="callout callout-warning mt-2">⚠️ Already in roster for this SY/Sem: ' + escapeHtml(existing.name) + '</div>';
-    html += '<div class="flex gap-1 flex-wrap mt-2">';
-    html += '<button class="btn btn-primary" onclick=\'confirmImport("' + escapeHtml(rec.code) + '", "update", "' + existing.id + '")\'>🔄 Update</button>';
-    html += '<button class="btn btn-outline" onclick=\'confirmImport("' + escapeHtml(rec.code) + '", "new", null)\'>➕ New</button>';
-    html += '</div>';
-  } else {
-    html += '<button class="btn btn-primary btn-lg mt-2" onclick=\'confirmImport("' + escapeHtml(rec.code) + '", "new", null)\'>✅ Add to Roster</button>';
-  }
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-async function confirmImport(code, mode, existingId) {
-  toast('⏳ Fetching latest...', 'info');
-  var r = await backendGet({ action: 'getByCode', code: code });
-  if (!r.success) return toast('Fetch failed.', 'error');
-  var rec = r.record;
-  var payload = rec.payload || {};
-  var s = payload.student || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
-  var sy = s.schoolYear || rec.schoolYear || CURRENT_SY;
-  var sem = s.semester || rec.semester || CURRENT_SEM;
-
-  if (mode === 'new') {
-    var dup = findExisting(s.studentNo, s.email, sy, sem);
-    if (dup) {
-      if (!confirm('Duplicate found: ' + dup.name + '\n\nUpdate existing?')) return;
-      mode = 'update';
-      existingId = dup.id;
-    }
-  }
-  var existing = (mode === 'update' && existingId) ? DB.state.students.find(function(x) { return x.id === existingId; }) : null;
-  var newRecord = {
-    id: existing ? existing.id : 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    name: s.fullName, studentNo: s.studentNo || '', section: s.section || '', group: s.group || '', email: s.email || '',
-    schoolYear: sy, semester: sem,
-    unitsCompleted: rec.unitsCompleted || '0%', unitAvg: rec.unitAvg || '0%',
-    examScore: rec.examScore, examTotal: rec.examTotal, examPercentage: rec.examPercentage, examPassed: rec.examPassed,
-    examTakenAt: rec.timestamp, submissionCode: rec.code,
-    retakeActive: existing ? existing.retakeActive : 'NO',
-    retakeCode: existing ? existing.retakeCode : null,
-    lastActive: rec.timestamp
-  };
-
-  if (mode === 'update' && existingId) {
-    var idx = DB.state.students.findIndex(function(x) { return x.id === existingId; });
-    if (idx >= 0) DB.state.students[idx] = newRecord;
-    toast('✅ Updated!', 'success');
-  } else {
-    DB.state.students.push(newRecord);
-    toast('✅ Added!', 'success');
-  }
-  saveLocal();
-  navigate('roster');
-}
-
-function renderRoster(main) {
-  var students = filterBySY(DB.state.students);
-  var html = '<div class="topbar"><div class="topbar-left"><h1>👥 Roster</h1><p>' + students.length + ' students</p></div>';
-  html += '<div class="topbar-actions">';
-  html += '<button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button>';
-  html += '<button class="btn btn-outline btn-sm" onclick="navigate(\'sync\')">🔄 Sync</button>';
-  html += '<button class="btn btn-outline btn-sm" onclick="exportCSV()">📤 Export CSV</button>';
-  html += '</div></div>';
-  html += renderFilterBar();
-  html += '<div class="card" style="padding:1rem;"><div class="search-box"><input type="text" id="searchInput" placeholder="Search..." oninput="filterTable()"></div></div>';
-  html += '<div class="card" style="padding:1rem 0;">';
-  if (students.length === 0) {
-    html += '<div class="empty-state"><div class="icon">📭</div><h3>No students</h3><p>Import students or sync from Sheet</p></div>';
-  } else {
-    html += renderStudentTable(students);
-  }
-  html += '</div>';
-  main.innerHTML = html;
-}
-
-function renderStudentTable(students) {
-  var html = '<div class="table-wrap"><table id="studentTable"><thead><tr>';
-  html += '<th>Student</th><th>Section</th><th>SY / Sem</th><th>Progress</th><th>Unit Avg</th><th>Exam</th><th>Status</th><th>Validation</th><th>Actions</th>';
-  html += '</tr></thead><tbody>';
-  students.forEach(function(s) {
-    var pct = getStudentPercent(s);
-    var examTaken = s.examTakenAt;
-    var examPass = isExamPassed(s);
-    var status = '', statusCls = '';
-    if (pct === 100 && examPass) { status = 'Mastered'; statusCls = 'pill-success'; }
-    else if (examTaken && !examPass) { status = 'Exam Failed'; statusCls = 'pill-danger'; }
-    else if (pct >= 50) { status = 'In Progress'; statusCls = 'pill-info'; }
-    else if (pct > 0) { status = 'At Risk'; statusCls = 'pill-warning'; }
-    else { status = 'Not Started'; statusCls = 'pill-gray'; }
-    var issues = validateStudentDash(s);
-
-    html += '<tr>';
-    html += '<td><div class="flex items-center gap-1"><div class="avatar">' + initialsOf(s.name) + '</div>';
-    html += '<div><div style="font-weight:700;font-size:.88rem;">' + escapeHtml(s.name) + '</div>';
-    html += '<div class="text-xs text-gray">' + escapeHtml(s.studentNo || '') + '</div></div></div></td>';
-    html += '<td class="text-sm">' + escapeHtml(s.section || '—') + '</td>';
-    html += '<td class="text-sm">' + escapeHtml(s.schoolYear || '—') + '<br><span class="text-xs text-gray">' + escapeHtml(s.semester || '') + '</span></td>';
-    html += '<td><div class="progress-bar"><div class="progress-fill ' + (pct >= 75 ? '' : pct >= 50 ? 'warn' : 'danger') + '" style="width:' + pct + '%"></div></div>';
-    html += '<div class="text-xs text-gray mt-1">' + pct + '%</div></td>';
-    html += '<td><strong>' + getUnitAvg(s) + '%</strong></td>';
-    html += '<td>' + (examTaken ? '<span class="pill ' + (examPass ? 'pill-success' : 'pill-danger') + '">' + getExamScore(s) + '/' + getExamTotal(s) + '</span>' : '<span class="pill pill-gray">Not taken</span>') + '</td>';
-    html += '<td><span class="pill ' + statusCls + '">' + status + '</span></td>';
-    html += '<td>' + (issues.length ? '<span class="pill pill-warning" title="' + escapeHtml(issues.join(', ')) + '">⚠️ ' + issues.length + ' issue(s)</span>' : '<span class="pill pill-success">✅ OK</span>') + '</td>';
-    html += '<td><button class="btn btn-primary btn-sm" onclick="viewStudent(\'' + s.id + '\')">View</button></td>';
-    html += '</tr>';
-  });
-  html += '</tbody></table></div>';
-  return html;
-}
-
-function filterTable() {
-  var q = (document.getElementById('searchInput').value || '').toLowerCase();
-  document.querySelectorAll('#studentTable tbody tr').forEach(function(tr) {
-    tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
-  });
-}
-
-function viewStudent(id) {
-  var s = DB.state.students.find(function(x) { return x.id === id; });
-  if (!s) return;
-  document.getElementById('modalTitle').textContent = s.name;
-  var html = '<div class="flex gap-2 flex-wrap mb-2">';
-  html += '<span class="pill pill-info">' + getStudentPercent(s) + '% Complete</span>';
-  html += '<span class="pill pill-primary">Unit Avg ' + getUnitAvg(s) + '%</span>';
-  if (s.examTakenAt) html += '<span class="pill ' + (isExamPassed(s) ? 'pill-success' : 'pill-danger') + '">Exam ' + getExamScore(s) + '/' + getExamTotal(s) + '</span>';
-  html += '</div>';
-  html += '<p><strong>Student No:</strong> ' + escapeHtml(s.studentNo) + '</p>';
-  html += '<p><strong>Section:</strong> ' + escapeHtml(s.section) + '</p>';
-  html += '<p><strong>Group:</strong> ' + escapeHtml(s.group) + '</p>';
-  html += '<p><strong>School Year:</strong> ' + escapeHtml(s.schoolYear || '—') + '</p>';
-  html += '<p><strong>Semester:</strong> ' + escapeHtml(s.semester || '—') + '</p>';
-  html += '<p><strong>Email:</strong> ' + escapeHtml(s.email) + '</p>';
-  html += '<p><strong>Code:</strong> <span class="code-chip">' + escapeHtml(s.submissionCode || '—') + '</span></p>';
-  html += '<div class="flex gap-1 flex-wrap mt-2">';
-  html += '<button class="btn btn-primary" onclick="editStudent(\'' + s.id + '\')">✏️ Edit</button>';
-  html += '<button class="btn btn-outline" onclick="closeModal()">Close</button>';
-  html += '</div>';
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('modalOverlay').classList.add('show');
-}
-
-function editStudent(id) {
-  var s = DB.state.students.find(function(x) { return x.id === id; });
-  if (!s) return;
-  document.getElementById('modalTitle').textContent = '✏️ Edit';
-  var html = '<div class="form-row">';
-  html += '<div class="form-group"><label>Name</label><input type="text" id="e_name" value="' + escapeHtml(s.name) + '"></div>';
-  html += '<div class="form-group"><label>Student No</label><input type="text" id="e_no" value="' + escapeHtml(s.studentNo) + '"></div></div>';
-  html += '<div class="form-row">';
-  html += '<div class="form-group"><label>Section</label><input type="text" id="e_sec" value="' + escapeHtml(s.section) + '"></div>';
-  html += '<div class="form-group"><label>Group</label><input type="text" id="e_grp" value="' + escapeHtml(s.group) + '"></div></div>';
-  html += '<div class="form-group"><label>Email</label><input type="email" id="e_email" value="' + escapeHtml(s.email) + '"></div>';
-  html += '<div class="flex gap-1 mt-2"><button class="btn btn-primary" onclick="saveEdit(\'' + s.id + '\')">💾 Save</button>';
-  html += '<button class="btn btn-outline" onclick="viewStudent(\'' + s.id + '\')">Cancel</button></div>';
-  document.getElementById('modalBody').innerHTML = html;
-}
-
-function saveEdit(id) {
-  var s = DB.state.students.find(function(x) { return x.id === id; });
-  if (!s) return;
-  s.name = document.getElementById('e_name').value.trim();
-  s.studentNo = document.getElementById('e_no').value.trim();
-  s.section = document.getElementById('e_sec').value.trim();
-  s.group = document.getElementById('e_grp').value.trim();
-  s.email = document.getElementById('e_email').value.trim();
-  saveLocal();
-  toast('✅ Saved!', 'success');
-  viewStudent(id);
-}
-
-function renderSync(main) {
-  var html = '<div class="topbar"><div class="topbar-left"><h1>☁️ Sync from Google Sheets</h1>';
-  html += '<p>Bulk import all submissions</p></div>';
-  html += '<div class="topbar-actions"><button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button></div></div>';
-  html += renderFilterBar();
-  html += '<div class="card">';
-  html += '<div class="callout callout-info"><strong>ℹ️ How it works:</strong> This fetches ALL submissions from your Google Sheet. Existing students (same person + SY + Sem) are updated.</div>';
-  html += '<button class="btn btn-primary btn-lg btn-block mt-2" onclick="doSync()">🔄 Sync Now</button>';
-  html += '<div id="syncResult" class="mt-2"></div></div>';
-  main.innerHTML = html;
-}
-
-async function doSync() {
-  var resultEl = document.getElementById('syncResult');
-  resultEl.innerHTML = '<div class="callout callout-info">⏳ Syncing...</div>';
-  try {
-    var r = await backendGet({ action: 'listAll' });
-    if (!r.success) { resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(r.error || 'Failed') + '</div>'; return; }
-    var added = 0, updated = 0;
-    r.records.forEach(function(rec) {
-      var payload = null;
-      try { payload = JSON.parse(rec.dataJson); } catch (e) {}
-      var s = (payload && payload.student) || { fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section, group: rec.group, email: rec.email, schoolYear: rec.schoolYear, semester: rec.semester };
-      var sy = s.schoolYear || rec.schoolYear || '';
-      var sem = s.semester || rec.semester || '';
-      var existing = findExisting(s.studentNo, s.email, sy, sem);
-      var newRecord = {
-        id: existing ? existing.id : 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name: s.fullName, studentNo: s.studentNo || '', section: s.section || '', group: s.group || '', email: s.email || '',
-        schoolYear: sy, semester: sem,
-        unitsCompleted: rec.unitsCompleted || '0%', unitAvg: rec.unitAvg || '0%',
-        examScore: rec.examScore, examTotal: rec.examTotal, examPercentage: rec.examPercentage, examPassed: rec.examPassed,
-        examTakenAt: rec.timestamp, submissionCode: rec.code,
-        retakeActive: existing ? existing.retakeActive : 'NO',
-        retakeCode: existing ? existing.retakeCode : null,
-        lastActive: rec.timestamp
-      };
-      if (existing) {
-        var idx = DB.state.students.findIndex(function(x) { return x.id === existing.id; });
-        if (idx >= 0) { DB.state.students[idx] = newRecord; updated++; }
-      } else {
-        DB.state.students.push(newRecord);
-        added++;
+        state.students.sort((a, b) => a.name.localeCompare(b.name));
+        allStudents = state.students;
+        
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderDashboard();
+        
+      } catch (err) {
+        console.error(err);
+        document.getElementById('studentTableBody').innerHTML = `<tr><td colspan="9" style="color:red;">Error: ${err.message}</td></tr>`;
       }
-    });
-    DB.state.lastSync = new Date().toISOString();
-    saveLocal();
-    resultEl.innerHTML = '<div class="callout callout-success">✅ Sync complete! Added: ' + added + ', Updated: ' + updated + '</div>';
-    toast('✅ Sync complete!', 'success');
-  } catch (err) {
-    resultEl.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
-  }
-}
-
-function renderRaw(main) {
-  main.innerHTML = '<div class="topbar"><div class="topbar-left"><h1>📋 Raw Data</h1></div></div>' +
-    '<div class="card"><pre>' + escapeHtml(JSON.stringify(DB.state, null, 2)) + '</pre></div>';
-}
-
-function renderSettings(main) {
-  main.innerHTML = '<div class="topbar"><div class="topbar-left"><h1>⚙️ Settings</h1></div>';
-  main.innerHTML += '<div class="topbar-actions"><button class="btn btn-outline btn-sm" onclick="window.open(\'gradebook.html\',\'_blank\')">📊 Open Gradebook</button></div></div>';
-  main.innerHTML += '<div class="card"><h3>Backend URL</h3><p class="text-sm text-gray">' + escapeHtml(BACKEND_URL) + '</p>';
-  main.innerHTML += '<button class="btn btn-outline btn-sm mt-2" onclick="checkBackend()">🔌 Test Connection</button></div>';
-  main.innerHTML += '<div class="card"><h3>Danger Zone</h3>';
-  main.innerHTML += '<button class="btn btn-danger btn-sm" onclick="if(confirm(\'Clear ALL local data?\')){localStorage.removeItem(DB.localKey);location.reload()}">🗑️ Clear All Local Data</button></div>';
-}
-
-function openNormalizeModal() {
-  document.getElementById('modalTitle').textContent = '🧹 Normalize Data';
-  document.getElementById('modalBody').innerHTML =
-    '<p style="font-size:.88rem;color:var(--gray);margin-bottom:1rem;">Fixes common data issues in the Submissions sheet: trim whitespace, proper-case names, standardize SY/Sem/group/section.</p>' +
-    '<div class="callout callout-warning"><strong>⚠️ This updates the Google Sheet directly.</strong></div>' +
-    '<div class="flex gap-1" style="flex-wrap:wrap;">' +
-    '<button class="btn btn-primary" onclick="runNormalize()">🧹 Run Normalize Now</button>' +
-    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>' +
-    '<div id="normalizeResult" class="mt-2"></div>';
-  document.getElementById('modalOverlay').classList.add('show');
-}
-async function runNormalize() {
-  var el = document.getElementById('normalizeResult');
-  el.innerHTML = '<div class="callout callout-info">⏳ Running...</div>';
-  try {
-    var params = new URLSearchParams();
-    params.append('action', 'normalizeAll');
-    params.append('sheetName', 'Submissions');
-    var r = await fetch(BACKEND_URL, { method: 'POST', body: params });
-    var d = await r.json();
-    if (d.success) {
-      el.innerHTML = '<div class="callout callout-success">✅ Normalized ' + d.fixed + ' row(s). Syncing...</div>';
-      setTimeout(function() { closeModal(); doSync(); }, 800);
-    } else {
-      el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(d.error || 'Failed') + '</div>';
     }
-  } catch (err) {
-    el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
-  }
-}
 
-function exportCSV() {
-  var students = filterBySY(DB.state.students);
-  if (!students.length) return toast('No data.', 'warning');
-  var headers = ['Name','Student No','Section','Group','School Year','Semester','Email','Units %','Unit Avg','Exam Score','Exam Total','Exam %','Exam Result','Submission Code'];
-  var rows = students.map(function(s) {
-    return [s.name, s.studentNo||'', s.section||'', s.group||'', s.schoolYear||'', s.semester||'', s.email||'',
-            getStudentPercent(s)+'%', getUnitAvg(s)+'%', getExamScore(s)||'', getExamTotal(s)||'', getExamPercent(s)||'',
-            s.examPassed||'NOT TAKEN', s.submissionCode||''];
-  });
-  var csv = [headers].concat(rows).map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
-  var blob = new Blob([csv], { type: 'text/csv' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = 'roster-' + DB.state.filters.schoolYear + '-' + DB.state.filters.semester.replace(/\s+/g,'') + '.csv';
-  a.click(); URL.revokeObjectURL(url);
-  toast('✅ CSV exported.', 'success');
-}
+    // 2. Load from LocalStorage (Initial)
+    function loadLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          allStudents = parsed.students || [];
+          renderDashboard();
+        } catch (e) { console.error('Parse error', e); }
+      } else {
+        syncData(); // Auto-sync if no cache
+      }
+    }
 
-function copyText(txt) {
-  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function() { toast('✅ Copied!', 'success'); });
-  else {
-    var ta = document.createElement('textarea'); ta.value = txt;
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('✅ Copied!', 'success'); } catch (e) {}
-    document.body.removeChild(ta);
-  }
-}
+    // 3. Render UI
+    function renderDashboard() {
+      if (!allStudents.length) {
+        document.getElementById('studentCount').textContent = '0 students';
+        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found. Click Sync to pull data.</td></tr>';
+        return;
+      }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+      // Calculate Stats
+      const total = allStudents.length;
+      const passedExam = allStudents.filter(s => s.examPassed).length;
+      const atRisk = allStudents.filter(s => s.examTaken && !s.examPassed).length;
+      const notTaken = allStudents.filter(s => !s.examTaken).length;
 
-function init() {
-  loadLocal();
-  document.querySelectorAll('.nav-item[data-view]').forEach(function(n) {
-    n.addEventListener('click', function() { navigate(n.dataset.view); });
-  });
-  document.getElementById('menuToggle').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.toggle('open');
-  });
-  document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target.id === 'modalOverlay') closeModal();
-  });
-  navigate('overview');
-  checkBackend();
-}
-document.addEventListener('DOMContentLoaded', init);
-</script>
+      document.getElementById('statGrid').innerHTML = `
+        <div class="stat-card"><h3>Total Students</h3><div class="value">${total}</div></div>
+        <div class="stat-card green"><h3>Exam Passed</h3><div class="value">${passedExam}</div></div>
+        <div class="stat-card orange"><h3>At Risk (Failed)</h3><div class="value">${atRisk}</div></div>
+        <div class="stat-card red"><h3>Not Taken</h3><div class="value">${notTaken}</div></div>
+      `;
+
+      document.getElementById('studentCount').textContent = `${total} in current filter`;
+
+      // Render Rows
+      const tbody = document.getElementById('studentTableBody');
+      tbody.innerHTML = allStudents.map(s => {
+        // Initials
+        const parts = s.name.trim().split(/\s+/);
+        const initials = ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
+
+        // Exam display
+        let examDisplay = '—';
+        let statusBadge = '<span class="badge badge-neutral">Pending</span>';
+        
+        if (s.examTaken) {
+          examDisplay = `<span style="font-weight:600; color:${s.examPassed ? 'var(--success)' : 'var(--danger)'}">${s.examScore}/${s.examTotal}</span>`;
+          statusBadge = s.examPassed 
+            ? '<span class="badge badge-success">Passed</span>' 
+            : '<span class="badge badge-danger">Failed</span>';
+        } else if (s.unitAvg > 0) {
+          statusBadge = '<span class="badge badge-warning">In Progress</span>';
+        }
+
+        return `
+          <tr>
+            <td>
+              <div class="student-info">
+                <div class="avatar">${initials}</div>
+                <div>
+                  <div class="student-name">${s.name}</div>
+                  <div class="student-id">${s.studentNo}</div>
+                </div>
+              </div>
+            </td>
+            <td>${s.section}</td>
+            <td>
+              <div style="font-size:0.8rem; font-weight:600;">${s.schoolYear}</div>
+              <div style="font-size:0.7rem; color:var(--gray);">${s.semester}</div>
+            </td>
+            <td>
+              <div class="progress-bar"><div class="progress-fill" style="width:${s.unitsCompleted}%; background:${s.unitsCompleted===100 ? 'var(--success)' : 'var(--primary)'};"></div></div>
+              <span class="progress-text">${Math.round(s.unitsCompleted)}%</span>
+            </td>
+            <td><span style="font-weight:600; color:${s.unitAvg >= 90 ? 'var(--success)' : s.unitAvg >= 75 ? 'var(--warning)' : 'var(--danger)'}">${Math.round(s.unitAvg)}%</span></td>
+            <td>${examDisplay}</td>
+            <td>${statusBadge}</td>
+            <td><span style="color:var(--success); font-weight:600; font-size:0.8rem;">✅ OK</span></td>
+            <td><button class="btn-view">View</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadLocal);
+  </script>
 </body>
 </html>
