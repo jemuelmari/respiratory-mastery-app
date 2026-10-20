@@ -37,8 +37,14 @@
 
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .header h1 { font-size: 1.5rem; }
-    .header-controls { display: flex; gap: 1rem; align-items: center; }
-    .search-box { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 250px; }
+    .header-controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 0.75rem; align-items: center; background: var(--white); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; }
+    .filter-bar label { font-size: 0.85rem; font-weight: 600; color: var(--gray); }
+    .search-box { padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; width: 200px; }
+    .filter-select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: inherit; background: var(--white); cursor: pointer; outline: none; }
+    .filter-select:focus, .search-box:focus { border-color: var(--primary); }
     
     /* Stat Grid */
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -167,7 +173,16 @@
           <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Monitor student progress and exam status</p>
         </div>
         <div class="header-controls">
-          <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
+          
+          <!-- FILTER BAR ADDED HERE -->
+          <div class="filter-bar">
+            <label>Filter:</label>
+            <select id="groupFilter" class="filter-select" onchange="renderTable()">
+              <option value="All">All Groups</option>
+            </select>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
+          </div>
+
           <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
         </div>
       </div>
@@ -321,12 +336,16 @@
       const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
       const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
 
+      // Extract group (fallback to "No Group" if empty)
+      let groupName = rec.group || student.group || 'No Group';
+      groupName = groupName.trim() !== '' ? groupName : 'No Group';
+
       return {
         id: rec.studentNo || student.studentNo || rec.email,
         name: rec.fullName || student.fullName || 'Unknown',
         studentNo: rec.studentNo || student.studentNo || '—',
         section: rec.section || student.section || '—',
-        group: rec.group || student.group || '—',
+        group: groupName,
         schoolYear: rec.schoolYear || student.schoolYear || '—',
         semester: rec.semester || student.semester || '—',
         unitsCompleted: unitsCompleted,
@@ -353,7 +372,6 @@
         
         data.records.forEach(rec => {
           const studentRecord = processRecord(rec, state.students);
-          // De-duplicate logic
           const existingIdx = state.students.findIndex(x => x.id === studentRecord.id);
           if (existingIdx >= 0) {
             state.students[existingIdx] = studentRecord;
@@ -366,6 +384,7 @@
         allStudents = state.students;
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateGroupDropdown(); // Refresh groups
         renderDashboard();
         
       } catch (err) {
@@ -391,37 +410,31 @@
       resultEl.innerHTML = '';
 
       try {
-        // We use the same listAll endpoint but filter on the client side by code.
         const res = await fetch(`${BACKEND_URL}?action=listAll`);
         const data = await res.json();
         
         if (!data.success) throw new Error('Failed to connect to backend');
 
-        // Find the record matching the code
         const record = data.records.find(r => r.code === code);
 
         if (!record) {
           throw new Error('Student code not found in the database. Please check the code and try again.');
         }
 
-        // Process the found record
         const newStudent = processRecord(record, allStudents);
 
-        // Update Global State & Local Storage
         const existingIdx = allStudents.findIndex(s => s.id === newStudent.id);
         if (existingIdx >= 0) {
-          allStudents[existingIdx] = newStudent; // Update
+          allStudents[existingIdx] = newStudent; 
         } else {
-          allStudents.push(newStudent); // Add new
+          allStudents.push(newStudent); 
         }
         
         allStudents.sort((a, b) => a.name.localeCompare(b.name));
         
-        // Save to storage
         const state = { students: allStudents, lastSync: new Date().toISOString() };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         
-        // Show success & redirect
         resultEl.innerHTML = `
           <div class="alert alert-success">
             <strong>✅ Success!</strong> Imported record for <strong>${newStudent.name}</strong>.<br>
@@ -432,7 +445,8 @@
         setTimeout(() => {
           codeInput.value = '';
           resultEl.innerHTML = '';
-          switchView('overview', document.querySelector('.nav-item')); // Go back to overview
+          updateGroupDropdown(); // Refresh groups
+          switchView('overview', document.querySelector('.nav-item')); 
           renderDashboard();
         }, 1500);
 
@@ -444,6 +458,39 @@
       }
     }
 
+    // --- DROPDOWN POPULATION ---
+    function updateGroupDropdown() {
+      const select = document.getElementById('groupFilter');
+      const currentValue = select.value; // Preserve selection if it exists
+      
+      // Extract unique groups
+      const groups = [...new Set(allStudents.map(s => s.group))].filter(g => g !== '—' && g !== '');
+      
+      // Sort numerically (Group 1, Group 2, Group 10)
+      groups.sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, '')) || 0;
+        const numB = parseInt(b.replace(/\D/g, '')) || 0;
+        return numA - numB;
+      });
+
+      // Rebuild HTML
+      let html = '<option value="All">All Groups</option>';
+      groups.forEach(g => {
+        // Count students in this group
+        const count = allStudents.filter(s => s.group === g).length;
+        html += `<option value="${g}">${g} (${count})</option>`;
+      });
+      
+      select.innerHTML = html;
+
+      // Restore previous selection if it still exists
+      if (groups.includes(currentValue) || currentValue === 'All') {
+        select.value = currentValue;
+      } else {
+        select.value = 'All';
+      }
+    }
+
     // --- RENDER ---
     function loadLocal() {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -451,6 +498,7 @@
         try {
           const parsed = JSON.parse(raw);
           allStudents = parsed.students || [];
+          updateGroupDropdown();
           renderDashboard();
         } catch (e) { console.error('Parse error', e); }
       } else {
@@ -476,15 +524,19 @@
 
     function renderTable() {
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allStudents.filter(s => 
-        s.name.toLowerCase().includes(search) || 
-        s.studentNo.toLowerCase().includes(search)
-      );
+      const selectedGroup = document.getElementById('groupFilter').value;
+
+      // Apply Filters
+      const filtered = allStudents.filter(s => {
+        const matchesSearch = s.name.toLowerCase().includes(search) || s.studentNo.toLowerCase().includes(search);
+        const matchesGroup = selectedGroup === 'All' || s.group === selectedGroup;
+        return matchesSearch && matchesGroup;
+      });
 
       document.getElementById('studentCount').textContent = `${filtered.length} students in view`;
 
       if (!filtered.length) {
-        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found matching your search.</td></tr>';
+        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found matching your filters.</td></tr>';
         return;
       }
 
@@ -512,7 +564,7 @@
                 <div class="avatar">${initials}</div>
                 <div>
                   <div class="student-name">${s.name}</div>
-                  <div class="student-id">${s.studentNo}</div>
+                  <div class="student-id">${s.studentNo} • <span style="color:var(--primary); font-weight:600;">${s.group}</span></div>
                 </div>
               </div>
             </td>
