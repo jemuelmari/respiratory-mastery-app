@@ -592,8 +592,15 @@
 
     // --- MODAL ---
     function openStudentModal(id) {
-      const student = allStudents.find(s => s.id === id);
-      if (!student) return;
+      const targetId = String(id);
+      const student = allStudents.find(s => 
+        String(s.id) === targetId || 
+        String(s.studentNo) === targetId
+      );
+      if (!student) {
+        console.warn('Student not found for ID:', id);
+        return;
+      }
 
       document.getElementById('modalName').textContent = student.name;
       document.getElementById('modalDetails').textContent = `${student.studentNo} — ${student.section} (${student.group})`;
