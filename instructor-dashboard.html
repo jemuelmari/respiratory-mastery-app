@@ -340,10 +340,13 @@
       let groupName = rec.group || student.group || 'No Group';
       groupName = groupName.trim() !== '' ? groupName : 'No Group';
 
+      const rawId = rec.studentNo || student.studentNo || rec.email;
+      const rawStudentNo = rec.studentNo || student.studentNo || '—';
+
       return {
-        id: rec.studentNo || student.studentNo || rec.email,
+        id: String(rawId),
         name: rec.fullName || student.fullName || 'Unknown',
-        studentNo: rec.studentNo || student.studentNo || '—',
+        studentNo: String(rawStudentNo),
         section: rec.section || student.section || '—',
         group: groupName,
         schoolYear: rec.schoolYear || student.schoolYear || '—',
