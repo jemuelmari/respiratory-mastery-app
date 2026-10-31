@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instructor Dashboard — Respiratory Mastery</title>
+  <title>Instructor Dashboard — Respiratory Mastery v4.0</title>
   <style>
     :root {
       --primary: #0D7377; --primary-light: #E0F2F1; --secondary: #1E88E5;
       --success: #43A047; --success-light: #E8F5E9; --warning: #FB8C00;
       --warning-light: #FFF3E0; --danger: #E53935; --danger-light: #FFEBEE;
+      --purple: #8E24AA; --purple-light: #F3E5F5;
       --dark: #0F2027; --dark-2: #203A43; --light: #F7F9FC; --white: #FFFFFF;
       --gray: #718096; --border: #E2E8F0;
       --font-main: 'Inter', -apple-system, sans-serif;
@@ -37,7 +38,7 @@
 
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .header h1 { font-size: 1.5rem; }
-    .header-controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .header-controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
     
     /* Filter Bar */
     .filter-bar { display: flex; gap: 0.75rem; align-items: center; background: var(--white); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; }
@@ -46,6 +47,16 @@
     .filter-select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: inherit; background: var(--white); cursor: pointer; outline: none; }
     .filter-select:focus, .search-box:focus { border-color: var(--primary); }
     
+    /* Buttons */
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem; transition: 0.2s; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-primary { background: var(--primary); color: var(--white); }
+    .btn-primary:hover { background: #095456; }
+    .btn-warning { background: var(--warning); color: var(--white); }
+    .btn-danger { background: var(--danger); color: var(--white); }
+    .btn-outline { background: var(--white); color: var(--dark); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+
     /* Stat Grid */
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .stat-card { background: var(--white); padding: 1.25rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
@@ -82,35 +93,12 @@
     .badge-danger { background: var(--danger-light); color: var(--danger); }
     .badge-neutral { background: var(--border); color: var(--gray); }
 
-    .btn-view { padding: 0.4rem 0.8rem; border: 1px solid var(--border); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--dark); transition: 0.2s; }
-    .btn-view:hover { background: var(--primary); color: var(--white); border-color: var(--primary); }
-    .btn-primary { padding: 0.75rem 1.5rem; background: var(--primary); color: var(--white); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-    .btn-primary:hover { background: var(--primary-dark); }
-
-    /* Forms & Cards */
-    .card { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1.25rem; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
-    .form-control { width: 100%; padding: 0.85rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; }
-    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-    .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; border-left: 4px solid; }
-    .alert-info { background: #E3F2FD; border-color: #1E88E5; color: #0D47A1; }
-    .alert-success { background: var(--success-light); border-color: var(--success); color: #1B5E20; }
-    .alert-danger { background: var(--danger-light); border-color: var(--danger); color: #B71C1C; }
-
-    /* Loader */
-    .loader { display: flex; justify-content: center; align-items: center; height: 50vh; flex-direction: column; gap: 1rem; color: var(--gray); }
-    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     /* Modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,32,39,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(4px); }
     .modal-overlay.show { display: flex; }
-    .modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 48px rgba(0,0,0,0.2); animation: slideUp 0.3s; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 48px rgba(0,0,0,0.2); }
     .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
     .modal-header h2 { font-size: 1.25rem; color: var(--dark); }
-    .modal-header p { font-size: 0.85rem; color: var(--gray); margin-top: 0.25rem; }
     .modal-close { background: var(--light); border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; color: var(--gray); }
     .modal-close:hover { background: var(--danger-light); color: var(--danger); }
     .modal-body { padding: 1.5rem; }
@@ -119,41 +107,38 @@
     .detail-item { background: var(--light); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
     .detail-label { font-size: 0.7rem; text-transform: uppercase; color: var(--gray); font-weight: 700; margin-bottom: 0.25rem; }
     .detail-value { font-size: 1.1rem; font-weight: 700; color: var(--dark); }
-    
-    .progress-list { list-style: none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .progress-list li { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.9rem; }
-    .progress-list li:last-child { border-bottom: none; }
-    .progress-list li span:first-child { font-weight: 600; color: var(--gray); }
-    .progress-list li span:last-child { font-weight: 700; color: var(--dark); }
+
+    .loader { display: flex; justify-content: center; align-items: center; height: 50vh; flex-direction: column; gap: 1rem; color: var(--gray); }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Exam History Table */
+    .exam-history-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+    .exam-history-table th, .exam-history-table td { border: 1px solid var(--border); padding: 0.5rem; text-align: center; }
+    .exam-history-table th { background: var(--light); font-weight: 600; }
   </style>
 </head>
 <body>
-
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo">🫁</div>
       <div>
         <h2>Instructor Panel</h2>
-        <small>Respiratory Mastery v3.1</small>
+        <small>Respiratory Mastery v4.0</small>
       </div>
     </div>
 
     <div class="nav-section">Main</div>
     <button class="nav-item active" onclick="switchView('overview', this)">📊 Overview</button>
     <button class="nav-item" onclick="switchView('import', this)">📥 Import Students</button>
-    <button class="nav-item" onclick="switchView('roster', this)">👥 Roster</button>
 
     <div class="nav-section">Data</div>
     <button class="nav-item" onclick="syncData(); switchView('overview', this)">🔄 Sync from Sheet</button>
-    <button class="nav-item">📄 Raw Data</button>
 
     <div class="nav-section">Quick Links</div>
     <a href="gradebook.html" class="nav-item">📖 Open Gradebook</a>
     <a href="index.html" class="nav-item" target="_blank">📱 Student App</a>
-
-    <div class="nav-section">Tools</div>
-    <button class="nav-item">⚙️ Settings</button>
 
     <div class="sidebar-footer">
       <strong>JEMUEL C. MARI, MAN, RN, LPT</strong>
@@ -173,8 +158,6 @@
           <p style="color: var(--gray); font-size: 0.85rem; margin-top: 0.25rem;">Monitor student progress and exam status</p>
         </div>
         <div class="header-controls">
-          
-          <!-- FILTER BAR ADDED HERE -->
           <div class="filter-bar">
             <label>Filter:</label>
             <select id="groupFilter" class="filter-select" onchange="renderTable()">
@@ -182,19 +165,16 @@
             </select>
             <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
           </div>
-
-          <button class="btn-view" onclick="syncData()">🔄 Sync Now</button>
+          <button class="btn btn-primary" onclick="syncData()">🔄 Sync Now</button>
         </div>
       </div>
 
-      <div class="stat-grid" id="statGrid">
-        <!-- Populated by JS -->
-      </div>
+      <div class="stat-grid" id="statGrid"></div>
 
       <div class="table-container">
         <div class="table-header">
           <div>
-            <h2>Students</h2>
+            <h2>Students (StudentMaster)</h2>
             <p id="studentCount">Loading students...</p>
           </div>
         </div>
@@ -208,13 +188,10 @@
               <th>Unit Avg</th>
               <th>Exam</th>
               <th>Status</th>
-              <th>Validation</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="studentTableBody">
-            <!-- Populated by JS -->
-          </tbody>
+          <tbody id="studentTableBody"></tbody>
         </table>
       </div>
     </div>
@@ -228,295 +205,143 @@
         </div>
       </div>
 
-      <div class="card" style="max-width: 600px;">
-        <div class="alert alert-info">
+      <div class="card" style="max-width: 600px; background: var(--white); padding: 2rem; border-radius: 12px; border: 1px solid var(--border);">
+        <div class="alert alert-info" style="padding: 1rem; background: #E3F2FD; border-left: 4px solid var(--secondary); margin-bottom: 1rem; font-size: 0.9rem;">
           <strong>💡 How it works:</strong><br>
           Ask the student for their <strong>Submission Code</strong> (e.g., <code>RA-1234-5678</code>). Paste it below to instantly pull their data from the Google Sheet without doing a full sync.
         </div>
         
-        <div class="form-group">
-          <label>Student Submission Code</label>
-          <input type="text" id="importCodeInput" class="form-control" placeholder="e.g., RA-1234-5678" style="text-transform: uppercase;">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Student Submission Code</label>
+          <input type="text" id="importCodeInput" style="width: 100%; padding: 0.85rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; text-transform: uppercase;" placeholder="e.g., RA-1234-5678">
         </div>
         
-        <button class="btn-primary" onclick="importByCode()" id="btnImport">📥 Fetch Record</button>
+        <button class="btn btn-primary" onclick="importByCode()" id="btnImport" style="width: 100%;">📥 Fetch Record</button>
         
         <div id="importResult" style="margin-top: 1rem;"></div>
       </div>
     </div>
 
-    <!-- VIEW: ROSTER (Placeholder) -->
-    <div id="view-roster" class="view-section">
-      <div class="header">
-        <h1>Master Roster</h1>
-      </div>
-      <div class="card">
-        <p>Full student roster view goes here.</p>
-      </div>
-    </div>
-
   </main>
 
-  <!-- MODAL -->
+  <!-- MODAL: STUDENT DETAILS -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal">
       <div class="modal-header">
         <div>
           <h2 id="modalName">Student Name</h2>
-          <p id="modalDetails">Student No — Section</p>
+          <p id="modalDetails" style="font-size: 0.85rem; color: var(--gray);">Student No — Section</p>
         </div>
-        <button class="modal-close" onclick="closeModal()">✕</button>
+        <button class="modal-close" onclick="closeModal('studentModal')">✕</button>
       </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Populated by JS -->
-      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
-  <script>
-    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
-    const STORAGE_KEY = 'respMastery_instructor_v2';
-    let allStudents = [];
+  <!-- MODAL: EXAM HISTORY -->
+  <div class="modal-overlay" id="examHistoryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>📝 Exam History</h2>
+          <p id="examHistoryStudentName" style="font-size: 0.85rem; color: var(--gray);"></p>
+        </div>
+        <button class="modal-close" onclick="closeModal('examHistoryModal')">✕</button>
+      </div>
+      <div class="modal-body" id="examHistoryBody"></div>
+    </div>
+  </div>
 
-    // --- NAVIGATION ---
+  <!-- MODAL: LOCK TERM -->
+  <div class="modal-overlay" id="lockTermModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>🔒 Manage Term Lock</h2>
+          <p style="font-size: 0.85rem; color: var(--gray);">Lock a term to make it read-only for students.</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('lockTermModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">School Year</label>
+          <select id="lockYearSelect" class="filter-select" style="width: 100%; padding: 0.75rem;"></select>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Semester</label>
+          <select id="lockSemSelect" class="filter-select" style="width: 100%; padding: 0.75rem;"></select>
+        </div>
+        <div id="lockTermStatus" style="margin-bottom: 1rem; text-align: center; font-weight: 600;"></div>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-warning" onclick="lockSelectedTerm()" style="flex: 1;">🔒 Lock Term</button>
+          <button class="btn btn-outline" onclick="unlockSelectedTerm()" style="flex: 1;">🔓 Unlock Term</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    <script>
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
+    let allStudents = [];
+    let allTermsSettings = [];
+
     function switchView(viewId, btnEl) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
-      
       if (btnEl) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         btnEl.classList.add('active');
       }
     }
 
-    // --- HELPERS ---
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+
     function parsePct(val) {
       if (val === null || val === undefined || val === '') return 0;
-      if (typeof val === 'string') {
-        if (val.includes('/')) {
-          const parts = val.split('/');
-          return (parseFloat(parts[0]) / parseFloat(parts[1])) * 100 || 0;
-        }
-        return parseFloat(val.replace('%', '')) || 0;
-      }
-      return Number(val) || 0;
+      if (typeof val === 'string' && val.includes('%')) return parseFloat(val.replace('%', '')) || 0;
+      return parseFloat(val) || 0;
     }
 
-    function calcProgress(payload, rawVal) {
-      if (payload && payload.progress) {
-        const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
-        let done = 0;
-        units.forEach(u => { if (payload.progress[u] && payload.progress[u].completed) done++; });
-        if (done > 0) return Math.round((done / 7) * 100);
-      }
-      return parsePct(rawVal);
-    }
-
-    function processRecord(rec, existingStudents) {
-      let payload = {};
-      try { payload = JSON.parse(rec.dataJson || '{}'); } catch (e) {}
-      
-      const student = payload.student || {};
-      const unitsCompleted = calcProgress(payload, rec.unitsCompleted);
-      
-      let unitAvg = parsePct(rec.unitAvg);
-      if (unitAvg <= 1 && payload.quizAttempts) {
-         const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
-         let scores = [];
-         units.forEach(u => {
-           if (payload.quizAttempts[u] && payload.quizAttempts[u].length) {
-             scores.push(Math.max(...payload.quizAttempts[u]));
-           }
-         });
-         if (scores.length) unitAvg = scores.reduce((a,b)=>a+b,0) / scores.length;
-      }
-
-      const examScore = rec.examScore !== undefined && rec.examScore !== '' ? rec.examScore : (payload.exam?.score || null);
-      const examTotal = rec.examTotal || payload.exam?.total || 30;
-      const examPct = parsePct(rec.examPercentage || payload.exam?.percentage || 0);
-      const examPassed = rec.examPassed === 'PASSED' || payload.exam?.passed === true;
-
-      // Extract group (fallback to "No Group" if empty)
-      let groupName = rec.group || student.group || 'No Group';
-      groupName = groupName.trim() !== '' ? groupName : 'No Group';
-
-      const rawId = rec.studentNo || student.studentNo || rec.email;
-      const rawStudentNo = rec.studentNo || student.studentNo || '—';
-
-      return {
-        id: String(rawId),
-        name: rec.fullName || student.fullName || 'Unknown',
-        studentNo: String(rawStudentNo),
-        section: rec.section || student.section || '—',
-        group: groupName,
-        schoolYear: rec.schoolYear || student.schoolYear || '—',
-        semester: rec.semester || student.semester || '—',
-        unitsCompleted: unitsCompleted,
-        unitAvg: Math.round(unitAvg),
-        examScore: examScore,
-        examTotal: examTotal,
-        examPct: examPct,
-        examPassed: examPassed,
-        examTaken: examScore !== null && examScore !== 'null',
-        rawPayload: payload
-      };
-    }
-
-    // --- DATA SYNC ---
     async function syncData() {
-      document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9"><div class="loader"><div class="spinner"></div>Syncing...</div></td></tr>';
-      
+      document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="8"><div class="loader"><div class="spinner"></div>Syncing from StudentMaster...</div></td></tr>';
       try {
-        const res = await fetch(`${BACKEND_URL}?action=listAll`);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || 'Sync failed');
-        
-        const state = { students: [], lastSync: new Date().toISOString() };
-        
-        data.records.forEach(rec => {
-          const studentRecord = processRecord(rec, state.students);
-          const existingIdx = state.students.findIndex(x => x.id === studentRecord.id);
-          if (existingIdx >= 0) {
-            state.students[existingIdx] = studentRecord;
-          } else {
-            state.students.push(studentRecord);
-          }
-        });
-
-        state.students.sort((a, b) => a.name.localeCompare(b.name));
-        allStudents = state.students;
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        updateGroupDropdown(); // Refresh groups
+        const [resStudents, resSettings] = await Promise.all([
+          fetch(`${BACKEND_URL}?action=listAllMaster`),
+          fetch(`${BACKEND_URL}?action=getTermSettings`)
+        ]);
+        const dataStudents = await resStudents.json();
+        const dataSettings = await resSettings.json();
+        if (!dataStudents.success) throw new Error(dataStudents.error || 'Sync failed');
+        allTermsSettings = dataSettings.settings || [];
+        allStudents = dataStudents.records || [];
+        allStudents.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+        updateGroupDropdown();
         renderDashboard();
-        
+        renderLockTermDropdowns();
       } catch (err) {
         console.error(err);
-        document.getElementById('studentTableBody').innerHTML = `<tr><td colspan="9" style="color:red;">Error: ${err.message}</td></tr>`;
+        document.getElementById('studentTableBody').innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Error: ${err.message}</td></tr>`;
       }
     }
 
-    // --- IMPORT BY CODE ---
-    async function importByCode() {
-      const codeInput = document.getElementById('importCodeInput');
-      const btn = document.getElementById('btnImport');
-      const resultEl = document.getElementById('importResult');
-      const code = codeInput.value.trim().toUpperCase();
-
-      if (!code) {
-        resultEl.innerHTML = '<div class="alert alert-danger">Please enter a code.</div>';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = '⏳ Fetching...';
-      resultEl.innerHTML = '';
-
-      try {
-        const res = await fetch(`${BACKEND_URL}?action=listAll`);
-        const data = await res.json();
-        
-        if (!data.success) throw new Error('Failed to connect to backend');
-
-        const record = data.records.find(r => r.code === code);
-
-        if (!record) {
-          throw new Error('Student code not found in the database. Please check the code and try again.');
-        }
-
-        const newStudent = processRecord(record, allStudents);
-
-        const existingIdx = allStudents.findIndex(s => s.id === newStudent.id);
-        if (existingIdx >= 0) {
-          allStudents[existingIdx] = newStudent; 
-        } else {
-          allStudents.push(newStudent); 
-        }
-        
-        allStudents.sort((a, b) => a.name.localeCompare(b.name));
-        
-        const state = { students: allStudents, lastSync: new Date().toISOString() };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        
-        resultEl.innerHTML = `
-          <div class="alert alert-success">
-            <strong>✅ Success!</strong> Imported record for <strong>${newStudent.name}</strong>.<br>
-            Redirecting to overview...
-          </div>
-        `;
-        
-        setTimeout(() => {
-          codeInput.value = '';
-          resultEl.innerHTML = '';
-          updateGroupDropdown(); // Refresh groups
-          switchView('overview', document.querySelector('.nav-item')); 
-          renderDashboard();
-        }, 1500);
-
-      } catch (err) {
-        resultEl.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '📥 Fetch Record';
-      }
-    }
-
-    // --- DROPDOWN POPULATION ---
     function updateGroupDropdown() {
       const select = document.getElementById('groupFilter');
-      const currentValue = select.value; // Preserve selection if it exists
-      
-      // Extract unique groups
-      const groups = [...new Set(allStudents.map(s => s.group))].filter(g => g !== '—' && g !== '');
-      
-      // Sort numerically (Group 1, Group 2, Group 10)
-      groups.sort((a, b) => {
-        const numA = parseInt(a.replace(/\D/g, '')) || 0;
-        const numB = parseInt(b.replace(/\D/g, '')) || 0;
-        return numA - numB;
-      });
-
-      // Rebuild HTML
+      const currentValue = select.value;
+      const groups = [...new Set(allStudents.map(s => s.group))].filter(g => g && g !== '—');
+      groups.sort((a, b) => (parseInt(a.replace(/\D/g, '')) || 0) - (parseInt(b.replace(/\D/g, '')) || 0));
       let html = '<option value="All">All Groups</option>';
-      groups.forEach(g => {
-        // Count students in this group
-        const count = allStudents.filter(s => s.group === g).length;
-        html += `<option value="${g}">${g} (${count})</option>`;
-      });
-      
+      groups.forEach(g => { html += `<option value="${g}">${g} (${allStudents.filter(s => s.group === g).length})</option>`; });
       select.innerHTML = html;
-
-      // Restore previous selection if it still exists
-      if (groups.includes(currentValue) || currentValue === 'All') {
-        select.value = currentValue;
-      } else {
-        select.value = 'All';
-      }
-    }
-
-    // --- RENDER ---
-    function loadLocal() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          allStudents = parsed.students || [];
-          updateGroupDropdown();
-          renderDashboard();
-        } catch (e) { console.error('Parse error', e); }
-      } else {
-        syncData(); 
-      }
+      if (groups.includes(currentValue) || currentValue === 'All') select.value = currentValue;
     }
 
     function renderDashboard() {
       renderTable();
-      
       const total = allStudents.length;
-      const passedExam = allStudents.filter(s => s.examPassed).length;
-      const atRisk = allStudents.filter(s => s.examTaken && !s.examPassed).length;
-      const notTaken = allStudents.filter(s => !s.examTaken).length;
-
+      const passedExam = allStudents.filter(s => s.examPassed === 'PASSED').length;
+      const atRisk = allStudents.filter(s => s.examPassed === 'FAILED').length;
+      const notTaken = allStudents.filter(s => !s.examPassed || s.examPassed === '').length;
       document.getElementById('statGrid').innerHTML = `
         <div class="stat-card"><h3>Total Students</h3><div class="value">${total}</div></div>
         <div class="stat-card green"><h3>Exam Passed</h3><div class="value">${passedExam}</div></div>
@@ -528,130 +353,221 @@
     function renderTable() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const selectedGroup = document.getElementById('groupFilter').value;
-
-      // Apply Filters
       const filtered = allStudents.filter(s => {
-        const matchesSearch = s.name.toLowerCase().includes(search) || s.studentNo.toLowerCase().includes(search);
-        const matchesGroup = selectedGroup === 'All' || s.group === selectedGroup;
-        return matchesSearch && matchesGroup;
+        const matchSearch = (s.fullName || '').toLowerCase().includes(search) || String(s.studentNo).toLowerCase().includes(search);
+        return matchSearch && (selectedGroup === 'All' || s.group === selectedGroup);
       });
-
       document.getElementById('studentCount').textContent = `${filtered.length} students in view`;
-
       if (!filtered.length) {
-        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:2rem;">No students found matching your filters.</td></tr>';
+        document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No students found.</td></tr>';
         return;
       }
-
-      const tbody = document.getElementById('studentTableBody');
-      tbody.innerHTML = filtered.map(s => {
-        const parts = s.name.trim().split(/\s+/);
+      document.getElementById('studentTableBody').innerHTML = filtered.map(s => {
+        const name = s.fullName || 'Unknown';
+        const parts = name.trim().split(/\s+/);
         const initials = ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
-
-        let examDisplay = '—';
+        const unitsCompleted = parsePct(s.unitsCompleted);
+        const unitAvg = parsePct(s.unitAvg);
+        const examScore = s.examScore !== '' && s.examScore !== null ? s.examScore : '—';
+        const examTotal = s.examTotal !== '' && s.examTotal !== null ? s.examTotal : '—';
         let statusBadge = '<span class="badge badge-neutral">Pending</span>';
-        
-        if (s.examTaken) {
-          examDisplay = `<span style="font-weight:600; color:${s.examPassed ? 'var(--success)' : 'var(--danger)'}">${s.examScore}/${s.examTotal}</span>`;
-          statusBadge = s.examPassed 
-            ? '<span class="badge badge-success">Passed</span>' 
-            : '<span class="badge badge-danger">Failed</span>';
-        } else if (s.unitAvg > 0 || s.unitsCompleted > 0) {
-          statusBadge = '<span class="badge badge-warning">In Progress</span>';
-        }
-
+        if (s.examPassed === 'PASSED') statusBadge = '<span class="badge badge-success">Passed</span>';
+        else if (s.examPassed === 'FAILED') statusBadge = '<span class="badge badge-danger">Failed</span>';
+        else if (unitsCompleted > 0) statusBadge = '<span class="badge badge-warning">In Progress</span>';
+        const isLocked = s.isLocked === 'TRUE';
+        const lockBadge = isLocked ? '<span class="badge badge-danger" style="margin-left:0.5rem;">🔒 Locked</span>' : '';
         return `
           <tr>
-            <td>
-              <div class="student-info">
-                <div class="avatar">${initials}</div>
-                <div>
-                  <div class="student-name">${s.name}</div>
-                  <div class="student-id">${s.studentNo} • <span style="color:var(--primary); font-weight:600;">${s.group}</span></div>
-                </div>
-              </div>
-            </td>
-            <td>${s.section}</td>
-            <td>
-              <div style="font-size:0.8rem; font-weight:600;">${s.schoolYear}</div>
-              <div style="font-size:0.7rem; color:var(--gray);">${s.semester}</div>
-            </td>
-            <td>
-              <div class="progress-bar"><div class="progress-fill" style="width:${s.unitsCompleted}%; background:${s.unitsCompleted===100 ? 'var(--success)' : 'var(--primary)'};"></div></div>
-              <span class="progress-text">${Math.round(s.unitsCompleted)}%</span>
-            </td>
-            <td><span style="font-weight:600; color:${s.unitAvg >= 90 ? 'var(--success)' : s.unitAvg >= 75 ? 'var(--warning)' : 'var(--danger)'}">${Math.round(s.unitAvg)}%</span></td>
-            <td>${examDisplay}</td>
+            <td><div class="student-info"><div class="avatar">${initials}</div><div><div class="student-name">${name} ${lockBadge}</div><div class="student-id">${s.studentNo} • <span style="color:var(--primary); font-weight:600;">${s.group || '—'}</span></div></div></div></td>
+            <td>${s.section || '—'}</td>
+            <td><div style="font-size:0.8rem; font-weight:600;">${s.schoolYear || '—'}</div><div style="font-size:0.7rem; color:var(--gray);">${s.semester || '—'}</div></td>
+            <td><div class="progress-bar"><div class="progress-fill" style="width:${unitsCompleted}%; background:${unitsCompleted===100 ? 'var(--success)' : 'var(--primary)'};"></div></div><span class="progress-text">${unitsCompleted}%</span></td>
+            <td><span style="font-weight:600; color:${unitAvg >= 90 ? 'var(--success)' : unitAvg >= 75 ? 'var(--warning)' : 'var(--danger)'}">${unitAvg}%</span></td>
+            <td><span style="font-weight:600;">${examScore}/${examTotal}</span></td>
             <td>${statusBadge}</td>
-            <td><span style="color:var(--success); font-weight:600; font-size:0.8rem;">✅ OK</span></td>
-            <td><button class="btn-view" onclick="openStudentModal('${s.id}')">View</button></td>
-          </tr>
-        `;
+            <td><button class="btn btn-sm btn-outline" onclick="openStudentModal('${s.studentNo}')">View</button><button class="btn btn-sm btn-outline" onclick="openExamHistory('${s.studentNo}', '${name}')" style="margin-left: 4px;">📝 History</button></td>
+          </tr>`;
       }).join('');
     }
 
-    // --- MODAL ---
-    function openStudentModal(id) {
-      const targetId = String(id);
-      const student = allStudents.find(s => 
-        String(s.id) === targetId || 
-        String(s.studentNo) === targetId
-      );
-      if (!student) {
-        console.warn('Student not found for ID:', id);
-        return;
-      }
-
-      document.getElementById('modalName').textContent = student.name;
-      document.getElementById('modalDetails').textContent = `${student.studentNo} — ${student.section} (${student.group})`;
-
+    function openStudentModal(studentNo) {
+      const s = allStudents.find(x => String(x.studentNo) === String(studentNo));
+      if (!s) return;
+      document.getElementById('modalName').textContent = s.fullName;
+      document.getElementById('modalDetails').textContent = `${s.studentNo} — ${s.section} (${s.group})`;
       let html = `
         <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-label">Units Completed</div>
-            <div class="detail-value">${Math.round(student.unitsCompleted)}%</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Unit Average</div>
-            <div class="detail-value" style="color:${student.unitAvg >= 75 ? 'var(--success)' : 'var(--danger)'}">${student.unitAvg}%</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Capstone Exam</div>
-            <div class="detail-value">${student.examTaken ? `${student.examScore}/${student.examTotal} (${student.examPct}%)` : 'Not Taken'}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Exam Status</div>
-            <div class="detail-value" style="color:${student.examPassed ? 'var(--success)' : (student.examTaken ? 'var(--danger)' : 'var(--gray)')}">
-              ${student.examPassed ? 'PASSED' : (student.examTaken ? 'FAILED' : '—')}
-            </div>
-          </div>
-        </div>
-      `;
-
-      if (student.rawPayload && student.rawPayload.quizAttempts) {
-        html += `<h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Unit Quiz Scores (Best)</h4><ul class="progress-list">`;
-        const units = ['unit1','unit2','unit3','unit4','unit5','unit6','unit7'];
-        units.forEach(u => {
-          const attempts = student.rawPayload.quizAttempts[u];
-          const best = attempts && attempts.length ? Math.max(...attempts) : null;
-          html += `<li><span>Unit ${u.replace('unit','')}</span><span>${best !== null ? best + '%' : '—'}</span></li>`;
-        });
-        html += `</ul>`;
-      }
-
+          <div class="detail-item"><div class="detail-label">Units Completed</div><div class="detail-value">${parsePct(s.unitsCompleted)}%</div></div>
+          <div class="detail-item"><div class="detail-label">Unit Average</div><div class="detail-value" style="color:${parsePct(s.unitAvg) >= 75 ? 'var(--success)' : 'var(--danger)'}">${parsePct(s.unitAvg)}%</div></div>
+          <div class="detail-item"><div class="detail-label">Capstone Exam</div><div class="detail-value">${s.examScore !== '' ? `${s.examScore}/${s.examTotal} (${s.examPercentage}%)` : 'Not Taken'}</div></div>
+          <div class="detail-item"><div class="detail-label">Exam Status</div><div class="detail-value" style="color:${s.examPassed === 'PASSED' ? 'var(--success)' : (s.examPassed === 'FAILED' ? 'var(--danger)' : 'var(--gray)')}">${s.examPassed || '—'}</div></div>
+        </div>`;
+      html += `<h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Unit Scores</h4><ul style="list-style:none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">`;
+      ['u1','u2','u3','u4','u5','u6','u7'].forEach((u, i) => {
+        html += `<li style="padding:0.75rem 1rem; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between;"><span>Unit ${i + 1}</span><span style="font-weight:700;">${s[u] !== '' ? s[u] : '—'}</span></li>`;
+      });
+      html += `</ul><h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Mastery Games</h4><ul style="list-style:none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">`;
+      ['blitz','tree','sound','redFlag','matrix'].forEach((g, i) => {
+        html += `<li style="padding:0.75rem 1rem; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between;"><span>${['Pattern Blitz', 'Decision Tree', 'Sound ID', 'Red Flag Rush', 'Matrix Master'][i]}</span><span style="font-weight:700;">${s[g] !== '' ? s[g] : '—'}</span></li>`;
+      });
+      html += `</ul>`;
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('studentModal').classList.add('show');
     }
 
-    function closeModal() {
-      document.getElementById('studentModal').classList.remove('show');
+    async function openExamHistory(studentNo, studentName) {
+      document.getElementById('examHistoryStudentName').textContent = studentName;
+      document.getElementById('examHistoryBody').innerHTML = '<div class="loader"><div class="spinner"></div>Loading history...</div>';
+      document.getElementById('examHistoryModal').classList.add('show');
+      try {
+        const res = await fetch(`${BACKEND_URL}?action=getExamHistory&studentNo=${encodeURIComponent(studentNo)}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        const records = data.records || [];
+        if (!records.length) {
+          document.getElementById('examHistoryBody').innerHTML = '<p style="text-align:center; color:var(--gray);">No exam attempts yet.</p>';
+          return;
+        }
+        let html = `<table class="exam-history-table"><thead><tr><th>Attempt</th><th>Date</th><th>Score</th><th>Percentage</th><th>Result</th></tr></thead><tbody>`;
+        records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(r => {
+          html += `<tr><td>${r.attemptNumber || '—'}</td><td>${new Date(r.timestamp).toLocaleDateString()}</td><td>${r.score}/${r.total}</td><td>${r.percentage}%</td><td style="color:${r.passed === 'PASSED' ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${r.passed}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+        document.getElementById
+        ('examHistoryBody').innerHTML = html;
+      } catch (err) {
+        document.getElementById('examHistoryBody').innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
+      }
     }
 
-    document.getElementById('studentModal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
+    function renderLockTermDropdowns() {
+      const sySelect = document.getElementById('lockYearSelect');
+      const semSelect = document.getElementById('lockSemSelect');
+      
+      const years = ['2025-2026', '2026-2027', '2027-2028', '2028-2029', '2029-2030', '2030-2031', '2031-2032', '2032-2033'];
+      const sems = ['1st Semester', '2nd Semester'];
+      
+      sySelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+      semSelect.innerHTML = sems.map(s => `<option value="${s}">${s}</option>`).join('');
+      
+      sySelect.value = '2026-2027';
+      
+      updateLockTermStatus();
+      sySelect.addEventListener('change', updateLockTermStatus);
+      semSelect.addEventListener('change', updateLockTermStatus);
+    }
 
-    document.addEventListener('DOMContentLoaded', loadLocal);
+    function updateLockTermStatus() {
+      const sy = document.getElementById('lockYearSelect').value;
+      const sem = document.getElementById('lockSemSelect').value;
+      
+      const setting = allTermsSettings.find(t => t.schoolYear === sy && t.semester === sem);
+      const isLocked = setting && setting.isLocked === 'TRUE';
+      
+      const statusEl = document.getElementById('lockTermStatus');
+      statusEl.innerHTML = isLocked 
+        ? '<span style="color: var(--danger);">🔒 Currently LOCKED</span>' 
+        : '<span style="color: var(--success);">🔓 Currently UNLOCKED</span>';
+    }
+
+    async function lockSelectedTerm() {
+      const sy = document.getElementById('lockYearSelect').value;
+      const sem = document.getElementById('lockSemSelect').value;
+      
+      if (!confirm(`Are you sure you want to LOCK ${sy} — ${sem}?\n\nStudents will NOT be able to submit new scores for this term.`)) return;
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'lockTerm');
+        formData.append('schoolYear', sy);
+        formData.append('semester', sem);
+        formData.append('lockedBy', 'Instructor');
+        
+        const res = await fetch(BACKEND_URL, { method: 'POST', body: formData });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('✅ Term locked successfully.');
+          await syncData();
+          updateLockTermStatus();
+        } else {
+          alert('❌ Failed: ' + data.error);
+        }
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
+
+    async function unlockSelectedTerm() {
+      const sy = document.getElementById('lockYearSelect').value;
+      const sem = document.getElementById('lockSemSelect').value;
+      
+      if (!confirm(`Are you sure you want to UNLOCK ${sy} — ${sem}?`)) return;
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('action', 'unlockTerm');
+        formData.append('schoolYear', sy);
+        formData.append('semester', sem);
+        
+        const res = await fetch(BACKEND_URL, { method: 'POST', body: formData });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('✅ Term unlocked successfully.');
+          await syncData();
+          updateLockTermStatus();
+        } else {
+          alert('❌ Failed: ' + data.error);
+        }
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
+
+    function openLockTermModal() {
+      document.getElementById('lockTermModal').classList.add('show');
+      updateLockTermStatus();
+    }
+
+    async function importByCode() {
+      const codeInput = document.getElementById('importCodeInput');
+      const btn = document.getElementById('btnImport');
+      const resultEl = document.getElementById('importResult');
+      const code = codeInput.value.trim().toUpperCase();
+
+      if (!code) {
+        resultEl.innerHTML = '<div style="color:red; margin-top:1rem;">Please enter a code.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Fetching...';
+      resultEl.innerHTML = '';
+
+      try {
+        resultEl.innerHTML = '<div style="color:orange; margin-top:1rem;">⚠️ Import by code is deprecated in v4.0. Please use "Sync Now" instead.</div>';
+      } catch (err) {
+        resultEl.innerHTML = `<div style="color:red; margin-top:1rem;">❌ ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📥 Fetch Record';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      syncData();
+      
+      const lockBtn = document.createElement('button');
+      lockBtn.className = 'btn btn-outline';
+      lockBtn.innerHTML = '🔒 Manage Term Lock';
+      lockBtn.onclick = openLockTermModal;
+      
+      const headerControls = document.querySelector('.header-controls');
+      if (headerControls) {
+        headerControls.insertBefore(lockBtn, headerControls.firstChild);
+      }
+    });
   </script>
 </body>
 </html>
