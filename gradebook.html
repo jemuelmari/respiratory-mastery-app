@@ -4,8 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0D7377" />
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
-<title>Gradebook — Respiratory Mastery v3.1</title>
+<title>Gradebook — Respiratory Mastery v4.0</title>
 <style>
 :root{--primary:#0D7377;--primary-dark:#095456;--primary-light:#E0F2F1;--secondary:#1E88E5;--secondary-light:#E3F2FD;--accent:#E53935;--accent-light:#FFEBEE;--success:#43A047;--success-light:#E8F5E9;--warning:#FB8C00;--warning-light:#FFF3E0;--purple:#8E24AA;--purple-light:#F3E5F5;--dark:#1A2027;--dark-2:#2D3748;--light:#F7F9FB;--white:#FFFFFF;--gray:#718096;--gray-light:#E2E8F0;--border:#CBD5E0;--radius:12px;--radius-sm:8px;--shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow:0 4px 16px rgba(0,0,0,.08);--shadow-lg:0 12px 32px rgba(0,0,0,.12);--font-head:'Inter','Montserrat',sans-serif;--font-body:'Inter','Open Sans',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -35,7 +34,6 @@ p{margin-bottom:.5rem}button{font-family:inherit}input,select{font-family:inheri
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .filter-select{padding:.5rem .7rem;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-size:.82rem;font-family:var(--font-head);font-weight:600;background:#fff;cursor:pointer;color:var(--dark)}
 .filter-select:focus{outline:none;border-color:var(--primary)}
-.filter-select.active-filter{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
 .info-banner{background:var(--white);border-radius:var(--radius);padding:1.15rem 1.35rem;box-shadow:var(--shadow-sm);border:1px solid var(--gray-light);border-left:5px solid var(--primary);margin-bottom:1.25rem}
 .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem}
 .info-grid .info-item{font-size:.85rem}
@@ -147,10 +145,8 @@ code{background:var(--light);padding:.15rem .4rem;border-radius:4px;font-family:
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script>
-var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwupOpH3_treKJrZPRni5RyiEYIX6RqU1mF-TruAj3A_j2DGU4pvrR2J8p8QQEZVD2b/exec';
-
+var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
 var SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033'];
 var SEMESTERS = ['1st Semester', '2nd Semester'];
 var CURRENT_SY = '2026-2027';
@@ -171,7 +167,7 @@ var GB = {
       gamesWeight: 20,
       capstoneWeight: 20
     },
-    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM, group: 'All' },
+    filters: { schoolYear: CURRENT_SY, semester: CURRENT_SEM },
     lastSync: null
   }
 };
@@ -181,177 +177,60 @@ var UNIT_NAMES = { unit1: 'U1 Baseline', unit2: 'U2 Inspection', unit3: 'U3 Palp
 var GAME_KEYS = ['blitz','tree','sound','redflag','matrix'];
 var GAME_NAMES = { blitz: 'Blitz', tree: 'Tree', sound: 'Sound', redflag: 'Red Flag', matrix: 'Matrix' };
 
-function loadLocal() {
-  try {
-    var raw = localStorage.getItem(GB.localKey);
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      GB.state.students = parsed.students || [];
-      GB.state.settings = Object.assign({}, GB.state.settings, parsed.settings || {});
-      if (parsed.filters) {
-        GB.state.filters = {
-          schoolYear: parsed.filters.schoolYear || CURRENT_SY,
-          semester: parsed.filters.semester || CURRENT_SEM,
-          group: parsed.filters.group || 'All'
-        };
-      }
-      GB.state.lastSync = parsed.lastSync || null;
-    }
-  } catch (e) { console.warn('Local load failed', e); }
-}
+function showLoading(msg) { document.getElementById('app').innerHTML = '<div class="loader"><div class="spinner"></div><div>' + (msg || 'Loading...') + '</div></div>'; }
+function showError(msg) { document.getElementById('app').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><h2>Could not load gradebook</h2><p>' + msg + '</p><button class="btn btn-primary" onclick="init()">🔄 Retry</button></div>'; }
+function toast(msg, type) { type = type || ''; var el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show ' + type; clearTimeout(el._t); el._t = setTimeout(function() { el.classList.remove('show'); }, 3000); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
-async function fetchAllSubmissions() {
-  var res = await fetch(BACKEND_URL + '?action=listAll', { method: 'GET' });
+async function fetchAllStudents() {
+  var res = await fetch(BACKEND_URL + '?action=listAllMaster');
   return await res.json();
 }
 
 async function syncFromBackend() {
-  showLoading('Syncing from Google Sheets...');
+  showLoading('Syncing from Google Sheets (StudentMaster)...');
   try {
-    var result = await fetchAllSubmissions();
+    var result = await fetchAllStudents();
     if (!result.success) throw new Error(result.error || 'Sync failed');
-    var added = 0, updated = 0;
-    result.records.forEach(function(rec) {
-      var payload = null;
-      try { payload = JSON.parse(rec.dataJson); } catch (e) {}
-      var s = (payload && payload.student) || {
-        fullName: rec.fullName, studentNo: rec.studentNo, section: rec.section,
-        group: rec.group, email: rec.email,
-        schoolYear: rec.schoolYear, semester: rec.semester
-      };
-      var existing = GB.state.students.find(function(x) {
-        var matchNo = s.studentNo && x.studentNo && String(x.studentNo).trim() === String(s.studentNo).trim();
-        var matchEmail = s.email && x.email && String(x.email).trim().toLowerCase() === String(s.email).trim().toLowerCase();
-        var sameSY = (x.schoolYear || '') === (s.schoolYear || rec.schoolYear || '');
-        var sameSem = (x.semester || '') === (s.semester || rec.semester || '');
-        return (matchNo || matchEmail) && sameSY && sameSem;
-      });
-      var studentRecord = {
-        id: existing ? existing.id : 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        name: s.fullName, studentNo: s.studentNo || '', section: s.section || '',
-        group: s.group || '', email: s.email || '',
-        schoolYear: s.schoolYear || rec.schoolYear || '',
-        semester: s.semester || rec.semester || '',
-        enrolled: existing ? existing.enrolled : new Date().toISOString().slice(0, 10),
-        unitsCompleted: rec.unitsCompleted || '0%',
-        unitAvg: rec.unitAvg || '0%',
-        examScore: rec.examScore || null,
-        examTotal: rec.examTotal || null,
-        examPercentage: rec.examPercentage || null,
-        examPassed: rec.examPassed || '',
-        examTakenAt: rec.timestamp || null,
-        integrityFlags: rec.integrityFlags || 0,
-        retakeActive: existing ? existing.retakeActive : 'NO',
-        retakeCode: existing ? existing.retakeCode : null,
-        retakeUsed: existing ? existing.retakeUsed : false,
-        appVersion: rec.appVersion || '2.1',
-        lastActive: rec.timestamp,
-        submissionCode: rec.code,
-        notes: existing ? existing.notes : 'Synced from Sheet',
-        progress: (payload && payload.progress) || {},
-        quizAttempts: (payload && payload.quizAttempts) || {},
-        games: (payload && payload.games) || {}
-      };
-      if (existing) {
-        var idx = GB.state.students.findIndex(function(x) { return x.id === existing.id; });
-        if (idx >= 0) { GB.state.students[idx] = studentRecord; updated++; }
-      } else {
-        GB.state.students.push(studentRecord);
-        added++;
-      }
-    });
+    GB.state.students = result.records || [];
     GB.state.lastSync = new Date().toISOString();
-    saveLocal();
+    localStorage.setItem(GB.localKey, JSON.stringify(GB.state));
     render();
-    toast('✅ Sync complete — Added: ' + added + ', Updated: ' + updated, 'success');
+    toast('✅ Sync complete — ' + GB.state.students.length + ' students loaded.', 'success');
   } catch (err) {
     console.error(err);
     showError(err.message);
-    toast('Sync failed: ' + err.message, 'error');
   }
 }
 
-function saveLocal() { try { localStorage.setItem(GB.localKey, JSON.stringify(GB.state)); } catch (e) {} }
-function toast(msg, type) {
-  type = type || '';
-  var el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show ' + type;
-  clearTimeout(el._t);
-  el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
-}
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
-    return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c];
-  });
-}
-function todayLong() { return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
-function todayISO() { return new Date().toISOString().slice(0, 10); }
-function downloadFile(content, filename, mime) {
-  var blob = new Blob([content], { type: mime });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-function showLoading(msg) {
-  document.getElementById('app').innerHTML =
-    '<div class="loader"><div class="spinner"></div><div>' + escapeHtml(msg || 'Loading...') + '</div></div>';
-}
-function showError(msg) {
-  document.getElementById('app').innerHTML =
-    '<div class="empty-state"><div class="icon">⚠️</div><h2>Could not load gradebook</h2><p>' + escapeHtml(msg) + '</p><button class="btn btn-primary" onclick="init()">🔄 Retry</button></div>';
-}
-
 function getUnitBestScore(s, unit) {
-  if (s.progress && s.progress[unit] && typeof s.progress[unit].score === 'number') return s.progress[unit].score;
-  var attempts = s.quizAttempts && s.quizAttempts[unit];
-  if (attempts && attempts.length) return Math.max.apply(null, attempts);
-  return null;
+  var val = s[unit] || s['u' + unit.replace('unit','')] || null;
+  if (val === '' || val === null || val === undefined) return null;
+  return parseFloat(val) || 0;
 }
 function getGameBestScore(s, game) {
-  var attempts = s.games && s.games[game];
-  if (attempts && attempts.length) return Math.max.apply(null, attempts);
-  return null;
+  var val = s[game] || null;
+  if (val === '' || val === null || val === undefined) return null;
+  return parseFloat(val) || 0;
 }
-function getUnitAvg(s) {
-  if (typeof s.unitAvg === 'string') return parseInt(s.unitAvg, 10) || 0;
-  if (typeof s.unitAvg === 'number') return s.unitAvg;
-  var scores = UNIT_KEYS.map(function(u) { return getUnitBestScore(s, u); }).filter(function(x) { return x !== null; });
-  if (!scores.length) return null;
-  return Math.round(scores.reduce(function(a, b) { return a + b; }, 0) / scores.length);
-}
+function getUnitAvg(s) { return parseFloat(s.unitAvg) || 0; }
 function getGamesAvg(s) {
   var scores = GAME_KEYS.map(function(g) { return getGameBestScore(s, g); }).filter(function(x) { return x !== null; });
   if (!scores.length) return null;
   return Math.round(scores.reduce(function(a, b) { return a + b; }, 0) / scores.length);
 }
-function getExamScore(s) {
-  if (s.examPercentage !== null && s.examPercentage !== undefined && s.examPercentage !== '') return parseInt(s.examPercentage, 10) || null;
-  return null;
-}
-function getExamRaw(s) {
-  if (s.examScore !== null && s.examScore !== undefined && s.examScore !== '') {
-    return { score: parseInt(s.examScore, 10), total: parseInt(s.examTotal, 10) || 30 };
-  }
-  return null;
-}
-function getCompletionPercent(s) {
-  if (typeof s.unitsCompleted === 'string') return parseInt(s.unitsCompleted, 10) || 0;
-  if (typeof s.unitsCompleted === 'number') return s.unitsCompleted;
-  var done = UNIT_KEYS.filter(function(u) { return s.progress && s.progress[u] && s.progress[u].completed; }).length;
-  return Math.round((done / UNIT_KEYS.length) * 100);
-}
-function isExamPassed(s) { return s.examPassed === true || s.examPassed === 'PASSED' || s.examPassed === 'TRUE'; }
-function hasExam(s) { return s.examTakenAt || (s.examPercentage !== null && s.examPercentage !== undefined && s.examPercentage !== ''); }
+function getExamScore(s) { return s.examPercentage !== null && s.examPercentage !== '' ? parseInt(s.examPercentage) : null; }
+function getExamRaw(s) { return s.examScore !== null && s.examScore !== '' ? { score: parseInt(s.examScore), total: parseInt(s.examTotal) || 30 } : null; }
+function getCompletionPercent(s) { return parseFloat(s.unitsCompleted) || 0; }
+function isExamPassed(s) { return s.examPassed === 'PASSED' || s.examPassed === true; }
+function hasExam(s) { return s.examTakenAt || (s.examPercentage !== null && s.examPercentage !== ''); }
 
 function computeWeightedFinal(s, settings) {
   var unitAvg = getUnitAvg(s);
   var gameAvg = getGamesAvg(s);
   var exam = getExamScore(s);
   var completion = getCompletionPercent(s);
-  if (unitAvg === null && gameAvg === null && exam === null && completion === 0) return null;
+  if (unitAvg === 0 && gameAvg === null && exam === null && completion === 0) return null;
   var w = settings;
   var total = 0, weightSum = 0;
   if (completion !== null) { total += completion * (w.unitsCompletedWeight / 100); weightSum += w.unitsCompletedWeight; }
@@ -362,94 +241,26 @@ function computeWeightedFinal(s, settings) {
   return Math.round((total / weightSum) * 100);
 }
 
-var TRANSMUTATION = [
-  { min: 97, max: 100, grade: 1.00 }, { min: 94, max: 96, grade: 1.25 },
-  { min: 91, max: 93, grade: 1.50 }, { min: 88, max: 90, grade: 1.75 },
-  { min: 85, max: 87, grade: 2.00 }, { min: 82, max: 84, grade: 2.25 },
-  { min: 79, max: 81, grade: 2.50 }, { min: 76, max: 78, grade: 2.75 },
-  { min: 75, max: 75, grade: 3.00 }, { min: 0, max: 74, grade: 5.00 }
-];
-function transmute(p) {
-  if (p === null || p === undefined) return null;
-  var row = TRANSMUTATION.find(function(r) { return p >= r.min && p <= r.max; });
-  return row ? row.grade : 5.00;
-}
+var TRANSMUTATION = [{ min: 97, max: 100, grade: 1.00 },{ min: 94, max: 96, grade: 1.25 },{ min: 91, max: 93, grade: 1.50 },{ min: 88, max: 90, grade: 1.75 },{ min: 85, max: 87, grade: 2.00 },{ min: 82, max: 84, grade: 2.25 },{ min: 79, max: 81, grade: 2.50 },{ min: 76, max: 78, grade: 2.75 },{ min: 75, max: 75, grade: 3.00 },{ min: 0, max: 74, grade: 5.00 }];
+function transmute(p) { if (p === null || p === undefined) return null; var row = TRANSMUTATION.find(function(r) { return p >= r.min && p <= r.max; }); return row ? row.grade : 5.00; }
 function formatGrade(g) { return (g === null || g === undefined) ? '—' : g.toFixed(2); }
-function getRemarks(g) {
-  if (g === null || g === undefined) return '—';
-  if (g === 1.00) return 'Excellent'; if (g <= 1.50) return 'Very Good';
-  if (g <= 2.00) return 'Good'; if (g <= 2.50) return 'Satisfactory';
-  if (g <= 3.00) return 'Passed'; return 'Failed';
-}
+function getRemarks(g) { if (g === null || g === undefined) return '—'; if (g === 1.00) return 'Excellent'; if (g <= 1.50) return 'Very Good'; if (g <= 2.00) return 'Good'; if (g <= 2.50) return 'Satisfactory'; if (g <= 3.00) return 'Passed'; return 'Failed'; }
 function getRemarksClass(g) { return (g === null || g === undefined) ? '' : (g <= 3.00 ? 'remarks-pass' : 'remarks-fail'); }
-function scoreClass(val, passThreshold) {
-  passThreshold = passThreshold || 90;
-  if (val === null || val === undefined) return 'score-empty';
-  if (val >= passThreshold) return 'score-pass';
-  if (val >= 75) return 'score-warn';
-  return 'score-fail';
-}
-function finalGradeClass(g) {
-  if (g === null || g === undefined) return '';
-  if (g <= 2.00) return 'final-pass';
-  if (g <= 3.00) return 'final-warn';
-  return 'final-fail';
-}
+function scoreClass(val, passThreshold) { passThreshold = passThreshold || 90; if (val === null || val === undefined) return 'score-empty'; if (val >= passThreshold) return 'score-pass'; if (val >= 75) return 'score-warn'; return 'score-fail'; }
+function finalGradeClass(g) { if (g === null || g === undefined) return ''; if (g <= 2.00) return 'final-pass'; if (g <= 3.00) return 'final-warn'; return 'final-fail'; }
 function cell(val) { return (val === null || val === undefined) ? '<span style="color:#B0BEC5;">—</span>' : val; }
-
-/* ---------- GROUP FILTER HELPERS ---------- */
-function allGroupOptions() {
-  var groups = {};
-  GB.state.students.forEach(function(s) {
-    var g = String(s.group || '').trim();
-    if (g) groups[g] = (groups[g] || 0) + 1;
-  });
-  return Object.keys(groups).sort(function(a, b) {
-    return (parseInt(a.replace(/\D/g, ''), 10) || 0) - (parseInt(b.replace(/\D/g, ''), 10) || 0);
-  }).map(function(g) { return { value: g, count: groups[g] }; });
-}
-function buildGroupOptions(groups) {
-  var html = '<option value="All">All Groups</option>';
-  groups.forEach(function(g) {
-    var selected = GB.state.filters.group === g.value ? ' selected' : '';
-    html += '<option value="' + escapeHtml(g.value) + '"' + selected + '>' +
-      escapeHtml(g.value) + ' (' + g.count + ')</option>';
-  });
-  return html;
-}
-function clearGroupFilter() {
-  GB.state.filters.group = 'All';
-  saveLocal();
-  render();
-  toast('Group filter cleared', 'info');
-}
 
 function filterStudents(students, f) {
   return students.filter(function(s) {
-    if (f.schoolYear && (s.schoolYear || '') !== f.schoolYear) return false;
-    if (f.semester && (s.semester || '') !== f.semester) return false;
-    if (f.group && f.group !== 'All' && String(s.group || '').trim() !== f.group) return false;
+    var sy = String(s.schoolYear || '').trim();
+    var sem = String(s.semester || '').trim();
+    if (f.schoolYear && sy && sy !== '—' && sy !== f.schoolYear) return false;
+    if (f.semester && sem && sem !== '—' && sem !== f.semester) return false;
     return true;
   });
 }
-function onFilterChange() {
-  GB.state.filters.schoolYear = document.getElementById('filterSY').value;
-  GB.state.filters.semester = document.getElementById('filterSem').value;
-  var gEl = document.getElementById('filterGroup');
-  if (gEl) GB.state.filters.group = gEl.value;
-  saveLocal();
-  render();
-}
-function validateStudent(s) {
-  var issues = [];
-  if (!s.name || s.name.length < 3) issues.push('Missing name');
-  if (!s.studentNo) issues.push('Missing student number');
-  if (!s.section) issues.push('Missing section');
-  if (!s.email || s.email.indexOf('@') < 0) issues.push('Invalid email');
-  if (!s.schoolYear) issues.push('Missing school year');
-  if (!s.semester) issues.push('Missing semester');
-  return issues;
-}
+function onFilterChange() { GB.state.filters.schoolYear = document.getElementById('filterSY').value; GB.state.filters.semester = document.getElementById('filterSem').value; localStorage.setItem(GB.localKey, JSON.stringify(GB.state)); render(); }
+function infoItem(label, value) { return '<div class="info-item"><div class="info-label">' + label + '</div><div class="info-value">' + value + '</div></div>'; }
 
 function render() {
   var app = document.getElementById('app');
@@ -457,94 +268,30 @@ function render() {
   var students = filterStudents(allStudents, GB.state.filters);
 
   if (!students.length) {
-    var f = GB.state.filters;
-    var filterDesc = f.schoolYear + ' — ' + f.semester;
-    if (f.group && f.group !== 'All') filterDesc += ' — ' + f.group;
-    app.innerHTML = renderToolbar() +
-      '<div class="empty-state">' +
-      '<div class="icon">📋</div>' +
-      '<h2>No students for ' + escapeHtml(filterDesc) + '</h2>' +
-      '<p>Try another filter, or click "Sync from Sheet" to fetch data.</p>' +
-      '<div class="flex gap-1" style="justify-content:center;">' +
-      '<button class="btn btn-outline" onclick="clearGroupFilter()">↺ Clear Group Filter</button>' +
-      '<button class="btn btn-primary" onclick="syncFromBackend()">🔄 Sync from Sheet</button></div></div>' +
-      renderDeveloperFooter();
+    app.innerHTML = renderToolbar() + '<div class="empty-state"><div class="icon">📋</div><h2>No students for ' + GB.state.filters.schoolYear + ' — ' + GB.state.filters.semester + '</h2><p>Try another School Year / Semester, or click "Sync from Sheet".</p><button class="btn btn-primary" onclick="syncFromBackend()">🔄 Sync from Sheet</button></div>' + renderDeveloperFooter();
     return;
   }
 
   app.innerHTML = renderToolbar() +
-    renderInfoBanner(students.length) +
-    '<div class="sheet" id="sheet">' +
-      renderSheetHeader() +
-      renderTable(students) +
-      renderLegend() +
-      renderSignatureBlock() +
-    '</div>' +
-    renderStatsSummary(students) +
-    renderDeveloperFooter();
+    '<div class="info-banner no-print"><div class="info-grid">' +
+    infoItem('Course', GB.state.settings.courseName) + infoItem('Instructor', GB.state.settings.instructorName) +
+    infoItem('School Year', GB.state.filters.schoolYear) + infoItem('Semester', GB.state.filters.semester) +
+    infoItem('Students in View', students.length) + infoItem('Generated', new Date().toLocaleDateString()) + '</div></div>' +
+    '<div class="sheet" id="sheet"><div class="sheet-header"><h1>' + GB.state.settings.courseName + '</h1><h2>Class Record — Respiratory Assessment Mastery</h2><p>School Year ' + GB.state.filters.schoolYear + ' &nbsp;|&nbsp; ' + GB.state.filters.semester + ' &nbsp;|&nbsp; Instructor: ' + GB.state.settings.instructorName + '</p><p>' + new Date().toLocaleDateString() + '</p><span class="version-tag">App Version 4.0</span></div>' +
+    renderTable(students) + renderLegend() + renderSignatureBlock() + '</div>' +
+    renderStatsSummary(students) + renderDeveloperFooter();
 }
 
 function renderToolbar() {
   var lastSync = GB.state.lastSync;
   var curSY = GB.state.filters.schoolYear;
   var curSem = GB.state.filters.semester;
-  var curGroup = GB.state.filters.group || 'All';
-  var groupActive = curGroup !== 'All';
-  return '<div class="toolbar no-print">' +
-    '<div class="toolbar-left">' +
-    '<div class="logo">📊</div>' +
-    '<div><h1>Class Record — Gradebook</h1>' +
-    '<small>' + escapeHtml(GB.state.settings.courseName) + ' — v3.1</small></div>' +
-    '</div>' +
-    '<div class="toolbar-right">' +
-    '<select id="filterSY" onchange="onFilterChange()" class="filter-select" title="School Year">' +
-      SCHOOL_YEARS.map(function(sy) { return '<option value="' + sy + '"' + (sy === curSY ? ' selected' : '') + '>' + sy + '</option>'; }).join('') +
-    '</select>' +
-    '<select id="filterSem" onchange="onFilterChange()" class="filter-select" title="Semester">' +
-      SEMESTERS.map(function(sm) { return '<option value="' + sm + '"' + (sm === curSem ? ' selected' : '') + '>' + sm + '</option>'; }).join('') +
-    '</select>' +
-    '<select id="filterGroup" onchange="onFilterChange()" class="filter-select' + (groupActive ? ' active-filter' : '') + '" title="Group">' +
-      buildGroupOptions(allGroupOptions()) +
-    '</select>' +
-    '<button class="btn btn-outline btn-sm" onclick="openNormalizeModal()">🧹 Normalize</button>' +
+  return '<div class="toolbar no-print"><div class="toolbar-left"><div class="logo">📊</div><div><h1>Class Record — Gradebook</h1><small>' + GB.state.settings.courseName + ' — v4.0</small></div></div><div class="toolbar-right">' +
+    '<select id="filterSY" onchange="onFilterChange()" class="filter-select">' + SCHOOL_YEARS.map(function(sy) { return '<option value="' + sy + '"' + (sy === curSY ? ' selected' : '') + '>' + sy + '</option>'; }).join('') + '</select>' +
+    '<select id="filterSem" onchange="onFilterChange()" class="filter-select">' + SEMESTERS.map(function(sm) { return '<option value="' + sm + '"' + (sm === curSem ? ' selected' : '') + '>' + sm + '</option>'; }).join('') + '</select>' +
     '<button class="btn btn-outline btn-sm" onclick="window.location.href=\'instructor-dashboard.html\'">👨‍🏫 Dashboard</button>' +
-    '<button class="btn btn-outline btn-sm" onclick="openWeightsModal()">⚖️ Weights</button>' +
-    '<button class="btn btn-outline btn-sm" onclick="syncFromBackend()">🔄 Sync' +
-      (lastSync ? ' (' + new Date(lastSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ')' : '') + '</button>' +
-    '<button class="btn btn-secondary btn-sm" onclick="exportCSV()">📤 Export CSV</button>' +
-    '<button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print</button>' +
-    '</div></div>';
-}
-
-function renderInfoBanner(count) {
-  var s = GB.state.settings;
-  var f = GB.state.filters;
-  var groupInfo = (f.group && f.group !== 'All') ? infoItem('Group Filter', f.group) : '';
-  return '<div class="info-banner no-print"><div class="info-grid">' +
-    infoItem('Course', s.courseName) +
-    infoItem('Instructor', s.instructorName) +
-    infoItem('School Year', f.schoolYear) +
-    infoItem('Semester', f.semester) +
-    groupInfo +
-    infoItem('Students in View', count) +
-    infoItem('Generated', todayLong()) +
-    '</div></div>';
-}
-function infoItem(label, value) {
-  return '<div class="info-item"><div class="info-label">' + escapeHtml(label) + '</div><div class="info-value">' + escapeHtml(value) + '</div></div>';
-}
-
-function renderSheetHeader() {
-  var s = GB.state.settings;
-  var f = GB.state.filters;
-  var groupLine = (f.group && f.group !== 'All') ? ' &nbsp;|&nbsp; Group: ' + escapeHtml(f.group) : '';
-  return '<div class="sheet-header">' +
-    '<h1>' + escapeHtml(s.courseName) + '</h1>' +
-    '<h2>Class Record — Respiratory Assessment Mastery</h2>' +
-    '<p>School Year ' + escapeHtml(f.schoolYear) + ' &nbsp;|&nbsp; ' + escapeHtml(f.semester) + groupLine + ' &nbsp;|&nbsp; Instructor: ' + escapeHtml(s.instructorName) + '</p>' +
-    '<p>' + todayLong() + '</p>' +
-    '<span class="version-tag">App Version 3.1</span>' +
-    '</div>';
+    '<button class="btn btn-outline btn-sm" onclick="syncFromBackend()">🔄 Sync' + (lastSync ? ' (' + new Date(lastSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ')' : '') + '</button>' +
+    '<button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print</button></div></div>';
 }
 
 function renderTable(students) {
@@ -566,8 +313,8 @@ function renderTable(students) {
   html += '<th rowspan="2" style="min-width:95px;">REMARKS</th>';
   html += '<th rowspan="2" style="min-width:120px;">VALIDATION</th>';
   html += '</tr><tr>';
-  UNIT_KEYS.forEach(function(u) { html += '<th class="sub" style="min-width:50px;">' + escapeHtml(UNIT_NAMES[u]) + '</th>'; });
-  GAME_KEYS.forEach(function(g) { html += '<th class="sub" style="min-width:50px;">' + escapeHtml(GAME_NAMES[g]) + '</th>'; });
+  UNIT_KEYS.forEach(function(u) { html += '<th class="sub" style="min-width:50px;">' + UNIT_NAMES[u] + '</th>'; });
+  GAME_KEYS.forEach(function(g) { html += '<th class="sub" style="min-width:50px;">' + GAME_NAMES[g] + '</th>'; });
   html += '<th class="sub exam-header" style="min-width:55px;">SCORE</th>';
   html += '<th class="sub exam-header" style="min-width:70px;">RESULT</th>';
   html += '</tr></thead><tbody>';
@@ -591,15 +338,14 @@ function renderStudentRow(s) {
   var rawFinal = computeWeightedFinal(s, w);
   var transmuted = transmute(rawFinal);
   var remarks = getRemarks(transmuted);
-  var issues = validateStudent(s);
 
-  var html = '<tr' + (issues.length ? ' style="background:#FFF8E1;"' : '') + '>';
-  html += '<td class="name-cell">' + escapeHtml(s.name) + '</td>';
-  html += '<td class="no-cell">' + escapeHtml(s.studentNo || '—') + '</td>';
-  html += '<td class="group-cell">' + escapeHtml(s.section || '—') + '</td>';
-  html += '<td class="group-cell">' + escapeHtml(s.group || '—') + '</td>';
-  html += '<td class="group-cell">' + escapeHtml(s.schoolYear || '—') + '</td>';
-  html += '<td class="group-cell">' + escapeHtml(s.semester || '—') + '</td>';
+  var html = '<tr>';
+  html += '<td class="name-cell">' + s.fullName + '</td>';
+  html += '<td class="no-cell">' + (s.studentNo || '—') + '</td>';
+  html += '<td class="group-cell">' + (s.section || '—') + '</td>';
+  html += '<td class="group-cell">' + (s.group || '—') + '</td>';
+  html += '<td class="group-cell">' + (s.schoolYear || '—') + '</td>';
+  html += '<td class="group-cell">' + (s.semester || '—') + '</td>';
   unitScores.forEach(function(v) { html += '<td class="num ' + scoreClass(v, w.masteryThreshold) + '">' + cell(v) + '</td>'; });
   html += '<td class="num final ' + scoreClass(unitAvg, w.masteryThreshold) + '">' + cell(unitAvg) + '</td>';
   gameScores.forEach(function(v) { html += '<td class="num ' + scoreClass(v, 90) + '">' + cell(v) + '</td>'; });
@@ -615,8 +361,7 @@ function renderStudentRow(s) {
   html += '<td class="num final">' + (rawFinal !== null ? rawFinal : '—') + '</td>';
   html += '<td class="num final ' + finalGradeClass(transmuted) + '">' + formatGrade(transmuted) + '</td>';
   html += '<td class="remarks ' + getRemarksClass(transmuted) + '">' + remarks + '</td>';
-  html += '<td style="text-align:left;font-size:0.72rem;color:' + (issues.length ? 'var(--accent)' : 'var(--success)') + ';">' +
-    (issues.length ? '⚠️ ' + issues.join(', ') : '✅ OK') + '</td>';
+  html += '<td style="text-align:left;font-size:0.72rem;color:var(--success);">✅ OK</td>';
   html += '</tr>';
   return html;
 }
@@ -625,11 +370,7 @@ function renderClassAverageRow(students) {
   var w = GB.state.settings;
   var n = students.length;
   if (!n) return '';
-  var avg = function(vals) {
-    var nums = vals.filter(function(v) { return v !== null && v !== undefined; });
-    if (!nums.length) return null;
-    return Math.round(nums.reduce(function(a, b) { return a + b; }, 0) / nums.length);
-  };
+  var avg = function(vals) { var nums = vals.filter(function(v) { return v !== null && v !== undefined; }); if (!nums.length) return null; return Math.round(nums.reduce(function(a, b) { return a + b; }, 0) / nums.length); };
   var unitAvgs = UNIT_KEYS.map(function(u) { return avg(students.map(function(s) { return getUnitBestScore(s, u); })); });
   var gameAvgs = GAME_KEYS.map(function(g) { return avg(students.map(function(s) { return getGameBestScore(s, g); })); });
   var unitAvgOfAvgs = avg(unitAvgs);
@@ -671,10 +412,7 @@ function renderLegend() {
 
 function renderSignatureBlock() {
   var s = GB.state.settings;
-  return '<div class="signature-block">' +
-    '<div><div class="signature-line"><strong>' + escapeHtml(s.instructorName) + '</strong><small>Instructor</small></div></div>' +
-    '<div><div class="signature-line"><strong>_____________________________</strong><small>Program Chair / Dean</small></div></div>' +
-    '</div>';
+  return '<div class="signature-block"><div><div class="signature-line"><strong>' + s.instructorName + '</strong><small>Instructor</small></div></div><div><div class="signature-line"><strong>_____________________________</strong><small>Program Chair / Dean</small></div></div></div>';
 }
 
 function renderStatsSummary(students) {
@@ -701,155 +439,30 @@ function renderStatsSummary(students) {
 }
 
 function statPill(label, value, colorClass, sub) {
-  return '<div class="stat-pill ' + (colorClass || '') + '">' +
-    '<div class="stat-label">' + label + '</div>' +
-    '<div class="stat-value">' + value + '</div>' +
-    (sub ? '<div class="stat-sub">' + sub + '</div>' : '') + '</div>';
+  return '<div class="stat-pill ' + (colorClass || '') + '"><div class="stat-label">' + label + '</div><div class="stat-value">' + value + '</div>' + (sub ? '<div class="stat-sub">' + sub + '</div>' : '') + '</div>';
 }
 
 function renderDeveloperFooter() {
-  return '<div class="developer-footer no-print">' +
-    '<div class="dev-label">Class Record System Developed by</div>' +
-    '<div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div>' +
-    '<div>Clinical Instructor | Teacher II — Department of Education</div>' +
-    '<div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div>' +
-    '<div style="margin-top:.5rem;font-size:.7rem;">Version 3.1 — © ' + new Date().getFullYear() + '</div>' +
-    '</div>';
+  return '<div class="developer-footer no-print"><div class="dev-label">Class Record System Developed by</div><div class="dev-name">JEMUEL C. MARI, MAN, RN, LPT</div><div>Clinical Instructor | Teacher II — Department of Education</div><div><strong>Tarlac State University</strong> — College of Science — Nursing Department</div><div style="margin-top:.5rem;font-size:.7rem;">Version 4.0 — © ' + new Date().getFullYear() + '</div></div>';
 }
-
-function openWeightsModal() {
-  var w = GB.state.settings;
-  document.getElementById('modalTitle').textContent = '⚖️ Adjust Grade Weights';
-  document.getElementById('modalBody').innerHTML =
-    '<p style="font-size:.85rem;color:var(--gray);margin-bottom:1rem;">Set how much each component contributes to the final raw percentage. Weights should sum to 100%.</p>' +
-    '<div class="form-row">' +
-    '<div class="form-group"><label>Units Completed (%)</label><input type="number" id="w_completion" min="0" max="100" value="' + w.unitsCompletedWeight + '" /></div>' +
-    '<div class="form-group"><label>Unit Quiz Average (%)</label><input type="number" id="w_unitavg" min="0" max="100" value="' + w.unitQuizWeight + '" /></div>' +
-    '</div><div class="form-row">' +
-    '<div class="form-group"><label>Mastery Games (%)</label><input type="number" id="w_games" min="0" max="100" value="' + w.gamesWeight + '" /></div>' +
-    '<div class="form-group"><label>Capstone Exam (%)</label><input type="number" id="w_capstone" min="0" max="100" value="' + w.capstoneWeight + '" /></div>' +
-    '</div><div id="weightSum" style="font-size:.9rem;margin-bottom:1rem;font-weight:700;"></div>' +
-    '<div class="flex gap-1" style="flex-wrap:wrap;">' +
-    '<button class="btn btn-primary" onclick="saveWeights()">💾 Save Weights</button>' +
-    '<button class="btn btn-outline" onclick="resetWeights()">↺ Reset Default</button>' +
-    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>';
-  document.getElementById('modalOverlay').classList.add('show');
-  updateWeightSum();
-  ['w_completion','w_unitavg','w_games','w_capstone'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('input', updateWeightSum);
-  });
-}
-function updateWeightSum() {
-  var sum = ['w_completion','w_unitavg','w_games','w_capstone'].map(function(id) { return parseInt(document.getElementById(id).value, 10) || 0; }).reduce(function(a, b) { return a + b; }, 0);
-  var el = document.getElementById('weightSum');
-  if (!el) return;
-  var ok = sum === 100;
-  el.innerHTML = 'Total: <span style="color:' + (ok ? 'var(--success)' : 'var(--accent)') + ';">' + sum + '%</span> ' + (ok ? '✅' : '— will be normalized');
-}
-function saveWeights() {
-  GB.state.settings.unitsCompletedWeight = parseInt(document.getElementById('w_completion').value, 10) || 0;
-  GB.state.settings.unitQuizWeight = parseInt(document.getElementById('w_unitavg').value, 10) || 0;
-  GB.state.settings.gamesWeight = parseInt(document.getElementById('w_games').value, 10) || 0;
-  GB.state.settings.capstoneWeight = parseInt(document.getElementById('w_capstone').value, 10) || 0;
-  saveLocal();
-  closeModal();
-  toast('✅ Weights saved.', 'success');
-  render();
-}
-function resetWeights() {
-  document.getElementById('w_completion').value = 20;
-  document.getElementById('w_unitavg').value = 40;
-  document.getElementById('w_games').value = 20;
-  document.getElementById('w_capstone').value = 20;
-  updateWeightSum();
-}
-
-function exportCSV() {
-  var students = filterStudents(GB.state.students, GB.state.filters);
-  var w = GB.state.settings;
-  if (!students.length) return toast('No data to export.', 'warning');
-  var headers = ['Student Name','Student No.','Section','Group','School Year','Semester','Email','Unit1','Unit2','Unit3','Unit4','Unit5','Unit6','Unit7','Unit Avg','Blitz','Tree','Sound','RedFlag','Matrix','Games Avg','Exam Score','Exam Total','Exam Percentage','Exam Result','Exam Date','Units Completed %','Weighted Raw %','Final Grade','Remarks','Retake Active','Submission Code','Last Active'];
-  var rows = students.map(function(s) {
-    var unitScores = UNIT_KEYS.map(function(u) { return getUnitBestScore(s, u) !== null ? getUnitBestScore(s, u) : ''; });
-    var gameScores = GAME_KEYS.map(function(g) { return getGameBestScore(s, g) !== null ? getGameBestScore(s, g) : ''; });
-    var unitAvg = getUnitAvg(s);
-    var gameAvg = getGamesAvg(s);
-    var examRaw = getExamRaw(s);
-    var examPct = getExamScore(s);
-    var examResult = hasExam(s) ? (isExamPassed(s) ? 'PASSED' : 'FAILED') : 'NOT TAKEN';
-    var completion = getCompletionPercent(s);
-    var raw = computeWeightedFinal(s, w);
-    var g = transmute(raw);
-    return [s.name, s.studentNo || '', s.section || '', s.group || '', s.schoolYear || '', s.semester || '', s.email || '',
-      unitScores[0], unitScores[1], unitScores[2], unitScores[3], unitScores[4], unitScores[5], unitScores[6],
-      unitAvg !== null ? unitAvg : '',
-      gameScores[0], gameScores[1], gameScores[2], gameScores[3], gameScores[4],
-      gameAvg !== null ? gameAvg : '',
-      examRaw ? examRaw.score : '', examRaw ? examRaw.total : '', examPct !== null ? examPct : '',
-      examResult, s.examTakenAt || '',
-      completion + '%', raw !== null ? raw : '', formatGrade(g), getRemarks(g),
-      s.retakeActive || 'NO', s.submissionCode || '', s.lastActive || ''];
-  });
-  var groupSuffix = (GB.state.filters.group && GB.state.filters.group !== 'All') ? '-' + GB.state.filters.group.replace(/\s+/g, '') : '';
-  var csv = [headers].concat(rows).map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
-  downloadFile(csv, 'class-record-' + GB.state.filters.schoolYear + '-' + GB.state.filters.semester.replace(/\s+/g,'') + groupSuffix + '-' + todayISO() + '.csv', 'text/csv');
-  toast('✅ CSV exported.', 'success');
-}
-
-function openNormalizeModal() {
-  document.getElementById('modalTitle').textContent = '🧹 Normalize Data';
-  document.getElementById('modalBody').innerHTML =
-    '<p style="font-size:.88rem;color:var(--gray);margin-bottom:1rem;">This will scan the Submissions sheet and fix common data issues:<br>' +
-    '• Trim whitespace<br>• Proper-case names<br>• Uppercase student numbers<br>' +
-    '• Uppercase sections<br>• Standardize group names<br>• Standardize School Year format<br>• Standardize Semester</p>' +
-    '<div class="callout callout-warning"><strong>⚠️ This updates the Google Sheet directly.</strong></div>' +
-    '<div class="flex gap-1" style="flex-wrap:wrap;">' +
-    '<button class="btn btn-primary" onclick="runNormalize()">🧹 Run Normalize Now</button>' +
-    '<button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>' +
-    '<div id="normalizeResult" class="mt-2"></div>';
-  document.getElementById('modalOverlay').classList.add('show');
-}
-async function runNormalize() {
-  var el = document.getElementById('normalizeResult');
-  el.innerHTML = '<div class="callout callout-info">⏳ Running...</div>';
-  try {
-    var params = new URLSearchParams();
-    params.append('action', 'normalizeAll');
-    params.append('sheetName', 'Submissions');
-    var r = await fetch(BACKEND_URL, { method: 'POST', body: params });
-    var d = await r.json();
-    if (d.success) {
-      el.innerHTML = '<div class="callout callout-success">✅ Normalized ' + d.fixed + ' row(s). Syncing...</div>';
-      setTimeout(function() { closeModal(); syncFromBackend(); }, 800);
-    } else {
-      el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(d.error || 'Failed') + '</div>';
-    }
-  } catch (err) {
-    el.innerHTML = '<div class="callout callout-danger">❌ ' + escapeHtml(err.message) + '</div>';
-  }
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
 function init() {
-  loadLocal();
+  var raw = localStorage.getItem(GB.localKey);
+  if (raw) {
+    try {
+      var parsed = JSON.parse(raw);
+      GB.state.students = parsed.students || [];
+      GB.state.settings = Object.assign({}, GB.state.settings, parsed.settings || {});
+      if (parsed.filters) GB.state.filters = parsed.filters;
+      GB.state.lastSync = parsed.lastSync || null;
+    } catch (e) { console.warn('Local load failed', e); }
+  }
+  
   if (!GB.state.students.length) {
     syncFromBackend();
   } else {
     render();
-    setTimeout(function() {
-      fetchAllSubmissions().then(function(result) {
-        if (result.success && result.records.length !== GB.state.students.length) syncFromBackend();
-      }).catch(function() {});
-    }, 2000);
   }
-  document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target.id === 'modalOverlay') closeModal();
-  });
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
-  });
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>
