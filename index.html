@@ -1513,6 +1513,40 @@ function performLogout(mode) {
   document.getElementById('appContainer').style.display = 'none';
   toast('Logged out.', 'success');
 }
+// ============================================================
+// SYNC SCORE
+// ============================================================
+async function syncNewScore(type, unitOrGame, score) {
+  if (state.isLocked) { toast('Term is locked. Score not saved.', 'error'); return; }
+  if (!state.student) { toast('Not logged in.', 'error'); return; }
+  
+  if (type === 'unit') {
+    if (!state.quizAttempts[unitOrGame]) state.quizAttempts[unitOrGame] = [];
+    if (score > 0) state.quizAttempts[unitOrGame].push(score);
+    if (score >= 90) state.progress[unitOrGame] = { completed: true, score: score };
+  } else if (type === 'game') {
+    if (!state.games[unitOrGame]) state.games[unitOrGame] = [];
+    if (score > 0) state.games[unitOrGame].push(score);
+  }
+  
+  saveState();
+  
+  const payload = {
+    student: { fullName: state.student.fullName, studentNo: state.student.studentNo, section: state.student.section, group: state.student.group, email: state.student.email },
+    quizAttempts: state.quizAttempts,
+    games: state.games,
+    progress: state.progress,
+    exam: state.exam
+  };
+  
+  addToQueue(type, payload);
+  
+  if (isOnline) {
+    await processSyncQueue();
+  } else {
+    toast('Saved offline. Will sync when online.', 'warning');
+  }
+}
 </script>
 </body>
 </html>
