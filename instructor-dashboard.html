@@ -417,13 +417,21 @@
           <div class="detail-item"><div class="detail-label">Exam Status</div><div class="detail-value" style="color:${s.examPassed === 'PASSED' ? 'var(--success)' : (s.examPassed === 'FAILED' ? 'var(--danger)' : 'var(--gray)')}">${s.examPassed || '—'}</div></div>
         </div>`;
       html += `<h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Unit Scores</h4><ul style="list-style:none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">`;
-      ['u1','u2','u3','u4','u5','u6','u7'].forEach((u, i) => {
-        html += `<li style="padding:0.75rem 1rem; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between;"><span>Unit ${i + 1}</span><span style="font-weight:700;">${s[u] !== '' ? s[u] : '—'}</span></li>`;
-      });
+      ['U1','U2','U3','U4','U5','U6','U7'].forEach((u, i) => {
+  const val = s[u] !== undefined ? s[u] : s[u.toLowerCase()]; // Check both U1 and u1
+  html += `<li style="...">
+    <span>Unit ${i + 1}</span>
+    <span style="font-weight:700;">${val !== '' && val !== undefined ? val : '—'}</span>
+  </li>`;
+});
       html += `</ul><h4 style="font-size:0.9rem; margin-bottom:0.5rem; margin-top:1.5rem;">Mastery Games</h4><ul style="list-style:none; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">`;
-      ['blitz','tree','sound','redFlag','matrix'].forEach((g, i) => {
-        html += `<li style="padding:0.75rem 1rem; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between;"><span>${['Pattern Blitz', 'Decision Tree', 'Sound ID', 'Red Flag Rush', 'Matrix Master'][i]}</span><span style="font-weight:700;">${s[g] !== '' ? s[g] : '—'}</span></li>`;
-      });
+     ['blitz','tree','sound','redFlag','matrix'].forEach((g, i) => {
+  const val = s[g] !== undefined ? s[g] : s[g.charAt(0).toUpperCase() + g.slice(1)]; // Check 'blitz' and 'Blitz'
+  html += `<li style="...">
+    <span>${['Pattern Blitz', 'Decision Tree', 'Sound ID', 'Red Flag Rush', 'Matrix Master'][i]}</span>
+    <span style="font-weight:700;">${val !== '' && val !== undefined ? val : '—'}</span>
+  </li>`;
+});
       html += `</ul>`;
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('studentModal').classList.add('show');
