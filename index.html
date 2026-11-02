@@ -644,15 +644,86 @@ async function submitRegistration() {
 
 function openEditProfile() {
   if (!state.student) return;
-  const s = state.student;
-  $('modalTitle').textContent = '✏️ Edit Profile';
-  $('modalBody').innerHTML =
-    '<div class="form-group"><label>Full Name</label><input type="text" id="editFullName" value="' + escapeHtml(s.fullName) + '"></div>' +
-    '<div class="form-group"><label>Section</label><input type="text" id="editSection" value="' + escapeHtml(s.section) + '"></div>' +
-    '<div class="form-group"><label>Group</label><input type="text" id="editGroup" value="' + escapeHtml(s.group || '') + '"></div>' +
-    '<div class="form-group"><label>Email</label><input type="email" id="editEmail" value="' + escapeHtml(s.email) + '"></div>' +
-    '<button class="btn btn-primary btn-block" onclick="saveProfile()">💾 Save Changes</button>';
-  $('genericModal').classList.add('show');
+  
+  const modal = document.getElementById('genericModal');
+  if (!modal) return;
+
+  document.getElementById('modalTitle').textContent = '✏️ Edit Profile';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Full Name</label><input type="text" id="editFullName" value="${escapeHtml(state.student.fullName)}"></div>
+    <div class="form-group"><label>Section</label><input type="text" id="editSection" value="${escapeHtml(state.student.section)}"></div>
+    <div class="form-group"><label>Group</label><input type="text" id="editGroup" value="${escapeHtml(state.student.group || '')}"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="editEmail" value="${escapeHtml(state.student.email || '')}"></div>
+    
+    <!-- IDINAGDAG ANG SCHOOL YEAR AT SEMESTER -->
+    <div class="form-group"><label>School Year</label>
+      <select id="editSY">
+        <option ${state.activeTerm.schoolYear === '2025-2026' ? 'selected' : ''}>2025-2026</option>
+        <option ${state.activeTerm.schoolYear === '2026-2027' ? 'selected' : ''}>2026-2027</option>
+        <option ${state.activeTerm.schoolYear === '2027-2028' ? 'selected' : ''}>2027-2028</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Semester</label>
+      <select id="editSem">
+        <option ${state.activeTerm.semester === '1st Semester' ? 'selected' : ''}>1st Semester</option>
+        <option ${state.activeTerm.semester === '2nd Semester' ? 'selected' : ''}>2nd Semester</option>
+      </select>
+    </div>
+    
+    <button class="btn btn-primary btn-block" onclick="submitEditProfile()">💾 Save Changes</button>
+  `;
+  modal.classList.add('show');
+}
+
+async function submitEditProfile() {
+  const fullName = document.getElementById('editFullName').value.trim();
+  const section = document.getElementById('editSection').value.trim();
+  const group = document.getElementById('editGroup').value.trim();
+  const email = document.getElementById('editEmail').value.trim();
+  const sy = document.getElementById('editSY').value;
+  const sem = document.getElementById('editSem').value;
+
+  if (!fullName || !section) { toast('Full Name and Section are required.', 'warning'); return; }
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'syncProgress', // Ginagamit natin ang syncProgress para i-update ang profile
+        studentNo: state.student.studentNo,
+        schoolYear: sy,
+        semester: sem,
+        fullName: fullName,
+        section: section,
+        group: group,
+        email: email,
+        payloadJson: JSON.stringify({}), // Walang quiz data, profile update lang
+        appVersion: '4.1'
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // I-update ang local state
+      state.student.fullName = fullName;
+      state.student.section = section;
+      state.student.group = group;
+      state.student.email = email;
+      state.activeTerm.schoolYear = sy;
+      state.activeTerm.semester = sem;
+      
+      saveState();
+      closeModal('genericModal');
+      toast('✅ Profile updated successfully.', 'success');
+      
+      // I-refresh ang UI
+      showApp();
+    } else {
+      toast('❌ ' + data.error, 'error');
+    }
+  } catch (err) {
+    toast('❌ Error: ' + err.message, 'error');
+  }
 }
 
 function saveProfile() {
