@@ -326,38 +326,89 @@ function renderTable(students) {
 
 function renderStudentRow(s) {
   var w = GB.state.settings;
-  var unitScores = UNIT_KEYS.map(function(u) { return getUnitBestScore(s, u); });
-  var gameScores = GAME_KEYS.map(function(g) { return getGameBestScore(s, g); });
-  var unitAvg = getUnitAvg(s);
-  var gameAvg = getGamesAvg(s);
-  var examPct = getExamScore(s);
-  var examRaw = getExamRaw(s);
-  var examTaken = hasExam(s);
-  var examPass = isExamPassed(s);
-  var completion = getCompletionPercent(s);
-  var rawFinal = computeWeightedFinal(s, w);
+  
+  var studentName = s.fullName || s.name || 'Unknown Student';
+  
+  var unitScores = UNIT_KEYS.map(function(u) { 
+    var val = s[u] || s['u' + u.replace('unit','')] || null;
+    if (val === '' || val === null || val === undefined) return null;
+    var num = parseFloat(val);
+    return (num <= 1 && num > 0) ? Math.round(num * 100) : Math.round(num);
+  });
+  
+  var gameScores = GAME_KEYS.map(function(g) { 
+    var val = s[g] || null;
+    if (val === '' || val === null || val === undefined) return null;
+    var num = parseFloat(val);
+    return (num <= 1 && num > 0) ? Math.round(num * 100) : Math.round(num);
+  });
+  
+  var unitAvg = 0;
+  var validUnits = unitScores.filter(function(x) { return x !== null; });
+  if (validUnits.length) {
+    unitAvg = Math.round(validUnits.reduce(function(a, b) { return a + b; }, 0) / validUnits.length);
+  } else if (s.unitAvg) {
+    var rawAvg = parseFloat(s.unitAvg);
+    unitAvg = (rawAvg <= 1 && rawAvg > 0) ? Math.round(rawAvg * 100) : Math.round(rawAvg);
+  }
+  
+  var gameAvg = null;
+  var validGames = gameScores.filter(function(x) { return x !== null; });
+  if (validGames.length) {
+    gameAvg = Math.round(validGames.reduce(function(a, b) { return a + b; }, 0) / validGames.length);
+  }
+  
+  var examTaken = s.examTakenAt || (s.examScore !== null && s.examScore !== '' && s.examScore !== undefined);
+  var examPass = s.examPassed === 'PASSED';
+  var examPct = null;
+  var examRaw = null;
+  
+  if (examTaken) {
+    var sc = parseFloat(s.examScore) || 0;
+    var tot = parseFloat(s.examTotal) || 30;
+    examRaw = { score: sc, total: tot };
+    examPct = tot > 0 ? Math.round((sc / tot) * 100) : 0;
+  }
+  
+  var completion = parseFloat(s.unitsCompleted) || 0;
+  if (completion <= 1 && completion > 0) completion = Math.round(completion * 100);
+  
+  var rawFinal = null;
+  if (unitAvg > 0 || examPct !== null || completion > 0) {
+    var totalScore = 0;
+    var totalWeight = 0;
+    if (completion > 0) { totalScore += completion * 0.20; totalWeight += 0.20; }
+    if (unitAvg > 0) { totalScore += unitAvg * 0.40; totalWeight += 0.40; }
+    if (gameAvg !== null) { totalScore += gameAvg * 0.20; totalWeight += 0.20; }
+    if (examPct !== null) { totalScore += examPct * 0.20; totalWeight += 0.20; }
+    if (totalWeight > 0) rawFinal = Math.round(totalScore / totalWeight);
+  }
+  
   var transmuted = transmute(rawFinal);
   var remarks = getRemarks(transmuted);
 
   var html = '<tr>';
-  html += '<td class="name-cell">' + s.fullName + '</td>';
+  html += '<td class="name-cell">' + studentName + '</td>';
   html += '<td class="no-cell">' + (s.studentNo || '—') + '</td>';
   html += '<td class="group-cell">' + (s.section || '—') + '</td>';
   html += '<td class="group-cell">' + (s.group || '—') + '</td>';
   html += '<td class="group-cell">' + (s.schoolYear || '—') + '</td>';
   html += '<td class="group-cell">' + (s.semester || '—') + '</td>';
+  
   unitScores.forEach(function(v) { html += '<td class="num ' + scoreClass(v, w.masteryThreshold) + '">' + cell(v) + '</td>'; });
-  html += '<td class="num final ' + scoreClass(unitAvg, w.masteryThreshold) + '">' + cell(unitAvg) + '</td>';
+  html += '<td class="num final ' + scoreClass(unitAvg, w.masteryThreshold) + '">' + (unitAvg > 0 ? unitAvg : '—') + '</td>';
+  
   gameScores.forEach(function(v) { html += '<td class="num ' + scoreClass(v, 90) + '">' + cell(v) + '</td>'; });
-  html += '<td class="num final ' + scoreClass(gameAvg, 90) + '">' + cell(gameAvg) + '</td>';
-  if (examTaken) {
-    var examScoreText = examRaw ? (examRaw.score + '/' + examRaw.total) : (examPct + '%');
-    html += '<td class="num ' + scoreClass(examPct, 90) + '">' + examScoreText + '<br><small>' + examPct + '%</small></td>';
+  html += '<td class="num final ' + scoreClass(gameAvg, 90) + '">' + (gameAvg !== null ? gameAvg : '—') + '</td>';
+  
+  if (examTaken && examRaw) {
+    html += '<td class="num ' + scoreClass(examPct, 50) + '">' + examRaw.score + '/' + examRaw.total + '<br><small>' + examPct + '%</small></td>';
     html += '<td class="num ' + (examPass ? 'exam-pass' : 'exam-fail') + '">' + (examPass ? '✅ PASS' : '❌ FAIL') + '</td>';
   } else {
     html += '<td class="num score-empty">—</td><td class="num score-empty">Not taken</td>';
   }
-  html += '<td class="num">' + completion + '%</td>';
+  
+  html += '<td class="num">' + (completion > 0 ? completion + '%' : '—') + '</td>';
   html += '<td class="num final">' + (rawFinal !== null ? rawFinal : '—') + '</td>';
   html += '<td class="num final ' + finalGradeClass(transmuted) + '">' + formatGrade(transmuted) + '</td>';
   html += '<td class="remarks ' + getRemarksClass(transmuted) + '">' + remarks + '</td>';
