@@ -575,10 +575,10 @@ async function submitRegistration(studentNo) {
 // DASHBOARD RENDERING
 // ============================================================
 function renderDashboard() {
-  // Simple stats rendering
   const unitsDone = Object.keys(state.progress).length;
   const avgScore = Object.values(state.quizAttempts).flat().reduce((a,b)=>a+b,0) / (Object.values(state.quizAttempts).flat().length || 1);
   
+  // I-update ang stats
   document.getElementById('dashboardStats').innerHTML = `
     <div style="display:flex;gap:1rem;flex-wrap:wrap;">
       <div style="flex:1;min-width:100px;text-align:center;background:var(--primary-light);padding:1rem;border-radius:12px;">
@@ -594,9 +594,9 @@ function renderDashboard() {
         <div style="font-size:0.75rem;color:var(--gray);">Exam</div>
       </div>
     </div>
-        `;
+  `;
   
-  // Render Units
+  // I-render ang Units
   const unitNames = ['Baseline', 'Inspection', 'Palpation', 'Percussion', 'Auscultation', 'Diseases', 'Interventions'];
   document.getElementById('unitList').innerHTML = unitNames.map((name, i) => {
     const unitKey = 'unit' + (i+1);
@@ -622,10 +622,104 @@ function renderDashboard() {
 
 function openUnit(num) {
   if (state.isLocked) { toast('This term is locked. Cannot edit.', 'error'); return; }
-  // Placeholder for Unit logic (Quiz/Game integration)
-  toast('Opening Unit ' + num + '... (Functionality pending)', 'info');
+  
+  const unitKey = 'unit' + num;
+  const quiz = QUIZZES[unitKey];
+  if (!quiz) { toast('Quiz not found for Unit ' + num, 'error'); return; }
+  
+  // I-render ang Quiz sa Modal
+  const modal = document.getElementById('genericModal');
+  document.getElementById('modalTitle').textContent = '📝 Unit ' + num + ' Quiz';
+  document.getElementById('modalBody').innerHTML = `
+    <div id="quizContainer">
+      ${quiz.map((q, i) => `
+        <div class="quiz-question" data-q="${i}" style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);">
+          <p style="font-weight:600;margin-bottom:0.75rem;font-size:0.95rem;">${i+1}. ${escapeHtml(q.q)}</p>
+          <div class="quiz-options">
+            ${q.options.map(o => `
+              <button class="quiz-opt" onclick="selectOption(this)" data-q="${i}" data-selected="0" style="display:block;width:100%;text-align:left;padding:0.75rem 1rem;border:2px solid var(--border);border-radius:10px;background:#fff;margin-bottom:0.5rem;cursor:pointer;font-family:var(--font-main);font-size:0.88rem;">${escapeHtml(o)}</button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn btn-primary btn-block" onclick="submitQuiz(${num})" style="margin-top:1rem;">✅ Submit Quiz</button>
+      <div id="quizResult-${num}" style="margin-top:1rem;"></div>
+    </div>
+  `;
+  modal.classList.add('show');
 }
 
+// Function para pumili ng sagot
+function selectOption(btn) {
+  const siblings = btn.parentElement.querySelectorAll('.quiz-opt');
+  siblings.forEach(s => {
+    s.dataset.selected = '0';
+    s.style.borderColor = 'var(--border)';
+    s.style.background = '#fff';
+    s.style.fontWeight = '400';
+  });
+  btn.dataset.selected = '1';
+  btn.style.borderColor = 'var(--secondary)';
+  btn.style.background = 'var(--secondary-light)';
+  btn.style.fontWeight = '600';
+}
+
+// Function para i-submit ang quiz
+async function submitQuiz(num) {
+  const unitKey = 'unit' + num;
+  const quiz = QUIZZES[unitKey];
+  let correct = 0;
+  
+  quiz.forEach((q, i) => {
+    const qEl = document.querySelector(`.quiz-question[data-q="${i}"]`);
+    if (!qEl) return;
+    const allOpts = qEl.querySelectorAll('.quiz-opt');
+    let userChoice = null;
+    allOpts.forEach(o => { if (o.dataset.selected === '1') userChoice = o; });
+    
+    if (userChoice) {
+      const choice = userChoice.textContent.trim();
+      if (choice === q.answer) {
+        correct++;
+        userChoice.style.borderColor = 'var(--success)';
+        userChoice.style.background = 'var(--success-light)';
+      } else {
+        userChoice.style.borderColor = 'var(--accent)';
+        userChoice.style.background = 'var(--accent-light)';
+      }
+      allOpts.forEach(o => {
+        if (o.textContent.trim() === q.answer && o !== userChoice) {
+          o.style.borderColor = 'var(--success)';
+          o.style.background = 'var(--success-light)';
+        }
+      });
+    }
+  });
+  
+  const total = quiz.length;
+  const pct = Math.round((correct / total) * 100);
+  const pass = pct >= 90;
+  
+  document.getElementById(`quizResult-${num}`).innerHTML = `
+    <div class="callout callout-${pass ? 'success' : 'warning'}" style="padding:1rem;border-radius:8px;margin-top:1rem;border-left:4px solid ${pass ? 'var(--success)' : 'var(--warning)'};background:${pass ? 'var(--success-light)' : 'var(--warning-light)'};">
+      <strong>Score: ${correct}/${total} (${pct}%)</strong><br>
+      ${pass ? '🎉 Mastery achieved!' : '⚠️ You need 90% to master this unit.'}
+    </div>
+  `;
+  
+  // I-save ang score
+  await syncNewScore('unit', unitKey, pct);
+  
+  if (pass) {
+    state.progress[unitKey] = { completed: true, score: pct };
+    saveState();
+    toast('Unit mastered!', 'success');
+    setTimeout(() => { closeModal('genericModal'); renderDashboard(); }, 1500);
+  } else {
+    toast('Score: ' + pct + '% — need 90% to master', 'warning');
+  }
+}
+  
 // ============================================================
 // SYNC-ON-ACTION (Called kapag may bagong score)
 // ============================================================
