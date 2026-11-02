@@ -226,17 +226,39 @@ function isExamPassed(s) { return s.examPassed === 'PASSED' || s.examPassed === 
 function hasExam(s) { return s.examTakenAt || (s.examPercentage !== null && s.examPercentage !== ''); }
 
 function computeWeightedFinal(s, settings) {
-  var unitAvg = getUnitAvg(s);
-  var gameAvg = getGamesAvg(s);
-  var exam = getExamScore(s);
-  var completion = getCompletionPercent(s);
+  var unitAvg = parseFloat(s.unitAvg) || 0;
+  if (unitAvg <= 1 && unitAvg > 0) unitAvg = Math.round(unitAvg * 100);
+  
+  var completion = parseFloat(s.unitsCompleted) || 0;
+  if (completion <= 1 && completion > 0) completion = Math.round(completion * 100);
+  
+  var exam = null;
+  if (s.examScore !== null && s.examScore !== '' && s.examScore !== undefined) {
+    var sc = parseFloat(s.examScore) || 0;
+    var tot = parseFloat(s.examTotal) || 30;
+    if (tot > 0) exam = Math.round((sc / tot) * 100);
+  }
+  
+  var gameAvg = null;
+  var gameScores = [];
+  ['blitz','tree','sound','redFlag','matrix'].forEach(function(g) {
+    var v = parseFloat(s[g]);
+    if (!isNaN(v) && s[g] !== '' && s[g] !== null) {
+      gameScores.push(v <= 1 && v > 0 ? Math.round(v * 100) : Math.round(v));
+    }
+  });
+  if (gameScores.length) {
+    gameAvg = Math.round(gameScores.reduce(function(a,b){return a+b;},0) / gameScores.length);
+  }
+  
   if (unitAvg === 0 && gameAvg === null && exam === null && completion === 0) return null;
-  var w = settings;
+  
   var total = 0, weightSum = 0;
-  if (completion !== null) { total += completion * (w.unitsCompletedWeight / 100); weightSum += w.unitsCompletedWeight; }
-  if (unitAvg !== null) { total += unitAvg * (w.unitQuizWeight / 100); weightSum += w.unitQuizWeight; }
-  if (gameAvg !== null) { total += gameAvg * (w.gamesWeight / 100); weightSum += w.gamesWeight; }
-  if (exam !== null) { total += exam * (w.capstoneWeight / 100); weightSum += w.capstoneWeight; }
+  if (completion > 0) { total += completion * (settings.unitsCompletedWeight / 100); weightSum += settings.unitsCompletedWeight; }
+  if (unitAvg > 0) { total += unitAvg * (settings.unitQuizWeight / 100); weightSum += settings.unitQuizWeight; }
+  if (gameAvg !== null) { total += gameAvg * (settings.gamesWeight / 100); weightSum += settings.gamesWeight; }
+  if (exam !== null) { total += exam * (settings.capstoneWeight / 100); weightSum += settings.capstoneWeight; }
+  
   if (weightSum === 0) return null;
   return Math.round((total / weightSum) * 100);
 }
