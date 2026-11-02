@@ -265,13 +265,13 @@ function computeWeightedFinal(s, settings) {
   }
   
   var gameAvg = null;
-  var gameScores = [];
-  ['blitz','tree','sound','redFlag','matrix'].forEach(function(g) {
-    var v = parseFloat(s[g]);
-    if (!isNaN(v) && s[g] !== '' && s[g] !== null) {
-      gameScores.push(v <= 1 && v > 0 ? Math.round(v * 100) : Math.round(v));
-    }
-  });
+var gameScores = [];
+['Blitz','Tree','Sound','RedFlag','Matrix'].forEach(function(g) {
+  var v = parseFloat(s[g]);
+  if (!isNaN(v) && s[g] !== '' && s[g] !== null) {
+    gameScores.push(v <= 1 && v > 0 ? Math.round(v * 100) : Math.round(v));
+  }
+});
   if (gameScores.length) {
     gameAvg = Math.round(gameScores.reduce(function(a,b){return a+b;},0) / gameScores.length);
   }
@@ -377,18 +377,12 @@ function renderStudentRow(s) {
   var studentName = s.fullName || s.name || 'Unknown Student';
   
   var unitScores = UNIT_KEYS.map(function(u) { 
-    var val = s[u] || s['u' + u.replace('unit','')] || null;
-    if (val === '' || val === null || val === undefined) return null;
-    var num = parseFloat(val);
-    return (num <= 1 && num > 0) ? Math.round(num * 100) : Math.round(num);
-  });
-  
-  var gameScores = GAME_KEYS.map(function(g) { 
-    var val = s[g] || null;
-    if (val === '' || val === null || val === undefined) return null;
-    var num = parseFloat(val);
-    return (num <= 1 && num > 0) ? Math.round(num * 100) : Math.round(num);
-  });
+  return getUnitBestScore(s, u);
+});
+
+var gameScores = GAME_KEYS.map(function(g) { 
+  return getGameBestScore(s, g);
+});
   
   var unitAvg = 0;
   var validUnits = unitScores.filter(function(x) { return x !== null; });
