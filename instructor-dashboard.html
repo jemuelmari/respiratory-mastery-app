@@ -165,6 +165,7 @@
             </select>
             <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
           </div>
+          <button class="btn btn-outline" onclick="openLockTermModal()">🔒 Manage Term Lock</button>
           <button class="btn btn-primary" onclick="syncData()">🔄 Sync Now</button>
         </div>
       </div>
@@ -223,8 +224,7 @@
     </div>
 
   </main>
-
-  <!-- MODAL: STUDENT DETAILS -->
+    <!-- MODAL: STUDENT DETAILS -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal">
       <div class="modal-header">
@@ -281,6 +281,8 @@
   </div>
     <script>
     const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
+    const ADMIN_KEY = 'teacher2026'; // <-- SIGURADUHING TUGMA ITO SA SCRIPT PROPERTIES MO
+    
     let allStudents = [];
     let allTermsSettings = [];
 
@@ -306,16 +308,20 @@
     async function syncData() {
       document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="8"><div class="loader"><div class="spinner"></div>Syncing from StudentMaster...</div></td></tr>';
       try {
+        // IDINAGDAG ANG ADMIN_KEY DITO
         const [resStudents, resSettings] = await Promise.all([
-          fetch(`${BACKEND_URL}?action=listAllMaster`),
-          fetch(`${BACKEND_URL}?action=getTermSettings`)
+          fetch(`${BACKEND_URL}?action=listAllMaster&adminKey=${ADMIN_KEY}`),
+          fetch(`${BACKEND_URL}?action=getTermSettings&adminKey=${ADMIN_KEY}`)
         ]);
         const dataStudents = await resStudents.json();
         const dataSettings = await resSettings.json();
+        
         if (!dataStudents.success) throw new Error(dataStudents.error || 'Sync failed');
+        
         allTermsSettings = dataSettings.settings || [];
         allStudents = dataStudents.records || [];
         allStudents.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+        
         updateGroupDropdown();
         renderDashboard();
         renderLockTermDropdowns();
@@ -349,7 +355,6 @@
         <div class="stat-card red"><h3>Not Taken</h3><div class="value">${notTaken}</div></div>
       `;
     }
-
     function renderTable() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const selectedGroup = document.getElementById('groupFilter').value;
@@ -414,13 +419,13 @@
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('studentModal').classList.add('show');
     }
-
-    async function openExamHistory(studentNo, studentName) {
+        async function openExamHistory(studentNo, studentName) {
       document.getElementById('examHistoryStudentName').textContent = studentName;
       document.getElementById('examHistoryBody').innerHTML = '<div class="loader"><div class="spinner"></div>Loading history...</div>';
       document.getElementById('examHistoryModal').classList.add('show');
       try {
-        const res = await fetch(`${BACKEND_URL}?action=getExamHistory&studentNo=${encodeURIComponent(studentNo)}`);
+        // IDINAGDAG ANG ADMIN_KEY DITO
+        const res = await fetch(`${BACKEND_URL}?action=getExamHistory&adminKey=${ADMIN_KEY}&studentNo=${encodeURIComponent(studentNo)}`);
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
         const records = data.records || [];
@@ -433,8 +438,8 @@
           html += `<tr><td>${r.attemptNumber || '—'}</td><td>${new Date(r.timestamp).toLocaleDateString()}</td><td>${r.score}/${r.total}</td><td>${r.percentage}%</td><td style="color:${r.passed === 'PASSED' ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${r.passed}</td></tr>`;
         });
         html += `</tbody></table>`;
-        document.getElementById
-        ('examHistoryBody').innerHTML = html;
+        // INAYOS ANG SYNTAX ERROR DITO
+        document.getElementById('examHistoryBody').innerHTML = html;
       } catch (err) {
         document.getElementById('examHistoryBody').innerHTML = `<p style="color:red; text-align:center;">Error: ${err.message}</p>`;
       }
@@ -456,8 +461,7 @@
       sySelect.addEventListener('change', updateLockTermStatus);
       semSelect.addEventListener('change', updateLockTermStatus);
     }
-
-    function updateLockTermStatus() {
+        function updateLockTermStatus() {
       const sy = document.getElementById('lockYearSelect').value;
       const sem = document.getElementById('lockSemSelect').value;
       
@@ -479,6 +483,7 @@
       try {
         const formData = new URLSearchParams();
         formData.append('action', 'lockTerm');
+        formData.append('adminKey', ADMIN_KEY); // <-- IDINAGDAG
         formData.append('schoolYear', sy);
         formData.append('semester', sem);
         formData.append('lockedBy', 'Instructor');
@@ -507,6 +512,7 @@
       try {
         const formData = new URLSearchParams();
         formData.append('action', 'unlockTerm');
+        formData.append('adminKey', ADMIN_KEY); // <-- IDINAGDAG
         formData.append('schoolYear', sy);
         formData.append('semester', sem);
         
@@ -524,7 +530,6 @@
         alert('❌ Error: ' + e.message);
       }
     }
-
     function openLockTermModal() {
       document.getElementById('lockTermModal').classList.add('show');
       updateLockTermStatus();
@@ -557,16 +562,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       syncData();
-      
-      const lockBtn = document.createElement('button');
-      lockBtn.className = 'btn btn-outline';
-      lockBtn.innerHTML = '🔒 Manage Term Lock';
-      lockBtn.onclick = openLockTermModal;
-      
-      const headerControls = document.querySelector('.header-controls');
-      if (headerControls) {
-        headerControls.insertBefore(lockBtn, headerControls.firstChild);
-      }
     });
   </script>
 </body>
