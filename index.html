@@ -21,7 +21,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: var(--font-main); background: var(--light); color: var(--dark); line-height: 1.6; font-size: 15px; }
     
-    /* SYNC BANNER */
     .sync-banner { position: fixed; top: 0; left: 0; right: 0; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600; text-align: center; z-index: 2000; display: none; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; }
     .sync-banner.show { display: flex; }
     .sync-banner.online { background: var(--success-light); color: var(--success); border-bottom: 1px solid var(--success); }
@@ -31,7 +30,6 @@
     .sync-banner .spinner-small { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.2); border-top-color: currentColor; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* AUTH SCREEN */
     .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: linear-gradient(135deg, #0D7377 0%, #1E88E5 50%, #5C6BC0 100%); }
     .auth-card { background: var(--white); border-radius: 24px; box-shadow: 0 24px 64px rgba(0,0,0,0.3); max-width: 480px; width: 100%; padding: 2.5rem 2rem; }
     .auth-header { text-align: center; margin-bottom: 1.75rem; }
@@ -56,7 +54,6 @@
     .form-error { background: var(--accent-light); color: var(--accent); padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
     .form-error.show { display: block; }
 
-    /* APP LAYOUT */
     .app-container { display: none; min-height: 100vh; flex-direction: column; padding-top: 45px; }
     .app-header { background: var(--white); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
     .app-header h1 { font-size: 1.1rem; color: var(--primary); }
@@ -150,14 +147,12 @@
   </div>
   
   <div class="app-main">
-    <!-- Term Selector -->
     <div class="term-selector">
       <label>Active Term:</label>
       <select id="termSelector" onchange="switchTerm()"></select>
       <span id="termLockBadge" class="badge" style="display:none; align-self:center; background:var(--accent-light); color:var(--accent); padding:0.3rem 0.7rem; border-radius:999px; font-size:0.75rem; font-weight:700;">🔒 Locked</span>
     </div>
 
-    <!-- Sync Queue Panel -->
     <div class="sync-queue-panel" id="syncQueuePanel">
       <h4>⚠️ Pending Sync Items</h4>
       <p style="font-size:0.8rem; margin-bottom:0.5rem;">You have unsynced progress. Please connect to the internet to sync.</p>
@@ -167,7 +162,6 @@
       </div>
     </div>
 
-    <!-- Dashboard Content -->
     <div class="hero">
       <h1>Welcome back, <span id="heroName">Student</span>!</h1>
       <p>Continue your journey to master respiratory assessment.</p>
@@ -207,7 +201,6 @@
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
 const STORAGE_KEY = 'respMastery_v1';
 const QUEUE_KEY = 'respMastery_pendingSync';
-const TERM_KEY = 'respMastery_activeTerm';
 
 let state = {
   student: null,
@@ -513,7 +506,6 @@ function showApp() {
 }
 
 function showRegistrationForm(studentNo) {
-  // Simplified registration for new students
   document.getElementById('loginStudentNo').value = '';
   document.getElementById('loginStudentNo').placeholder = 'New student? Enter your details below.';
   
@@ -570,7 +562,6 @@ async function submitRegistration(studentNo) {
     toast('❌ Error: ' + err.message, 'error');
   }
 }
-
 // ============================================================
 // DASHBOARD RENDERING
 // ============================================================
@@ -649,7 +640,6 @@ function openUnit(num) {
   modal.classList.add('show');
 }
 
-// Function para pumili ng sagot
 function selectOption(btn) {
   const siblings = btn.parentElement.querySelectorAll('.quiz-opt');
   siblings.forEach(s => {
@@ -664,7 +654,6 @@ function selectOption(btn) {
   btn.style.fontWeight = '600';
 }
 
-// Function para i-submit ang quiz
 async function submitQuiz(num) {
   const unitKey = 'unit' + num;
   const quiz = QUIZZES[unitKey];
@@ -707,7 +696,6 @@ async function submitQuiz(num) {
     </div>
   `;
   
-  // I-save ang score
   await syncNewScore('unit', unitKey, pct);
   
   if (pass) {
@@ -719,14 +707,13 @@ async function submitQuiz(num) {
     toast('Score: ' + pct + '% — need 90% to master', 'warning');
   }
 }
-  
+
 // ============================================================
-// SYNC-ON-ACTION (Called kapag may bagong score)
+// SYNC-ON-ACTION
 // ============================================================
 async function syncNewScore(type, unitOrGame, score) {
   if (state.isLocked) { toast('Term is locked. Score not saved.', 'error'); return; }
   
-  // Update local state
   if (type === 'unit') {
     if (!state.quizAttempts[unitOrGame]) state.quizAttempts[unitOrGame] = [];
     state.quizAttempts[unitOrGame].push(score);
@@ -738,7 +725,6 @@ async function syncNewScore(type, unitOrGame, score) {
   
   saveState();
   
-  // Add to queue
   const payload = {
     student: { fullName: state.student.fullName, studentNo: state.student.studentNo, section: state.student.section, group: state.student.group, email: state.student.email },
     quizAttempts: state.quizAttempts,
@@ -749,7 +735,6 @@ async function syncNewScore(type, unitOrGame, score) {
   
   addToQueue(type, payload);
   
-  // If online, process queue immediately
   if (isOnline) {
     await processSyncQueue();
   } else {
@@ -774,7 +759,6 @@ window.addEventListener('offline', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Load saved session if exists
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
@@ -786,15 +770,69 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
   
-  // Initial sync banner
   updateSyncBanner();
   
-  // Login button handler
   document.getElementById('btnLogin').addEventListener('click', handleLogin);
   document.getElementById('loginStudentNo').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
   });
 });
+
+// ============================================================
+// QUIZ DATA (Para sa Unit 1-7)
+// ============================================================
+const QUIZZES = {
+  unit1: [
+    { q: 'Normal respiratory rate for an adult?', options: ['8-12','12-20','20-30','30-40'], answer: '12-20' },
+    { q: 'Normal SpO₂ range?', options: ['80-85%','85-90%','95-100%','100%'], answer: '95-100%' },
+    { q: 'Where should the trachea be?', options: ['Deviated right','Deviated left','Midline','Anterior'], answer: 'Midline' },
+    { q: 'Normal percussion tone?', options: ['Dull','Resonant','Hyperresonant','Tympany'], answer: 'Resonant' },
+    { q: 'Normal breath sound?', options: ['Bronchial','Bronchovesicular','Vesicular','Crackles'], answer: 'Vesicular' }
+  ],
+  unit2: [
+    { q: 'Tachypnea is?', options: ['<12','>20','None','Irregular'], answer: '>20' },
+    { q: 'Bradypnea is?', options: ['<12','>20','None','Irregular'], answer: '<12' },
+    { q: 'Cheyne-Stokes associated with?', options: ['Pneumonia','HF/Stroke','DKA','Brainstem'], answer: 'HF/Stroke' },
+    { q: 'Kussmaul respirations?', options: ['Alternating','Deep rapid','Irregular','Slow'], answer: 'Deep rapid' },
+    { q: 'Kussmaul associated with?', options: ['HF','DKA','Brainstem','Stroke'], answer: 'DKA' }
+  ],
+  unit3: [
+    { q: 'Symmetrical expansion?', options: ['PTX','Normal','Effusion','Atel'], answer: 'Normal' },
+    { q: 'Increased fremitus?', options: ['Air','Consolidation','Normal','PTX'], answer: 'Consolidation' },
+    { q: 'Decreased fremitus?', options: ['Consolidation','Air/fluid blocks','Normal','Pneumonia'], answer: 'Air/fluid blocks' },
+    { q: '↑ fremitus conditions?', options: ['Pneumonia,TB','Effusion','Asthma','PE'], answer: 'Pneumonia,TB' },
+    { q: '↓ fremitus conditions?', options: ['Pneumonia','Effusion,PTX,Hemo,Emph','Asthma','PE'], answer: 'Effusion,PTX,Hemo,Emph' }
+  ],
+  unit4: [
+    { q: 'Normal percussion?', options: ['Dull','Resonant','Hyper','Tympany'], answer: 'Resonant' },
+    { q: 'Dullness indicates?', options: ['Air','Fluid/solid','Normal','Trap'], answer: 'Fluid/solid' },
+    { q: 'Hyperresonance indicates?', options: ['Fluid','Excess air','Normal','Consol'], answer: 'Excess air' },
+    { q: 'Memory aid dull?', options: ['Too much air','Fluid/Solid','Consol','Outside'], answer: 'Fluid/Solid' },
+    { q: 'Memory aid hyper?', options: ['Fluid','Too much air','Consol','Outside'], answer: 'Too much air' }
+  ],
+  unit5: [
+    { q: 'Vesicular sounds?', options: ['Loud','Soft low','Moderate','Harsh'], answer: 'Soft low' },
+    { q: 'Crackles?', options: ['Musical','Popping','Snoring','Grating'], answer: 'Popping' },
+    { q: 'Crackles indicate?', options: ['Narrow','Fluid in alveoli','Secretions','Inflamm'], answer: 'Fluid in alveoli' },
+    { q: 'Wheezes?', options: ['Popping','Musical','Snoring','Grating'], answer: 'Musical' },
+    { q: 'Wheezes indicate?', options: ['Fluid','Narrowing','Secretions','Inflamm'], answer: 'Narrowing' }
+  ],
+  unit6: [
+    { q: 'Pneumonia pattern?', options: ['↓,Dull,Absent','↑,Dull,Crackles','↓,Hyper','Normal'], answer: '↑,Dull,Crackles' },
+    { q: 'Effusion pattern?', options: ['↑,Dull,Crackles','↓,Dull,Absent','↓,Hyper','Normal'], answer: '↓,Dull,Absent' },
+    { q: 'PTX pattern?', options: ['↑,Dull,Crackles','↓,Dull,Absent','↓,Hyper,Absent','Normal'], answer: '↓,Hyper,Absent' },
+    { q: 'Asthma?', options: ['Normal,Hyper,Wheezes','↓,Hyper,Diminished','↑,Dull','Normal'], answer: 'Normal,Hyper,Wheezes' },
+    { q: 'Emphysema?', options: ['Normal,Hyper,Wheezes','↓,Hyper,Diminished,Barrel','↑,Dull','Normal'], answer: '↓,Hyper,Diminished,Barrel' }
+  ],
+  unit7: [
+    { q: 'High Fowler pneumonia?', options: ['↓ venous','Maximize expansion','↓ abdo','↑ cardiac'], answer: 'Maximize expansion' },
+    { q: 'Thoracentesis?', options: ['Remove fluid','Biopsy','Tube','Med'], answer: 'Remove fluid' },
+    { q: 'Tension PTX?', options: ['Diuretics','Rapid response','Supine','Document'], answer: 'Rapid response' },
+    { q: 'Pursed lip emphysema?', options: ['↑ RR','Prevent collapse','Cardiac','Anxiety'], answer: 'Prevent collapse' },
+    { q: 'Airborne TB?', options: ['Contact','Prevent M.TB','Droplet','Vector'], answer: 'Prevent M.TB' }
+  ]
+};
+
 </script>
 </body>
 </html>
