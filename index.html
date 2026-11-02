@@ -624,22 +624,48 @@ function showRegistrationForm(studentNo) {
   modal.classList.add('show');
 }
 
-async function submitRegistration() {
-  const fullName = $('regFullName').value.trim(), section = $('regSection').value.trim();
-  const group = $('regGroup').value.trim(), email = $('regEmail').value.trim();
-  const sy = $('regSY').value, sem = $('regSem').value;
-  if (!fullName || !section || !group || !email) { toast('Please fill all fields.', 'warning'); return; }
-  if (!/^\S+@\S+\.\S+$/.test(email)) { toast('Please enter a valid email.', 'warning'); return; }
-  const btn = $('btnRegister'); btn.disabled = true;
+async function submitRegistration(studentNo) {
+  const fullName = document.getElementById('regFullName').value.trim();
+  const section = document.getElementById('regSection').value.trim();
+  const group = document.getElementById('regGroup').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  
+  // KUNIN ANG SCHOOL YEAR AT SEMESTER SA FORM
+  const sy = document.getElementById('regSY').value;
+  const sem = document.getElementById('regSem').value;
+
+  if (!fullName || !section || !group || !email) { 
+    toast('Please fill all fields.', 'warning'); 
+    return; 
+  }
+
   try {
-    const data = await api('POST', { action: 'createNewTerm', studentNo: pendingRegNo, fullName, section, group, email, schoolYear: sy, semester: sem, appVersion: APP_VERSION });
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'createNewTerm',
+        studentNo: studentNo,
+        fullName: fullName,
+        section: section,
+        group: group,
+        email: email,
+        schoolYear: sy,
+        semester: sem,
+        appVersion: '4.1'
+      })
+    });
+    const data = await res.json();
+
     if (data.success) {
       closeModal('genericModal');
-      $('loginStudentNo').value = pendingRegNo;   // keep it so the re-login works
-      toast('Registration successful! Logging you in...', 'success');
-      setTimeout(handleLogin, 600);
-    } else { toast(data.error || 'Registration failed.', 'error'); btn.disabled = false; }
-  } catch (err) { toast('Error: ' + err.message, 'error'); btn.disabled = false; }
+      toast('✅ Registration successful! Please login again.', 'success');
+      setTimeout(() => handleLogin(), 1000);
+    } else {
+      toast('❌ ' + data.error, 'error');
+    }
+  } catch (err) {
+    toast('❌ Error: ' + err.message, 'error');
+  }
 }
 
 function openEditProfile() {
