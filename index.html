@@ -457,17 +457,7 @@ async function processSyncQueue(silent) {
     setTimeout(() => toast(`⚠️ ${remainingQueue.length} item(s) failed. Will retry.`, 'warning'), 1000);
   }
 }
-  // re-read: items may have been added while syncing
-  setQueue(getPendingQueue().filter(i => !done.has(i.id)));
-  isSyncing = false; updateSyncBanner();
-  const left = getPendingQueue().length;
-  if (lockedHit) toast('This term is locked by your instructor — recent changes were not saved.', 'error');
-  if (!silent) {
-    if (done.size && !lockedHit) toast('Synced ' + done.size + ' item(s).', 'success');
-    if (left) toast(left + ' item(s) not synced yet. Will retry.', 'warning');
-  }
-}
-
+ 
 async function syncNewScore() {
   if (!state.student) return;
   saveState();
