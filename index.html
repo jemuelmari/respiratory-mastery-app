@@ -404,30 +404,59 @@ function addToQueue(type, data) {
 async function processSyncQueue(silent) {
   if (isSyncing) return;
   if (!isOnline) { if (!silent) toast('Cannot sync — you are offline.', 'error'); return; }
-  const queue = getPendingQueue();
-  if (!queue.length) return;
-  isSyncing = true; updateSyncBanner();
-  const done = new Set();
-  let lockedHit = false;
-  for (const item of queue) {
+  
+  let queue = getPendingQueue();
+  if (!queue.length) { updateSyncBanner(); return; }
+  
+  isSyncing = true; 
+  updateSyncBanner();
+  
+  let successCount = 0;
+  const successfulIds = [];
+  const queueSnapshot = [...queue];
+
+  for (const item of queueSnapshot) {
     const st = (item.data && item.data.student) || {};
     try {
-      const r = await api('POST', {
-        action: 'syncProgress', studentNo: item.studentNo, schoolYear: item.schoolYear, semester: item.semester,
-        fullName: st.fullName || '', section: st.section || '', group: st.group || '', email: st.email || '',
-        dataJson: JSON.stringify(item.data), appVersion: APP_VERSION
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        body: new URLSearchParams({
+          action: 'syncProgress',
+          studentNo: item.studentNo,
+          schoolYear: item.schoolYear,
+          semester: item.semester,
+          fullName: st.fullName || '',
+          section: st.section || '',
+          group: st.group || '',
+          email: st.email || '',
+          payloadJson: JSON.stringify(item.data),
+          appVersion: APP_VERSION || '4.1'
+        })
       });
-      if (r && r.success) done.add(item.id);
-      else if (r && r.locked) {
-        // The instructor locked this term: retrying can never succeed, so drop the item.
-        done.add(item.id); lockedHit = true;
-        const t = state.activeTerm;
-        if (state.student && item.studentNo === state.student.studentNo && item.schoolYear === t.schoolYear && item.semester === t.semester) {
-          state.isLocked = true; saveState();
-        }
+      const r = await res.json();
+      
+      if (r && r.success) {
+        successCount++;
+        successfulIds.push(item.id);
       }
-    } catch (e) { /* stays in queue, retried later */ }
+    } catch (e) {
+      console.warn("Sync failed for item", item.id, e);
+    }
   }
+
+  const remainingQueue = queueSnapshot.filter(item => !successfulIds.includes(item.id));
+  localStorage.setItem(QUEUE_KEY, JSON.stringify(remainingQueue));
+
+  isSyncing = false;
+  updateSyncBanner();
+
+  if (successCount > 0 && !silent) {
+    toast(`✅ Synced ${successCount} item(s).`, 'success');
+  }
+  if (remainingQueue.length > 0 && !silent) {
+    setTimeout(() => toast(`⚠️ ${remainingQueue.length} item(s) failed. Will retry.`, 'warning'), 1000);
+  }
+}
   // re-read: items may have been added while syncing
   setQueue(getPendingQueue().filter(i => !done.has(i.id)));
   isSyncing = false; updateSyncBanner();
