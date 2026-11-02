@@ -301,8 +301,17 @@
 
     function parsePct(val) {
       if (val === null || val === undefined || val === '') return 0;
-      if (typeof val === 'string' && val.includes('%')) return parseFloat(val.replace('%', '')) || 0;
-      return parseFloat(val) || 0;
+      // Kung may % sign, tanggalin at gawing float (e.g. "96%" -> 96)
+      if (typeof val === 'string' && val.includes('%')) {
+        return parseFloat(val.replace('%', '')) || 0;
+      }
+      // Kung numero lang siya (e.g. 1, 0.96, 0.57), i-multiply sa 100
+      var num = parseFloat(val);
+      if (isNaN(num)) return 0;
+      if (num > 0 && num <= 1) {
+        return Math.round(num * 100);
+      }
+      return Math.round(num);
     }
 
     async function syncData() {
