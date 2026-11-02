@@ -194,6 +194,11 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,32,39,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(6px); }
     .modal-overlay.show { display: flex; }
     .modal { background: var(--white); border-radius: var(--radius-lg); max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--gray-light); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--white); z-index: 3; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    .modal-header h2 { font-size: 1.25rem; color: var(--dark); }
+    .modal-close { background: var(--light); border: none; font-size: 1.1rem; cursor: pointer; color: var(--gray); line-height: 1; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: var(--accent-light); color: var(--accent); }
+    .modal-body { padding: 1.5rem; }
     .modal-content { padding: 2rem; text-align: center; }
     .modal-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.25rem; }
     .modal h2 { color: var(--dark); font-size: 1.35rem; margin-bottom: 0.5rem; font-weight: 800; }
@@ -281,7 +286,11 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="logo-wrap">🫁</div>
-      <div><h1>Respiratory Mastery</h1><small>NCM 101B Lab — v4.0</small></div>
+      <div>
+        <h1>Respiratory Mastery</h1>
+        <small id="headerName">Student Name</small>
+        <small id="headerId" style="color:var(--gray);">Student No</small>
+      </div>
     </div>
     <div class="student-card">
       <div class="avatar" id="chipAvatar">—</div>
@@ -392,6 +401,17 @@
   </div>
 </div>
 
+<!-- MODAL: GENERIC (Para sa Registration) -->
+<div class="modal-overlay" id="genericModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Modal</h2>
+      <button class="modal-close" onclick="closeModal('genericModal')">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 // ============================================================
@@ -400,7 +420,6 @@
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
 const STORAGE_KEY = 'respMastery_v1';
 const QUEUE_KEY = 'respMastery_pendingSync';
-const TERM_KEY = 'respMastery_activeTerm';
 
 let state = {
   student: null,
@@ -428,8 +447,14 @@ function toast(msg, type) {
   el._t = setTimeout(() => el.classList.remove('show'), 3500);
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+function closeModal(id) { 
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+function escapeHtml(s) { 
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); 
+}
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -471,25 +496,6 @@ function updateSyncBanner() {
     banner.classList.add('locked');
     icon.textContent = '🔒';
     message.textContent = 'Term Locked — Read-only mode';
-  }
-  
-  const panel = document.getElementById('syncQueuePanel');
-  if (panel) {
-    const queue = getPendingQueue();
-    if (queue.length > 0) {
-      panel.classList.add('show');
-      document.getElementById('syncQueueList').innerHTML = queue.map(q => 
-        `<li><span>${q.type} (${q.data.unit || q.data.game || 'Exam'})</span><span style="color:var(--warning);font-weight:600;">Pending</span></li>`
-      ).join('');
-    } else {
-      panel.classList.remove('show');
-    }
-  }
-  
-  const lockBadge = document.getElementById('termLockBadge');
-  if (lockBadge) {
-    if (state.isLocked) lockBadge.style.display = 'block';
-    else lockBadge.style.display = 'none';
   }
 }
 
@@ -559,7 +565,6 @@ async function processSyncQueue() {
   if (remainingQueue.length > 0) toast(`⚠️ ${remainingQueue.length} item(s) failed. Will retry.`, 'warning');
   else toast('🎉 All progress is now synced!', 'success');
 }
-
 // ============================================================
 // LOGIN & TERM MANAGEMENT
 // ============================================================
@@ -680,9 +685,19 @@ function showApp() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('appContainer').style.display = 'flex';
   
-  document.getElementById('headerName').textContent = state.student.fullName;
-  document.getElementById('headerId').textContent = state.student.studentNo;
-  document.getElementById('heroName').textContent = state.student.firstName || 'Student';
+  const headerName = document.getElementById('headerName');
+  const headerId = document.getElementById('headerId');
+  const chipName = document.getElementById('chipName');
+  const chipMeta = document.getElementById('chipMeta');
+  const chipAvatar = document.getElementById('chipAvatar');
+  const heroName = document.getElementById('heroName');
+  
+  if (headerName) headerName.textContent = state.student.fullName;
+  if (headerId) headerId.textContent = state.student.studentNo;
+  if (chipName) chipName.textContent = state.student.fullName;
+  if (chipMeta) chipMeta.innerHTML = escapeHtml(state.student.studentNo) + ' — ' + escapeHtml(state.student.section) + '<br>' + escapeHtml(state.student.group || '—');
+  if (chipAvatar) chipAvatar.textContent = state.student.firstName ? state.student.firstName[0] : '?';
+  if (heroName) heroName.textContent = state.student.firstName || 'Student';
   
   const selector = document.getElementById('termSelector');
   if (selector) {
@@ -763,44 +778,50 @@ function renderDashboard() {
   const unitsDone = Object.keys(state.progress).length;
   const avgScore = Object.values(state.quizAttempts).flat().reduce((a,b)=>a+b,0) / (Object.values(state.quizAttempts).flat().length || 1);
   
-  document.getElementById('dashboardStats').innerHTML = `
-    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-      <div style="flex:1;min-width:100px;text-align:center;background:var(--primary-light);padding:1rem;border-radius:12px;">
-        <div style="font-size:1.5rem;font-weight:800;color:var(--primary);">${unitsDone}/7</div>
-        <div style="font-size:0.75rem;color:var(--gray);">Units</div>
-      </div>
-      <div style="flex:1;min-width:100px;text-align:center;background:var(--secondary-light);padding:1rem;border-radius:12px;">
-        <div style="font-size:1.5rem;font-weight:800;color:var(--secondary);">${Math.round(avgScore) || 0}%</div>
-        <div style="font-size:0.75rem;color:var(--gray);">Avg Score</div>
-      </div>
-      <div style="flex:1;min-width:100px;text-align:center;background:var(--purple-light);padding:1rem;border-radius:12px;">
-        <div style="font-size:1.5rem;font-weight:800;color:var(--purple);">${state.exam ? state.exam.score + '/' + state.exam.total : '—'}</div>
-        <div style="font-size:0.75rem;color:var(--gray);">Exam</div>
-      </div>
-    </div>
-  `;
-  
-  const unitNames = ['Baseline', 'Inspection', 'Palpation', 'Percussion', 'Auscultation', 'Diseases', 'Interventions'];
-  document.getElementById('unitList').innerHTML = unitNames.map((name, i) => {
-    const unitKey = 'unit' + (i+1);
-    const attempts = state.quizAttempts[unitKey] || [];
-    const best = attempts.length ? Math.max(...attempts) : null;
-    const isDone = state.progress[unitKey] && state.progress[unitKey].completed;
-    const isLocked = state.isLocked;
-    
-    let statusBadge = '<span class="badge badge-neutral">Not Started</span>';
-    if (isDone) statusBadge = '<span class="badge badge-success">Mastered • ' + best + '%</span>';
-    else if (best !== null) statusBadge = '<span class="badge badge-warning">In Progress • ' + best + '%</span>';
-    
-    return `
-      <div class="card" style="margin-bottom:0.75rem; padding:1rem; cursor:pointer; opacity:${isLocked ? 0.6 : 1};" onclick="${isLocked ? '' : `openUnit(${i+1})`}">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-weight:700; font-size:0.95rem;">Unit ${i+1}: ${name}</div>
-          <div>${statusBadge}</div>
+  const dashboardStats = document.getElementById('dashboardStats');
+  if (dashboardStats) {
+    dashboardStats.innerHTML = `
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:100px;text-align:center;background:var(--primary-light);padding:1rem;border-radius:12px;">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--primary);">${unitsDone}/7</div>
+          <div style="font-size:0.75rem;color:var(--gray);">Units</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;background:var(--secondary-light);padding:1rem;border-radius:12px;">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--secondary);">${Math.round(avgScore) || 0}%</div>
+          <div style="font-size:0.75rem;color:var(--gray);">Avg Score</div>
+        </div>
+        <div style="flex:1;min-width:100px;text-align:center;background:var(--purple-light);padding:1rem;border-radius:12px;">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--purple);">${state.exam ? state.exam.score + '/' + state.exam.total : '—'}</div>
+          <div style="font-size:0.75rem;color:var(--gray);">Exam</div>
         </div>
       </div>
     `;
-  }).join('');
+  }
+  
+  const unitList = document.getElementById('unitList');
+  if (unitList) {
+    const unitNames = ['Baseline', 'Inspection', 'Palpation', 'Percussion', 'Auscultation', 'Diseases', 'Interventions'];
+    unitList.innerHTML = unitNames.map((name, i) => {
+      const unitKey = 'unit' + (i+1);
+      const attempts = state.quizAttempts[unitKey] || [];
+      const best = attempts.length ? Math.max(...attempts) : null;
+      const isDone = state.progress[unitKey] && state.progress[unitKey].completed;
+      const isLocked = state.isLocked;
+      
+      let statusBadge = '<span class="badge badge-neutral">Not Started</span>';
+      if (isDone) statusBadge = '<span class="badge badge-success">Mastered • ' + best + '%</span>';
+      else if (best !== null) statusBadge = '<span class="badge badge-warning">In Progress • ' + best + '%</span>';
+      
+      return `
+        <div class="card" style="margin-bottom:0.75rem; padding:1rem; cursor:pointer; opacity:${isLocked ? 0.6 : 1};" onclick="${isLocked ? '' : `openUnit(${i+1})`}">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700; font-size:0.95rem;">Unit ${i+1}: ${name}</div>
+            <div>${statusBadge}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 // ============================================================
@@ -1072,28 +1093,34 @@ var UNIT_CONTENT = {
 // ============================================================
 // UNIT RENDERING
 // ============================================================
-function renderUnit(main, num) {
-  var unitKey = 'unit' + num;
-  var content = UNIT_CONTENT[unitKey];
-  var titles = ['','Normal Respiratory Baseline','Inspection Findings','Palpation Findings','Percussion Findings','Auscultation Findings','Disease Pattern Recognition','Respiratory Interventions'];
-  var subtitles = ['','Master Normal Before Recognizing Abnormal','The First Look Tells the Story','Feeling the Vibrations of Disease','Listening to the Density','Hearing the Story of the Lungs','Signature Patterns of 13 Conditions','From Assessment to Action'];
-  var icons = ['','📚','👁️','✋','👂','🩺','🔍','💉'];
+function openUnit(num) {
+  if (state.isLocked) { toast('This term is locked. Cannot edit.', 'error'); return; }
+  
+  const unitKey = 'unit' + num;
+  const content = UNIT_CONTENT[unitKey];
+  if (!content) { toast('Content not found for Unit ' + num, 'error'); return; }
+  
+  const titles = ['','Normal Respiratory Baseline','Inspection Findings','Palpation Findings','Percussion Findings','Auscultation Findings','Disease Pattern Recognition','Respiratory Interventions'];
+  const subtitles = ['','Master Normal Before Recognizing Abnormal','The First Look Tells the Story','Feeling the Vibrations of Disease','Listening to the Density','Hearing the Story of the Lungs','Signature Patterns of 13 Conditions','From Assessment to Action'];
+  const icons = ['','📚','👁️','✋','👂','🩺','🔍','💉'];
 
-  var html = '<div class="hero fade-in" style="padding:1.75rem 2rem;"><div class="hero-content">';
+  let html = '<div class="hero fade-in" style="padding:1.75rem 2rem;"><div class="hero-content">';
   html += '<p class="hero-greeting">Unit ' + num + ' of 7</p>';
   html += '<h1>' + icons[num] + ' ' + titles[num] + '</h1>';
   html += '<p class="hero-subtitle">' + subtitles[num] + '</p>';
   html += '</div></div>';
 
-  if (content && content.intro) {
+  if (content.intro) {
     html += '<div class="card fade-in"><p style="font-size:0.95rem;line-height:1.7;margin:0;">' + escapeHtml(content.intro) + '</p></div>';
   }
-  if (content && content.sections) {
+  if (content.sections) {
     content.sections.forEach(function(sec) { html += renderUnitSection(sec); });
   }
 
-  var isComplete = isUnitComplete(unitKey);
-  var best = getUnitBestScore(unitKey);
+  const isComplete = state.progress[unitKey] && state.progress[unitKey].completed;
+  const attempts = state.quizAttempts[unitKey] || [];
+  const best = attempts.length ? Math.max(...attempts) : null;
+  
   html += '<div class="card fade-in" id="quiz-unit' + num + '">';
   html += '<div class="card-header"><div><div class="card-title">📝 Mastery Check</div>';
   html += '<div class="card-subtitle">Passing score: 90%' + (isComplete ? ' — ✅ Mastered (' + best + '%)' : '') + '</div></div></div>';
@@ -1107,12 +1134,12 @@ function renderUnit(main, num) {
   else html += '<button class="btn btn-primary" style="margin-left:auto;" onclick="navigate(\'exam\')">Capstone Exam →</button>';
   html += '</div>';
 
-  main.innerHTML = html;
+  document.getElementById('mainContent').innerHTML = html;
   initQuiz(num);
 }
 
 function renderUnitSection(sec) {
-  var html = '';
+  let html = '';
   switch (sec.type) {
     case 'table':
       html += '<div class="card fade-in"><div class="card-header"><div class="card-title">' + sec.heading + '</div></div>';
@@ -1182,9 +1209,9 @@ function renderUnitSection(sec) {
 }
 
 function initQuiz(num) {
-  var container = document.getElementById('quizBody-unit' + num);
+  const container = document.getElementById('quizBody-unit' + num);
   if (!container) return;
-  var qs = QUIZZES['unit' + num] || [];
+  const qs = QUIZZES['unit' + num] || [];
   container.innerHTML = qs.map(function(q, i) {
     return '<div class="quiz-question" data-q="' + i + '" style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--gray-light);">' +
       '<p style="font-weight:600;margin-bottom:0.75rem;font-size:0.95rem;">' + (i+1) + '. ' + escapeHtml(q.q) + '</p>' +
@@ -1197,7 +1224,7 @@ function initQuiz(num) {
 }
 
 function selectOption(btn) {
-  var siblings = btn.parentElement.querySelectorAll('.quiz-opt');
+  const siblings = btn.parentElement.querySelectorAll('.quiz-opt');
   siblings.forEach(function(s) {
     s.dataset.selected = '0';
     s.style.borderColor = 'var(--gray-light)';
@@ -1211,17 +1238,18 @@ function selectOption(btn) {
 }
 
 function submitQuiz(num) {
-  var qs = QUIZZES['unit' + num] || [];
-  var correct = 0;
-  var total = qs.length;
+  const qs = QUIZZES['unit' + num] || [];
+  let correct = 0;
+  const total = qs.length;
+  
   qs.forEach(function(q, i) {
-    var qEl = document.querySelector('#quizBody-unit' + num + ' .quiz-question[data-q="' + i + '"]');
+    const qEl = document.querySelector('#quizBody-unit' + num + ' .quiz-question[data-q="' + i + '"]');
     if (!qEl) return;
-    var allOpts = qEl.querySelectorAll('.quiz-opt');
-    var userChoice = null;
+    const allOpts = qEl.querySelectorAll('.quiz-opt');
+    let userChoice = null;
     allOpts.forEach(function(o) { if (o.dataset.selected === '1') userChoice = o; });
     if (userChoice) {
-      var choice = userChoice.textContent.trim();
+      const choice = userChoice.textContent.trim();
       if (choice === q.answer) {
         correct++;
         userChoice.style.borderColor = 'var(--success)';
@@ -1238,21 +1266,25 @@ function submitQuiz(num) {
       });
     }
   });
-  var pct = Math.round((correct / total) * 100);
-  var pass = pct >= 90;
-  var resultEl = document.getElementById('quizResult-unit' + num);
+  
+  const pct = Math.round((correct / total) * 100);
+  const pass = pct >= 90;
+  const resultEl = document.getElementById('quizResult-unit' + num);
   resultEl.innerHTML = '<div class="callout callout-' + (pass ? 'success' : 'warning') + '">' +
     '<strong>Score: ' + correct + '/' + total + ' (' + pct + '%)</strong><br>' +
     (pass ? '🎉 Mastery achieved!' : '⚠️ You need 90% to master this unit.') + '</div>' +
     '<button class="btn btn-outline mt-1" onclick="navigate(\'unit' + num + '\')">🔄 Retry Unit</button>';
+  
   if (!state.quizAttempts['unit' + num]) state.quizAttempts['unit' + num] = [];
   state.quizAttempts['unit' + num].push(pct);
+  
   if (pass) {
     state.progress['unit' + num] = { completed: true, score: pct, date: new Date().toISOString() };
     toast('Unit mastered!', 'success');
   } else {
     toast('Score: ' + pct + '% — need 90% to master', 'warning');
   }
+  
   saveState();
   syncNewScore('unit', 'unit' + num, pct);
 }
@@ -1289,8 +1321,6 @@ async function syncNewScore(type, unitOrGame, score) {
   } else {
     toast('Saved offline. Will sync when online.', 'warning');
   }
-  
-  renderDashboard();
 }
 
 // ============================================================
@@ -1376,8 +1406,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   updateSyncBanner();
   
-  document.getElementById('btnLogin').addEventListener('click', handleLogin);
-  document.getElementById('loginStudentNo').addEventListener('keypress', (e) => {
+  const btnLogin = document.getElementById('btnLogin');
+  const loginInput = document.getElementById('loginStudentNo');
+  
+  if (btnLogin) btnLogin.addEventListener('click', handleLogin);
+  if (loginInput) loginInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
   });
 });
