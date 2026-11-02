@@ -204,9 +204,21 @@ async function syncFromBackend() {
 }
 
 function getUnitBestScore(s, unit) {
-  var val = s[unit] || s['u' + unit.replace('unit','')] || null;
+  // I-convert ang 'unit1' papuntang 'U1'
+  var colName = 'U' + unit.replace('unit', '');
+  var val = s[colName];
+  
+  // Fallback kung lowercase ang naka-save
+  if (val === undefined || val === null || val === '') {
+    val = s[unit] || s['u' + unit.replace('unit','')];
+  }
+  
   if (val === '' || val === null || val === undefined) return null;
-  return parseFloat(val) || 0;
+  var num = parseFloat(val);
+  if (isNaN(num)) return null;
+  
+  // Kung decimal (0.96), gawing 96
+  return (num > 0 && num <= 1) ? Math.round(num * 100) : Math.round(num);
 }
 function getGameBestScore(s, game) {
   var val = s[game] || null;
