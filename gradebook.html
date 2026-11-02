@@ -221,9 +221,22 @@ function getUnitBestScore(s, unit) {
   return (num > 0 && num <= 1) ? Math.round(num * 100) : Math.round(num);
 }
 function getGameBestScore(s, game) {
-  var val = s[game] || null;
+  // I-convert ang 'blitz' papuntang 'Blitz', 'redflag' papuntang 'RedFlag'
+  var colName = game.charAt(0).toUpperCase() + game.slice(1);
+  if (game === 'redflag') colName = 'RedFlag';
+  if (game === 'tree') colName = 'Tree';
+  if (game === 'sound') colName = 'Sound';
+  if (game === 'matrix') colName = 'Matrix';
+  if (game === 'blitz') colName = 'Blitz';
+  
+  var val = s[colName] || s[game] || null;
+  
   if (val === '' || val === null || val === undefined) return null;
-  return parseFloat(val) || 0;
+  var num = parseFloat(val);
+  if (isNaN(num)) return null;
+  
+  // Kung decimal (0.96), gawing 96
+  return (num > 0 && num <= 1) ? Math.round(num * 100) : Math.round(num);
 }
 function getUnitAvg(s) { return parseFloat(s.unitAvg) || 0; }
 function getGamesAvg(s) {
