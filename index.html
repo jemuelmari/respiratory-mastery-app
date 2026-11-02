@@ -279,16 +279,18 @@ body.banner-on .main-content{padding-top:3.2rem}
 
 <script>
 // ============================================================
-// CONFIG & STATE
+// CONFIG & STATE   (constants below MUST match Code.gs)
 // ============================================================
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
 const STORAGE_KEY = 'respMastery_v1';          // active session
 const USER_KEY = 'respMastery_user_';          // per-student saved data
 const QUEUE_KEY = 'respMastery_pendingSync';
 const APP_VERSION = '4.1';
-const PASS_PCT = 90;        // unit quiz / game mastery
-const EXAM_PASS_PCT = 75;   // capstone exam passing percentage
-const EXAM_ITEMS = 30;
+const PASS_PCT = 90;        // unit quiz / game mastery        (Code.gs PASS_PCT)
+const EXAM_PASS_PCT = 75;   // capstone exam passing percentage (Code.gs EXAM_PASS_PCT)
+const EXAM_ITEMS = 30;                                         // (Code.gs EXAM_ITEMS)
+const SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033']; // (Code.gs VALID_SY)
+const SEMESTERS = ['1st Semester','2nd Semester'];             // (Code.gs VALID_SEM)
 const UNIT_TITLES = ['','Normal Respiratory Baseline','Inspection Findings','Palpation Findings','Percussion Findings','Auscultation Findings','Disease Pattern Recognition','Respiratory Interventions'];
 
 const defaultState = () => ({
@@ -314,6 +316,7 @@ function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { co
 function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
 function firstNameOf(s) { if (!s) return ''; if (s.firstName) return s.firstName; const n = String(s.fullName || '').trim(); return n ? n.split(/\s+/)[0] : ''; }
 function hero(label, title, sub) { return '<div class="hero fade-in" style="padding:1.75rem 2rem;"><p class="hero-greeting">' + label + '</p><h1>' + title + '</h1><p class="hero-subtitle">' + sub + '</p></div>'; }
+function optionList(arr, selected) { return arr.map(v => '<option' + (v === selected ? ' selected' : '') + '>' + escapeHtml(v) + '</option>').join(''); }
 
 function toast(msg, type) {
   type = type || '';
@@ -405,6 +408,7 @@ async function processSyncQueue(silent) {
   if (!queue.length) return;
   isSyncing = true; updateSyncBanner();
   const done = new Set();
+  let lockedHit = false;
   for (const item of queue) {
     const st = (item.data && item.data.student) || {};
     try {
@@ -414,14 +418,23 @@ async function processSyncQueue(silent) {
         dataJson: JSON.stringify(item.data), appVersion: APP_VERSION
       });
       if (r && r.success) done.add(item.id);
+      else if (r && r.locked) {
+        // The instructor locked this term: retrying can never succeed, so drop the item.
+        done.add(item.id); lockedHit = true;
+        const t = state.activeTerm;
+        if (state.student && item.studentNo === state.student.studentNo && item.schoolYear === t.schoolYear && item.semester === t.semester) {
+          state.isLocked = true; saveState();
+        }
+      }
     } catch (e) { /* stays in queue, retried later */ }
   }
   // re-read: items may have been added while syncing
   setQueue(getPendingQueue().filter(i => !done.has(i.id)));
   isSyncing = false; updateSyncBanner();
   const left = getPendingQueue().length;
+  if (lockedHit) toast('This term is locked by your instructor — recent changes were not saved.', 'error');
   if (!silent) {
-    if (done.size) toast('Synced ' + done.size + ' item(s).', 'success');
+    if (done.size && !lockedHit) toast('Synced ' + done.size + ' item(s).', 'success');
     if (left) toast(left + ' item(s) not synced yet. Will retry.', 'warning');
   }
 }
@@ -462,7 +475,7 @@ async function handleLogin() {
 
     state = local || defaultState();
     state.student = data.student;
-    state.student.studentNo = state.student.studentNo || studentNo;
+    state.student.studentNo = (state.student.studentNo || studentNo).toUpperCase();
     state.terms = data.terms;
     const prev = state.activeTerm;
     const t = data.terms.find(x => prev && x.schoolYear === prev.schoolYear && x.semester === prev.semester) || data.terms[0];
@@ -508,9 +521,12 @@ async function loadTermData(sy, sem) {
       if (hasVal(rec[g]) && !isNaN(parseFloat(rec[g]))) state.games[g] = [parseFloat(rec[g])];
     });
     if (hasVal(rec.examScore)) {
+      const pct = parseFloat(rec.examPercentage) || 0;
       state.exam = {
         score: parseFloat(rec.examScore) || 0, total: parseFloat(rec.examTotal) || EXAM_ITEMS,
-        percentage: parseFloat(rec.examPercentage) || 0, passed: rec.examPassed === 'PASSED'
+        percentage: pct,
+        passed: pct >= EXAM_PASS_PCT,                    // same rule as the backend (75%)
+        date: rec.examTimestamp || null
       };
     } else state.exam = null;
     state.isLocked = rec.isLocked === true || String(rec.isLocked).toUpperCase() === 'TRUE';
@@ -525,6 +541,45 @@ async function switchTerm() {
   Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
   await loadTermData(sy, sem);
   saveState(); updateSyncBanner(); navigate('home');
+}
+
+// Existing students can add another term (e.g. next semester)
+function openAddTerm() {
+  if (!state.student) return;
+  const have = new Set((state.terms || []).map(t => t.schoolYear + '|' + t.semester));
+  const opts = [];
+  SCHOOL_YEARS.forEach(sy => SEMESTERS.forEach(sem => { if (!have.has(sy + '|' + sem)) opts.push([sy, sem]); }));
+  if (!opts.length) { toast('No more terms available to add.', 'warning'); return; }
+  $('modalTitle').textContent = '➕ Add Term';
+  $('modalBody').innerHTML =
+    '<p style="margin-bottom:1rem;font-size:.9rem;">Add a new term for <strong>' + escapeHtml(state.student.fullName) + '</strong>. You will start with a fresh set of scores for that term.</p>' +
+    '<div class="form-group"><label for="addTermSel">Term</label><select id="addTermSel">' +
+    opts.map(o => '<option value="' + escapeHtml(o[0] + '|' + o[1]) + '">' + escapeHtml(o[0] + ' — ' + o[1]) + '</option>').join('') + '</select></div>' +
+    '<button class="btn btn-primary btn-block" id="btnAddTerm" onclick="submitAddTerm()">✅ Add Term</button>';
+  $('genericModal').classList.add('show');
+}
+
+async function submitAddTerm() {
+  if (!isOnline) { toast('You need to be online to add a term.', 'error'); return; }
+  const val = $('addTermSel').value, i = val.indexOf('|');
+  const sy = val.slice(0, i), sem = val.slice(i + 1), s = state.student;
+  const btn = $('btnAddTerm'); btn.disabled = true;
+  try {
+    const r = await api('POST', { action: 'createNewTerm', studentNo: s.studentNo, fullName: s.fullName, section: s.section || '',
+      group: s.group || '', email: s.email || '', schoolYear: sy, semester: sem, appVersion: APP_VERSION });
+    if (!r.success) throw new Error(r.error || 'Could not add term');
+    try {
+      const m = await api('GET', { action: 'getStudentMaster', studentNo: s.studentNo });
+      if (m.success && m.terms && m.terms.length) state.terms = m.terms;
+    } catch (e) {}
+    if (!state.terms.some(t => t.schoolYear === sy && t.semester === sem)) state.terms.push({ schoolYear: sy, semester: sem, isLocked: false });
+    closeModal('genericModal');
+    state.activeTerm = { schoolYear: sy, semester: sem };
+    Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
+    await loadTermData(sy, sem);
+    saveState(); updateSyncBanner(); navigate('home');
+    toast('Term added.', 'success');
+  } catch (err) { toast('Failed: ' + err.message, 'error'); btn.disabled = false; }
 }
 
 function updateSidebar() {
@@ -554,8 +609,8 @@ function showRegistrationForm(studentNo) {
     '<div class="form-group"><label>Section</label><input type="text" id="regSection" placeholder="BSN 3-3"></div>' +
     '<div class="form-group"><label>Group</label><input type="text" id="regGroup" placeholder="Group 2"></div>' +
     '<div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="juan@tsu.edu.ph"></div>' +
-    '<div class="form-group"><label>School Year</label><select id="regSY"><option>2026-2027</option><option>2027-2028</option><option>2028-2029</option></select></div>' +
-    '<div class="form-group"><label>Semester</label><select id="regSem"><option>1st Semester</option><option>2nd Semester</option></select></div>' +
+    '<div class="form-group"><label>School Year</label><select id="regSY">' + optionList(SCHOOL_YEARS, '2026-2027') + '</select></div>' +
+    '<div class="form-group"><label>Semester</label><select id="regSem">' + optionList(SEMESTERS, '1st Semester') + '</select></div>' +
     '<button class="btn btn-primary btn-block" id="btnRegister" onclick="submitRegistration()">✅ Register &amp; Start</button>';
   $('genericModal').classList.add('show');
 }
@@ -673,15 +728,19 @@ function renderHome(main) {
     '<div><div class="stat-value">' + (state.exam ? state.exam.score + '/' + state.exam.total : '—') + '</div><div class="stat-label">Exam</div></div>' +
     '</div></div>';
 
+  h += '<div class="card fade-in"><div class="card-header"><div class="card-title">🗓️ Term</div><div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">';
   if (state.terms && state.terms.length > 1) {
-    h += '<div class="card fade-in"><div class="card-header"><div class="card-title">🗓️ Term</div><select id="termSelector" class="term-select" onchange="switchTerm()">';
+    h += '<select id="termSelector" class="term-select" onchange="switchTerm()">';
     state.terms.forEach(t => {
       const v = t.schoolYear + '|' + t.semester;
       const sel = (t.schoolYear === state.activeTerm.schoolYear && t.semester === state.activeTerm.semester) ? ' selected' : '';
       h += '<option value="' + escapeHtml(v) + '"' + sel + '>' + escapeHtml(t.schoolYear + ' — ' + t.semester) + '</option>';
     });
-    h += '</select></div></div>';
+    h += '</select>';
+  } else {
+    h += '<span style="font-size:.88rem;font-weight:600;">' + escapeHtml(state.activeTerm.schoolYear + ' — ' + state.activeTerm.semester) + '</span>';
   }
+  h += '<button class="btn btn-outline" style="padding:.5rem 1rem;" onclick="openAddTerm()">➕ Add Term</button></div></div></div>';
 
   h += '<div class="card fade-in"><div class="card-header"><div class="card-title">📊 Your Progress</div></div><div class="progress-ring-wrap"><div class="progress-ring">' +
     '<svg width="120" height="120"><defs><linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#43A047"/><stop offset="100%" stop-color="#0D7377"/></linearGradient></defs>' +
@@ -911,7 +970,7 @@ var UNIT_CONTENT = {
 
 function renderUnitSection(sec) {
   const head = '<div class="card fade-in"><div class="card-header"><div class="card-title">' + sec.heading + '</div></div>';
-  const ul = (arr, color, title, extra) => (arr && arr.length)
+  const ul = (arr, color, title) => (arr && arr.length)
     ? '<p style="font-weight:700;color:' + color + ';margin-top:.5rem;font-size:.9rem;">' + title + '</p><ul style="margin-left:1.5rem;font-size:.85rem;line-height:1.8;margin-bottom:.75rem;">' + arr.map(i => '<li>' + i + '</li>').join('') + '</ul>' : '';
   let h = head;
   switch (sec.type) {
@@ -1081,6 +1140,7 @@ const QUIZZES = {
 
 // ============================================================
 // GAMES  (each row: [question, correct answer, wrong1, wrong2, wrong3])
+// Keys here (blitz, tree, sound, redFlag, matrix) are the SAME keys Code.gs reads.
 // ============================================================
 const GAMES = {
   blitz: { icon: '⚡', title: 'Pattern Blitz', desc: 'Name the condition from its assessment pattern.', qs: [
@@ -1250,7 +1310,8 @@ function renderCertificate(main) {
       '<button class="btn btn-primary mt-2" onclick="navigate(\'home\')">← Back to Home</button></div>';
     return;
   }
-  const d = new Date(e.date || Date.now()).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+  const dt = new Date(e.date || Date.now());
+  const d = (isNaN(dt.getTime()) ? new Date() : dt).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
   main.innerHTML = '<div class="card fade-in"><div class="cert">' +
     '<div style="font-size:3rem;">🫁</div><h1>Certificate of Mastery</h1><p style="color:var(--gray);">Respiratory Assessment Mastery</p>' +
     '<p style="margin-top:1.25rem;">This certifies that</p><div class="cert-name">' + escapeHtml(s.fullName) + '</div>' +
@@ -1298,7 +1359,7 @@ async function submitFeedback() {
   const btn = $('btnFeedback'); btn.disabled = true;
   const s = state.student;
   try {
-    const r = await api('POST', { action: 'submitFeedback', studentNo: s.studentNo, fullName: s.fullName, section: s.section || '', email: s.email || '',
+    const r = await api('POST', { action: 'submitFeedback', studentNo: s.studentNo, fullName: s.fullName, section: s.section || '', group: s.group || '', email: s.email || '',
       category: $('fbCategory').value, message: msg, schoolYear: state.activeTerm.schoolYear, semester: state.activeTerm.semester, appVersion: APP_VERSION });
     if (!r.success) throw new Error(r.error || 'Could not send feedback');
     $('fbMessage').value = ''; toast('Thank you! Feedback sent.', 'success');
@@ -1334,7 +1395,10 @@ function importBackup(input) {
     try {
       const d = JSON.parse(r.result);
       if (d.app !== 'respiratory-mastery' || !d.student) throw new Error('bad file');
-      if (d.student.studentNo !== state.student.studentNo) { toast('This backup belongs to another student.', 'error'); return; }
+      if (String(d.student.studentNo).toUpperCase() !== String(state.student.studentNo).toUpperCase()) { toast('This backup belongs to another student.', 'error'); return; }
+      if (d.activeTerm && (d.activeTerm.schoolYear !== state.activeTerm.schoolYear || d.activeTerm.semester !== state.activeTerm.semester)) {
+        toast('This backup is for a different term (' + d.activeTerm.schoolYear + ' — ' + d.activeTerm.semester + ').', 'error'); return;
+      }
       if (!confirm('Replace your current scores with this backup?')) return;
       const clean = a => (Array.isArray(a) ? a : []).map(Number).filter(n => isFinite(n) && n >= 0 && n <= 100);
       const qa = {}, gm = {}, pr = {};
