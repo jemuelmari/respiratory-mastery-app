@@ -147,6 +147,7 @@ code{background:var(--light);padding:.15rem .4rem;border-radius:4px;font-family:
 <div class="toast" id="toast"></div>
 <script>
 var BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1TmnmqgMI0ttpKq_U0x-SBop_PDs-AwcY7ehBreUW7sDaCcfMEFpQq/exec';
+var ADMIN_KEY = 'teacher2026'; // <-- IDINAGDAG DITO
 var SCHOOL_YEARS = ['2025-2026','2026-2027','2027-2028','2028-2029','2029-2030','2030-2031','2031-2032','2032-2033'];
 var SEMESTERS = ['1st Semester', '2nd Semester'];
 var CURRENT_SY = '2026-2027';
@@ -183,7 +184,7 @@ function toast(msg, type) { type = type || ''; var el = document.getElementById(
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
 async function fetchAllStudents() {
-  var res = await fetch(BACKEND_URL + '?action=listAllMaster');
+  var res = await fetch(BACKEND_URL + '?action=listAllMaster&adminKey=' + ADMIN_KEY);
   return await res.json();
 }
 
