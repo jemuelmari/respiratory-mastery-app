@@ -12,7 +12,7 @@
             or to '3.2.0' for a new feature.
    ============================================================ */
 
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '4.3.0';
 
 const CACHE_NAME   = `resp-mastery-v${APP_VERSION}`;
 const RUNTIME_CACHE = `resp-mastery-runtime-v${APP_VERSION}`;
@@ -94,6 +94,9 @@ self.addEventListener('fetch', (event) => {
 
   // Ignore non-http(s) requests (e.g., chrome-extension://)
   if (!url.protocol.startsWith('http')) return;
+
+  // Never cache the Google Apps Script API: cached replies are stale scores, and the instructor key sits in those URLs.
+  if (url.hostname.indexOf('script.google.com') !== -1 || url.hostname.indexOf('googleusercontent.com') !== -1) return;
 
   // -------- CASE A: Cross-origin requests (Google Apps Script, fonts, CDNs) --------
   if (url.origin !== self.location.origin) {

@@ -230,7 +230,7 @@ function getGameBestScore(s, game) {
   if (game === 'matrix') colName = 'Matrix';
   if (game === 'blitz') colName = 'Blitz';
   
-  var val = s[colName] || s[game] || null;
+  var val = s[colName] || s[game] || s[colName.charAt(0).toLowerCase() + colName.slice(1)] || null;
   
   if (val === '' || val === null || val === undefined) return null;
   var num = parseFloat(val);
@@ -268,8 +268,9 @@ function computeWeightedFinal(s, settings) {
   var gameAvg = null;
 var gameScores = [];
 ['Blitz','Tree','Sound','RedFlag','Matrix'].forEach(function(g) {
-  var v = parseFloat(s[g]);
-  if (!isNaN(v) && s[g] !== '' && s[g] !== null) {
+  var gv = (s[g] !== undefined) ? s[g] : s[g.charAt(0).toLowerCase() + g.slice(1)];   // backend sends blitz / redFlag (lower-case first letter)
+  var v = parseFloat(gv);
+  if (!isNaN(v) && gv !== '' && gv !== null) {
     gameScores.push(v <= 1 && v > 0 ? Math.round(v * 100) : Math.round(v));
   }
 });

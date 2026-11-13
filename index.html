@@ -285,7 +285,7 @@ const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1Tmnmq
 const STORAGE_KEY = 'respMastery_v1';          // active session
 const USER_KEY = 'respMastery_user_';          // per-student saved data
 const QUEUE_KEY = 'respMastery_pendingSync';
-const APP_VERSION = '4.1';
+const APP_VERSION = '4.3';
 const PASS_PCT = 90;        // unit quiz / game mastery        (Code.gs PASS_PCT)
 const EXAM_PASS_PCT = 75;   // capstone exam passing percentage (Code.gs EXAM_PASS_PCT)
 const EXAM_ITEMS = 30;                                         // (Code.gs EXAM_ITEMS)
@@ -354,7 +354,8 @@ async function api(method, params) {
       ? await fetch(BACKEND_URL + '?' + new URLSearchParams(params), { signal: ctrl.signal })
       : await fetch(BACKEND_URL, { method: 'POST', body: new URLSearchParams(params), signal: ctrl.signal });
     if (!res.ok) throw new Error('Server error (' + res.status + ')');
-    return await res.json();
+    const txt = await res.text();
+    try { return JSON.parse(txt); } catch (e) { throw new Error('The server sent an unexpected reply. Please try again in a moment.'); }
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('Request timed out');
     throw e;
@@ -401,63 +402,114 @@ function addToQueue(type, data) {
   updateSyncBanner();
 }
 
-async function processSyncQueue(silent) {
-  if (isSyncing) return;
-  if (!isOnline) { if (!silent) toast('Cannot sync — you are offline.', 'error'); return; }
-  
-  let queue = getPendingQueue();
-  if (!queue.length) { updateSyncBanner(); return; }
-  
-  isSyncing = true; 
-  updateSyncBanner();
-  
-  let successCount = 0;
-  const successfulIds = [];
-  const queueSnapshot = [...queue];
+let syncAgain = false;
 
-  for (const item of queueSnapshot) {
-    const st = (item.data && item.data.student) || {};
-    try {
-      const res = await fetch(BACKEND_URL, {
-        method: 'POST',
-        body: new URLSearchParams({
-          action: 'syncProgress',
-          studentNo: item.studentNo,
-          schoolYear: item.schoolYear,
-          semester: item.semester,
-          fullName: st.fullName || '',
-          section: st.section || '',
-          group: st.group || '',
-          email: st.email || '',
-          payloadJson: JSON.stringify(item.data),
-          appVersion: APP_VERSION || '4.1'
-        })
-      });
-      const r = await res.json();
-      
-      if (r && r.success) {
-        successCount++;
-        successfulIds.push(item.id);
-      }
-    } catch (e) {
-      console.warn("Sync failed for item", item.id, e);
+function removeFromQueue(ids) {
+  const gone = new Set(ids);
+  setQueue(getPendingQueue().filter(i => !gone.has(i.id)));   // re-read: never wipe items added while a sync was running
+}
+
+const GAME_COLS = { Blitz: 'blitz', Tree: 'tree', Sound: 'sound', RedFlag: 'redFlag', Matrix: 'matrix' };
+
+// Adopt HIGHER scores that the server already has (e.g. earned on another device) without losing local attempts.
+function raiseLocalToServer(map) {
+  if (!map) return false;
+  let changed = false;
+  for (let i = 1; i <= 7; i++) {
+    const key = 'unit' + i, v = parseFloat(map['U' + i]);
+    if (isNaN(v) || v <= 0) continue;
+    if (v > bestOf(state.quizAttempts[key])) { (state.quizAttempts[key] = state.quizAttempts[key] || []).push(v); changed = true; }
+    if (v >= PASS_PCT && !(state.progress[key] && state.progress[key].completed)) {
+      state.progress[key] = { completed: true, score: v, date: new Date().toISOString() }; changed = true;
     }
   }
+  Object.keys(GAME_COLS).forEach(col => {
+    const key = GAME_COLS[col], v = parseFloat(map[col]);
+    if (!isNaN(v) && v > bestOf(state.games[key])) { (state.games[key] = state.games[key] || []).push(v); changed = true; }
+  });
+  return changed;
+}
 
-  const remainingQueue = queueSnapshot.filter(item => !successfulIds.includes(item.id));
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(remainingQueue));
+function isActiveTerm(item) {
+  return state.student && state.student.studentNo === item.studentNo &&
+    state.activeTerm.schoolYear === item.schoolYear && state.activeTerm.semester === item.semester;
+}
 
-  isSyncing = false;
-  updateSyncBanner();
-
-  if (successCount > 0 && !silent) {
-    toast(`✅ Synced ${successCount} item(s).`, 'success');
+function applyServerResult(item, r) {
+  if (!isActiveTerm(item)) return;
+  let changed = raiseLocalToServer(r.mergedScores || r);
+  if (hasVal(r.examScore) && hasVal(r.examPercentage)) {
+    const sp = parseFloat(r.examPercentage) || 0, lp = state.exam ? (parseFloat(state.exam.percentage) || 0) : -1;
+    if (sp > lp) {
+      state.exam = { score: parseFloat(r.examScore) || 0, total: parseFloat(r.examTotal) || EXAM_ITEMS, percentage: sp,
+        passed: sp >= EXAM_PASS_PCT, date: (state.exam && state.exam.date) || new Date().toISOString() };
+      changed = true;
+    }
   }
-  if (remainingQueue.length > 0 && !silent) {
-    setTimeout(() => toast(`⚠️ ${remainingQueue.length} item(s) failed. Will retry.`, 'warning'), 1000);
+  if (changed) saveState();
+}
+
+function markTermLocked(item) {
+  if (!isActiveTerm(item)) return;
+  state.isLocked = true;
+  (state.terms || []).forEach(t => { if (t.schoolYear === item.schoolYear && t.semester === item.semester) t.isLocked = true; });
+  saveState(); updateSyncBanner();
+  toast('This term is locked by your instructor. Your latest changes were not saved online.', 'warning');
+}
+
+// returns 'ok' | 'locked' | 'offline' | 'error'
+async function syncOneItem(item) {
+  // use the CURRENT profile (an old queued snapshot must not overwrite a newer name/section on the server)
+  const st = (state.student && state.student.studentNo === item.studentNo) ? state.student : ((item.data && item.data.student) || {});
+  const params = {
+    action: 'syncProgress', studentNo: item.studentNo, schoolYear: item.schoolYear, semester: item.semester,
+    fullName: st.fullName || '', section: st.section || '', group: st.group || '', email: st.email || '',
+    payloadJson: JSON.stringify(item.data), appVersion: APP_VERSION
+  };
+  try {
+    let r = await api('POST', params);
+    if (r && r.notFound) {   // the term row is missing on the server: create it, then retry once
+      const c = await api('POST', { action: 'createNewTerm', studentNo: item.studentNo, fullName: st.fullName || '',
+        section: st.section || '', group: st.group || '', email: st.email || '',
+        schoolYear: item.schoolYear, semester: item.semester, appVersion: APP_VERSION });
+      if (c && (c.success || /already exists/i.test(c.error || ''))) r = await api('POST', params);
+    }
+    if (r && r.success) { applyServerResult(item, r); return 'ok'; }
+    if (r && r.locked) return 'locked';
+    console.warn('Sync rejected:', r && r.error);
+    return 'error';
+  } catch (e) {
+    console.warn('Sync failed:', e);
+    return navigator.onLine ? 'error' : 'offline';
   }
 }
- 
+
+async function processSyncQueue(silent) {
+  if (isSyncing) { syncAgain = true; return; }   // a new snapshot arrived mid-sync: run again when this pass ends
+  if (!isOnline) { if (!silent) toast('Cannot sync — you are offline.', 'error'); return; }
+  if (!getPendingQueue().length) { updateSyncBanner(); return; }
+
+  isSyncing = true; updateSyncBanner();
+  let ok = 0, locked = 0;
+  try {
+    do {
+      syncAgain = false;
+      for (const item of getPendingQueue()) {
+        const r = await syncOneItem(item);
+        if (r === 'ok') { ok++; removeFromQueue([item.id]); }
+        else if (r === 'locked') { locked++; removeFromQueue([item.id]); try { markTermLocked(item); } catch (e) { console.warn(e); } }
+        else if (r === 'offline') { isOnline = false; break; }
+      }
+    } while (syncAgain && isOnline);
+  } finally {
+    isSyncing = false; updateSyncBanner();
+  }
+
+  const left = getPendingQueue().length;
+  if (ok > 0 && !silent) toast('✅ Synced ' + ok + ' item(s).', 'success');
+  if (left > 0 && !silent) setTimeout(() => toast('⚠️ ' + left + ' item(s) not synced yet. Will retry automatically.', 'warning'), 800);
+}
+
 async function syncNewScore() {
   if (!state.student) return;
   saveState();
@@ -499,6 +551,9 @@ async function handleLogin() {
     const prev = state.activeTerm;
     const t = data.terms.find(x => prev && x.schoolYear === prev.schoolYear && x.semester === prev.semester) || data.terms[0];
     state.activeTerm = { schoolYear: t.schoolYear, semester: t.semester };
+    if (!prev || prev.schoolYear !== t.schoolYear || prev.semester !== t.semester) {
+      Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
+    }
 
     await processSyncQueue(true);                       // push any offline work first
     await loadTermData(state.activeTerm.schoolYear, state.activeTerm.semester);
@@ -527,28 +582,42 @@ async function loadTermData(sy, sem) {
     const data = await api('GET', { action: 'getStudentByTerm', studentNo: no, schoolYear: sy, semester: sem });
     if (!(data.success && data.record)) return;
     const rec = data.record;
-    state.progress = {}; state.quizAttempts = {}; state.games = {};
+    state.isLocked = rec.isLocked === true || String(rec.isLocked).toUpperCase() === 'TRUE';
+    let needPush = false;   // true when this device holds something the server does not have yet
+
     for (let i = 1; i <= 7; i++) {
-      const v = rec['u' + i];
-      if (hasVal(v) && !isNaN(parseFloat(v))) {
-        const n = parseFloat(v);
-        state.quizAttempts['unit' + i] = [n];
-        if (n >= PASS_PCT) state.progress['unit' + i] = { completed: true, score: n };
-      }
+      const key = 'unit' + i, raw = rec['u' + i], v = parseFloat(raw);
+      const local = bestOf(state.quizAttempts[key]);
+      if (hasVal(raw) && !isNaN(v)) {
+        if (v > local) (state.quizAttempts[key] = state.quizAttempts[key] || []).push(v);
+        else if (local > v) needPush = true;
+        if (v >= PASS_PCT && !(state.progress[key] && state.progress[key].completed)) state.progress[key] = { completed: true, score: v, date: new Date().toISOString() };
+      } else if (local > 0) needPush = true;
     }
-    ['blitz', 'tree', 'sound', 'redFlag', 'matrix'].forEach(g => {
-      if (hasVal(rec[g]) && !isNaN(parseFloat(rec[g]))) state.games[g] = [parseFloat(rec[g])];
+    Object.keys(GAME_COLS).forEach(col => {
+      const g = GAME_COLS[col], raw = rec[g], v = parseFloat(raw), local = bestOf(state.games[g]);
+      if (hasVal(raw) && !isNaN(v)) {
+        if (v > local) (state.games[g] = state.games[g] || []).push(v);
+        else if (local > v) needPush = true;
+      } else if (local > 0) needPush = true;
     });
-    if (hasVal(rec.examScore)) {
-      const pct = parseFloat(rec.examPercentage) || 0;
+
+    const srvHas = hasVal(rec.examScore);
+    const srvPct = srvHas ? (parseFloat(rec.examPercentage) || 0) : -1;
+    const locPct = state.exam ? (parseFloat(state.exam.percentage) || 0) : -1;
+    if (srvHas && srvPct > locPct) {
       state.exam = {
         score: parseFloat(rec.examScore) || 0, total: parseFloat(rec.examTotal) || EXAM_ITEMS,
-        percentage: pct,
-        passed: pct >= EXAM_PASS_PCT,                    // same rule as the backend (75%)
+        percentage: srvPct, passed: srvPct >= EXAM_PASS_PCT,       // same rule as the backend (75%)
         date: rec.examTimestamp || null
       };
-    } else state.exam = null;
-    state.isLocked = rec.isLocked === true || String(rec.isLocked).toUpperCase() === 'TRUE';
+    } else if (state.exam && locPct > srvPct) needPush = true;
+
+    saveState();
+    if (needPush && !state.isLocked) {   // self-heal: upload what only this device has
+      addToQueue('snapshot', buildSnapshot());
+      processSyncQueue(true);
+    }
   } catch (err) { console.warn('Could not load term data', err); }
 }
 
@@ -635,8 +704,8 @@ function showRegistrationForm(studentNo) {
     <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="juan@tsu.edu.ph"></div>
     
     <!-- IDINAGDAG ANG SCHOOL YEAR AT SEMESTER -->
-    <div class="form-group"><label>School Year</label><select id="regSY"><option>2025-2026</option><option selected>2026-2027</option><option>2027-2028</option></select></div>
-    <div class="form-group"><label>Semester</label><select id="regSem"><option selected>1st Semester</option><option>2nd Semester</option></select></div>
+    <div class="form-group"><label>School Year</label><select id="regSY">${optionList(SCHOOL_YEARS, '2026-2027')}</select></div>
+    <div class="form-group"><label>Semester</label><select id="regSem">${optionList(SEMESTERS, '1st Semester')}</select></div>
     
     <button class="btn btn-primary btn-block" onclick="submitRegistration('${studentNo}')">✅ Register & Start</button>
   `;
@@ -648,37 +717,20 @@ async function submitRegistration(studentNo) {
   const section = document.getElementById('regSection').value.trim();
   const group = document.getElementById('regGroup').value.trim();
   const email = document.getElementById('regEmail').value.trim();
-  
-  // KUNIN ANG SCHOOL YEAR AT SEMESTER SA FORM
   const sy = document.getElementById('regSY').value;
   const sem = document.getElementById('regSem').value;
 
-  if (!fullName || !section || !group || !email) { 
-    toast('Please fill all fields.', 'warning'); 
-    return; 
-  }
+  if (!fullName || !section || !group || !email) { toast('Please fill all fields.', 'warning'); return; }
+  if (!isOnline) { toast('You need to be online to register.', 'error'); return; }
 
   try {
-    const res = await fetch(BACKEND_URL, {
-      method: 'POST',
-      body: new URLSearchParams({
-        action: 'createNewTerm',
-        studentNo: studentNo,
-        fullName: fullName,
-        section: section,
-        group: group,
-        email: email,
-        schoolYear: sy,
-        semester: sem,
-        appVersion: '4.1'
-      })
-    });
-    const data = await res.json();
-
-    if (data.success) {
+    const data = await api('POST', { action: 'createNewTerm', studentNo: studentNo, fullName: fullName, section: section,
+      group: group, email: email, schoolYear: sy, semester: sem, appVersion: APP_VERSION });
+    if (data.success || /already exists/i.test(data.error || '')) {
       closeModal('genericModal');
-      toast('✅ Registration successful! Please login again.', 'success');
-      setTimeout(() => handleLogin(), 1000);
+      toast('✅ Registration successful! Logging you in...', 'success');
+      $('loginStudentNo').value = studentNo;      // the form clears this box; put it back so the auto-login works
+      setTimeout(() => handleLogin(), 600);
     } else {
       toast('❌ ' + data.error, 'error');
     }
@@ -689,85 +741,33 @@ async function submitRegistration(studentNo) {
 
 function openEditProfile() {
   if (!state.student) return;
-  
-  const modal = document.getElementById('genericModal');
-  if (!modal) return;
-
-  document.getElementById('modalTitle').textContent = '✏️ Edit Profile';
-  document.getElementById('modalBody').innerHTML = `
-    <div class="form-group"><label>Full Name</label><input type="text" id="editFullName" value="${escapeHtml(state.student.fullName)}"></div>
-    <div class="form-group"><label>Section</label><input type="text" id="editSection" value="${escapeHtml(state.student.section)}"></div>
-    <div class="form-group"><label>Group</label><input type="text" id="editGroup" value="${escapeHtml(state.student.group || '')}"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="editEmail" value="${escapeHtml(state.student.email || '')}"></div>
-    
-    <!-- IDINAGDAG ANG SCHOOL YEAR AT SEMESTER -->
-    <div class="form-group"><label>School Year</label>
-      <select id="editSY">
-        <option ${state.activeTerm.schoolYear === '2025-2026' ? 'selected' : ''}>2025-2026</option>
-        <option ${state.activeTerm.schoolYear === '2026-2027' ? 'selected' : ''}>2026-2027</option>
-        <option ${state.activeTerm.schoolYear === '2027-2028' ? 'selected' : ''}>2027-2028</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Semester</label>
-      <select id="editSem">
-        <option ${state.activeTerm.semester === '1st Semester' ? 'selected' : ''}>1st Semester</option>
-        <option ${state.activeTerm.semester === '2nd Semester' ? 'selected' : ''}>2nd Semester</option>
-      </select>
-    </div>
-    
-    <button class="btn btn-primary btn-block" onclick="submitEditProfile()">💾 Save Changes</button>
-  `;
-  modal.classList.add('show');
+  $('modalTitle').textContent = '✏️ Edit Profile';
+  $('modalBody').innerHTML =
+    '<div class="form-group"><label>Full Name</label><input type="text" id="editFullName" value="' + escapeHtml(state.student.fullName) + '"></div>' +
+    '<div class="form-group"><label>Section</label><input type="text" id="editSection" value="' + escapeHtml(state.student.section) + '"></div>' +
+    '<div class="form-group"><label>Group</label><input type="text" id="editGroup" value="' + escapeHtml(state.student.group || '') + '"></div>' +
+    '<div class="form-group"><label>Email</label><input type="email" id="editEmail" value="' + escapeHtml(state.student.email || '') + '"></div>' +
+    '<button class="btn btn-primary btn-block" id="btnSaveProfile" onclick="submitEditProfile()">💾 Save Changes</button>';
+  $('genericModal').classList.add('show');
 }
 
 async function submitEditProfile() {
-  const fullName = document.getElementById('editFullName').value.trim();
-  const section = document.getElementById('editSection').value.trim();
-  const group = document.getElementById('editGroup').value.trim();
-  const email = document.getElementById('editEmail').value.trim();
-  const sy = document.getElementById('editSY').value;
-  const sem = document.getElementById('editSem').value;
-
+  const fullName = $('editFullName').value.trim(), section = $('editSection').value.trim();
+  const group = $('editGroup').value.trim(), email = $('editEmail').value.trim();
   if (!fullName || !section) { toast('Full Name and Section are required.', 'warning'); return; }
-
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) { toast('Please enter a valid email.', 'warning'); return; }
+  if (!isOnline) { toast('You need to be online to update your profile.', 'error'); return; }
+  const btn = $('btnSaveProfile'); btn.disabled = true;
   try {
-    const res = await fetch(BACKEND_URL, {
-      method: 'POST',
-      body: new URLSearchParams({
-        action: 'syncProgress', // Ginagamit natin ang syncProgress para i-update ang profile
-        studentNo: state.student.studentNo,
-        schoolYear: sy,
-        semester: sem,
-        fullName: fullName,
-        section: section,
-        group: group,
-        email: email,
-        payloadJson: JSON.stringify({}), // Walang quiz data, profile update lang
-        appVersion: '4.1'
-      })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      // I-update ang local state
-      state.student.fullName = fullName;
-      state.student.section = section;
-      state.student.group = group;
-      state.student.email = email;
-      state.activeTerm.schoolYear = sy;
-      state.activeTerm.semester = sem;
-      
-      saveState();
-      closeModal('genericModal');
-      toast('✅ Profile updated successfully.', 'success');
-      
-      // I-refresh ang UI
-      showApp();
-    } else {
-      toast('❌ ' + data.error, 'error');
-    }
+    const r = await api('POST', { action: 'updateProfile', studentNo: state.student.studentNo, fullName: fullName, section: section, group: group, email: email });
+    if (!r.success) throw new Error(r.error || 'Could not update profile');
+    Object.assign(state.student, { fullName: fullName, firstName: fullName.split(/\s+/)[0], section: section, group: group, email: email });
+    saveState(); updateSidebar(); closeModal('genericModal');
+    if (currentView === 'home') renderView('home');
+    toast('✅ Profile updated.', 'success');
   } catch (err) {
-    toast('❌ Error: ' + err.message, 'error');
+    toast('❌ ' + err.message, 'error');
+    btn.disabled = false;
   }
 }
 
