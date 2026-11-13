@@ -165,6 +165,7 @@
             </select>
             <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
           </div>
+          <button class="btn btn-outline" onclick="printFilteredExamEvidence()">🖨️ Print Exam Evidence</button>
           <button class="btn btn-outline" onclick="openLockTermModal()">🔒 Manage Term Lock</button>
           <button class="btn btn-primary" onclick="syncData()">🔄 Sync Now</button>
         </div>
@@ -377,7 +378,7 @@
         return;
       }
       document.getElementById('studentTableBody').innerHTML = filtered.map(s => {
-        const name = s.fullName || 'Unknown';
+        const name = String(s.fullName || 'Unknown');
         const parts = name.trim().split(/\s+/);
         const initials = ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
         const unitsCompleted = parsePct(s.unitsCompleted);
@@ -399,16 +400,167 @@
             <td><span style="font-weight:600; color:${unitAvg >= 90 ? 'var(--success)' : unitAvg >= 75 ? 'var(--warning)' : 'var(--danger)'}">${unitAvg}%</span></td>
             <td><span style="font-weight:600;">${examScore}/${examTotal}</span></td>
             <td>${statusBadge}</td>
-            <td><button class="btn btn-sm btn-outline" onclick="openStudentModal('${s.studentNo}')">View</button><button class="btn btn-sm btn-outline" onclick="openExamHistory('${s.studentNo}', '${name}')" style="margin-left: 4px;">📝 History</button></td>
+            <td><button class="btn btn-sm btn-outline" onclick="openStudentModal(${allStudents.indexOf(s)})">View</button><button class="btn btn-sm btn-outline" onclick="printExamEvidence([${allStudents.indexOf(s)}])" title="Print exam evidence" style="margin-left: 4px;">🖨️</button><button class="btn btn-sm btn-outline" onclick="openExamHistory(${allStudents.indexOf(s)})" style="margin-left: 4px;">📝 History</button></td>
           </tr>`;
       }).join('');
     }
 
-    function openStudentModal(studentNo) {
-      const s = allStudents.find(x => String(x.studentNo) === String(studentNo));
+    /* ============================================================
+       EXAM EVIDENCE PRINTING
+       One record per student: the HIGHEST-scoring attempt, with every question, all the choices,
+       the student's answer and the correct answer (answers come from the backend: listExamEvidence).
+       ============================================================ */
+    function escH(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+    function fmtDT(v) {
+      if (!v) return '—';
+      const d = new Date(v);
+      return isNaN(d) ? String(v) : d.toLocaleString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+    const EVID = { course: 'NCM 101B Lab — Respiratory Assessment', instructor: 'JEMUEL C. MARI, MAN, RN, LPT', passPct: 75 };
+    function evHasItems(a) { return !!(a && a.items && a.items.length); }
+    function evPct(a) {
+      const p = parseFloat(a.percentage);
+      if (!isNaN(p)) return p;
+      const t = parseFloat(a.total), sc = parseFloat(a.score);
+      return (t > 0 && !isNaN(sc)) ? sc / t * 100 : 0;
+    }
+    // highest score; on a tie prefer the attempt that has its items, then the later one (list is oldest -> newest)
+    function evBest(list) {
+      let best = null;
+      list.forEach(a => {
+        if (!best) { best = a; return; }
+        const x = evPct(a), y = evPct(best);
+        if (x > y) best = a;
+        else if (x === y) { if (evHasItems(a) || !evHasItems(best)) best = a; }
+      });
+      return best;
+    }
+    function evPage(s, ex, attemptCount, note) {
+      const rows = (ex.items || []).map(it => {
+        const stu = String(it.s == null ? '' : it.s).trim(), cor = String(it.a == null ? '' : it.a).trim();
+        return { q: it.q, opts: Array.isArray(it.o) ? it.o : [], stu: stu, cor: cor, none: stu === '', ok: stu !== '' && stu === cor };
+      });
+      const okN = rows.filter(r => r.ok).length, noneN = rows.filter(r => r.none).length;
+      const total = parseFloat(ex.total) || rows.length || 30;
+      const score = (ex.score !== '' && ex.score != null) ? ex.score : okN;
+      const pct = (ex.percentage !== '' && ex.percentage != null) ? Math.round(parseFloat(ex.percentage)) : Math.round(evPct({ score: score, total: total }));
+      const passed = ex.passed === true || String(ex.passed).toUpperCase() === 'PASSED';
+      let h = '<section class="page"><div class="hdr"><div class="uni">TARLAC STATE UNIVERSITY</div><div>College of Science — Nursing Department</div>';
+      h += '<div class="course">' + escH(EVID.course) + '</div><h1>CAPSTONE EXAMINATION — ANSWER RECORD</h1></div>';
+      h += '<table class="info"><tr><td class="k">Student</td><td><strong>' + escH(s.fullName) + '</strong></td><td class="k">Student No.</td><td>' + escH(s.studentNo || '—') + '</td></tr>';
+      h += '<tr><td class="k">Section</td><td>' + escH(s.section || '—') + '</td><td class="k">Group</td><td>' + escH(s.group || '—') + '</td></tr>';
+      h += '<tr><td class="k">Term</td><td>' + escH((s.schoolYear || '—') + ' — ' + (s.semester || '—')) + '</td><td class="k">Exam submitted</td><td>' + escH(fmtDT(ex.timestamp)) + '</td></tr>';
+      h += '<tr><td class="k">Attempt shown</td><td>' + (note ? 'Itemized attempt (see note)' : (attemptCount > 1 ? 'Highest score (of ' + attemptCount + ' attempts)' : 'Only attempt')) + '</td><td class="k">Result</td><td><strong class="' + (passed ? 'pass' : 'fail') + '">' + (passed ? 'PASSED' : 'NOT PASSED') + '</strong> <span class="muted">(passing: ' + EVID.passPct + '%)</span></td></tr>';
+      h += '<tr><td class="k">Score</td><td colspan="3"><strong>' + escH(score) + ' / ' + escH(total) + '</strong> (' + escH(pct) + '%)</td></tr></table>';
+      if (note) h += '<p class="note">' + escH(note) + '</p>';
+      if (rows.length) {
+        h += '<p class="legend"><span class="tag-s">◄ Student\'s answer</span> &nbsp; <span class="tag-c">✔ Correct answer</span></p>';
+        rows.forEach((r, i) => {
+          const status = r.ok ? '✔ Correct' : (r.none ? '✘ No answer' : '✘ Wrong');
+          h += '<div class="q ' + (r.ok ? 'ok' : 'bad') + '"><div class="qt"><span class="qn">' + (i + 1) + '.</span> ' + escH(r.q) + '<span class="res">' + status + '</span></div>';
+          if (r.opts.length) {
+            h += '<ul class="ch">';
+            r.opts.forEach((o, oi) => {
+              const isStu = !r.none && String(o).trim() === r.stu, isCor = String(o).trim() === r.cor;
+              h += '<li class="' + (isCor ? 'cor' : '') + (isStu ? ' stu' : '') + (isStu && !isCor ? ' wrong' : '') + '"><span class="lt">' + String.fromCharCode(65 + oi) + '.</span> ' + escH(o) +
+                (isStu ? ' <span class="tag-s">◄ Student\'s answer</span>' : '') + (isCor ? ' <span class="tag-c">✔ Correct answer</span>' : '') + '</li>';
+            });
+            h += '</ul>';
+            if (r.none) h += '<div class="na">Student did not answer this item.</div>';
+          } else {
+            h += '<div class="ch2"><div><b>Student\'s answer:</b> ' + escH(r.stu || '(no answer)') + '</div><div><b>Correct answer:</b> ' + escH(r.cor) + '</div></div>';
+          }
+          h += '</div>';
+        });
+        h += '<p class="sum">Correct: <strong>' + okN + '</strong> &nbsp;•&nbsp; Wrong: <strong>' + (rows.length - okN - noneN) + '</strong> &nbsp;•&nbsp; Unanswered: <strong>' + noneN + '</strong> &nbsp;•&nbsp; Total items: <strong>' + rows.length + '</strong></p>';
+      } else {
+        h += '<p class="note">The item-by-item answers are not available for this attempt (it was submitted before answers were being saved). Only the score summary was recorded.</p>';
+      }
+      h += '<div class="sign"><div><div class="line"></div>' + escH(s.fullName) + '<br><span class="muted">Student\'s signature over printed name</span></div>';
+      h += '<div><div class="line"></div>' + escH(EVID.instructor) + '<br><span class="muted">Clinical Instructor</span></div>';
+      h += '<div><div class="line"></div>Date<br><span class="muted">&nbsp;</span></div></div>';
+      h += '<p class="foot">Answers were recorded automatically by the Respiratory Assessment Mastery app at the time of submission and stored in the online database. Printed ' + escH(fmtDT(new Date().toISOString())) + '.</p></section>';
+      return h;
+    }
+    const EVID_CSS = '@page{size:A4;margin:12mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;margin:0}' +
+      '.page{page-break-after:always}.page:last-child{page-break-after:auto}.hdr{text-align:center;margin-bottom:8px}.uni{font-weight:700;font-size:13pt}.course{margin-top:2px}' +
+      'h1{font-size:13pt;margin:8px 0 0;letter-spacing:.5px;border-top:2px solid #111;border-bottom:2px solid #111;padding:4px 0}table{width:100%;border-collapse:collapse}' +
+      '.info td{padding:3px 6px;border:1px solid #999;vertical-align:top}.info .k{background:#eee;font-weight:700;width:15%}.legend{font-size:8.5pt;margin:8px 0 4px}' +
+      '.q{border:1px solid #999;border-radius:3px;padding:5px 8px;margin:5px 0;page-break-inside:avoid;font-size:9pt}.q.ok{border-left:5px solid #2e7d32}.q.bad{border-left:5px solid #c62828;background:#fff5f5}' +
+      '.qt{font-weight:700;margin-bottom:3px}.qn{display:inline-block;min-width:20px}.res{float:right;font-size:8.5pt;margin-left:8px}.q.ok .res{color:#1b5e20}.q.bad .res{color:#b71c1c}' +
+      '.ch{list-style:none;margin:0;padding:0 0 0 20px}.ch li{padding:1px 4px;margin:1px 0;border-radius:2px}.lt{display:inline-block;width:16px;font-weight:700}' +
+      '.ch li.cor{background:#e3f4e4}.ch li.wrong{background:#fde0de}.ch li.stu{font-weight:700}.tag-s{font-size:8pt;font-weight:700;color:#1a237e}.tag-c{font-size:8pt;font-weight:700;color:#1b5e20}' +
+      '.na{font-size:8.5pt;color:#b71c1c;margin:2px 0 0 20px}.ch2{margin-left:20px}.pass{color:#1b5e20}.fail{color:#b71c1c}.muted{color:#555;font-weight:400;font-size:9pt}.sum{margin:8px 0}' +
+      '.note{padding:10px;border:1px dashed #777;margin:10px 0}.sign{display:flex;gap:24px;margin-top:22px;text-align:center;font-size:9.5pt;page-break-inside:avoid}.sign>div{flex:1}' +
+      '.line{border-top:1px solid #111;margin-bottom:3px;height:24px}.foot{font-size:8pt;color:#555;margin-top:14px;text-align:center}';
+
+    async function printExamEvidence(indices) {
+      const list = indices.map(i => allStudents[i]).filter(Boolean);
+      if (!list.length) { alert('No students to print.'); return; }
+      const w = window.open('', '_blank');   // open NOW (inside the click) so the browser does not block it
+      if (!w) { alert('Allow pop-ups for this page, then try again.'); return; }
+      w.document.write('<p style="font-family:Arial;padding:2rem">⏳ Preparing exam evidence…</p>');
+      try {
+        const termKeyOf = s => (String(s.schoolYear).trim() + '|' + String(s.semester).trim()).toUpperCase();
+        const terms = {};
+        list.forEach(s => { terms[termKeyOf(s)] = { sy: s.schoolYear, sem: s.semester }; });
+        const evid = {};
+        for (const k of Object.keys(terms)) {
+          const res = await fetch(`${BACKEND_URL}?action=listExamEvidence&adminKey=${ADMIN_KEY}&schoolYear=${encodeURIComponent(terms[k].sy)}&semester=${encodeURIComponent(terms[k].sem)}`);
+          const d = await res.json();
+          if (!d.success) throw new Error(d.error || 'Could not load exam evidence. Make sure Code.gs v4.4 is deployed.');
+          (d.records || []).forEach(r => {
+            const key = String(r.studentNo).trim().toUpperCase() + '|' + termKeyOf(r);
+            (evid[key] = evid[key] || []).push(r);
+          });
+        }
+        list.sort((a, b) => String(a.section || '').localeCompare(String(b.section || '')) || String(a.fullName || '').localeCompare(String(b.fullName || '')));
+        const pages = [], missing = [];
+        list.forEach(s => {
+          let attempts = (evid[String(s.studentNo).trim().toUpperCase() + '|' + termKeyOf(s)] || []).slice();
+          attempts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          if (!attempts.length && s.examScore !== '' && s.examScore != null) {   // no logged attempt: fall back to the roster summary
+            attempts = [{ score: s.examScore, total: s.examTotal, percentage: s.examPercentage, passed: s.examPassed, timestamp: s.examTimestamp, items: null }];
+          }
+          if (!attempts.length) { missing.push(s.fullName); return; }
+          const best = evBest(attempts);
+          pages.push(evPage(s, best, attempts.length));
+          if (!evHasItems(best)) {   // the highest score was saved without items: also print the newest attempt that has them
+            const det = attempts.filter(a => a !== best && evHasItems(a)).pop();
+            if (det) pages.push(evPage(s, det, attempts.length, 'The highest score above was recorded without item details. This page is the itemized record of the attempt submitted ' + fmtDT(det.timestamp) + '.'));
+          }
+        });
+        if (!pages.length) { w.close(); alert('No submitted exam to print for the selected student(s).'); return; }
+        if (missing.length) alert('No exam yet (not printed): ' + missing.slice(0, 5).join(', ') + (missing.length > 5 ? '…' : ''));
+        const doc = '<!doctype html><html><head><meta charset="utf-8"><title>Capstone Exam Evidence</title><style>' + EVID_CSS + '</style></head><body>' + pages.join('') +
+          '<script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>';
+        w.document.open(); w.document.write(doc); w.document.close();
+      } catch (e) {
+        try { w.close(); } catch (_) {}
+        alert('❌ ' + e.message);
+      }
+    }
+
+    // prints every student currently shown in the roster (respects the Group filter and the search box) who has taken the exam
+    function printFilteredExamEvidence() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const grp = document.getElementById('groupFilter').value;
+      const idx = [];
+      allStudents.forEach((s, i) => {
+        const okSearch = (s.fullName || '').toLowerCase().includes(search) || String(s.studentNo).toLowerCase().includes(search);
+        const hasExam = s.examScore !== '' && s.examScore !== null && s.examScore !== undefined;
+        if (okSearch && (grp === 'All' || s.group === grp) && hasExam) idx.push(i);
+      });
+      if (!idx.length) { alert('No students with a submitted exam in the current view.'); return; }
+      if (idx.length > 1 && !confirm('Print exam evidence for ' + idx.length + ' student(s) in the current view?')) return;
+      printExamEvidence(idx);
+    }
+
+    function openStudentModal(i) {
+      const s = allStudents[i];
       if (!s) return;
       document.getElementById('modalName').textContent = s.fullName;
-      document.getElementById('modalDetails').textContent = `${s.studentNo} — ${s.section} (${s.group})`;
+      document.getElementById('modalDetails').textContent = `${s.studentNo} — ${s.section} (${s.group}) • ${s.schoolYear || ''} ${s.semester || ''}`;
       let html = `
         <div class="detail-grid">
           <div class="detail-item"><div class="detail-label">Units Completed</div><div class="detail-value">${parsePct(s.unitsCompleted)}%</div></div>
@@ -433,10 +585,13 @@
   </li>`;
 });
       html += `</ul>`;
+      html += '<div style="margin-top:1.25rem;"><button class="btn btn-primary" onclick="printExamEvidence([' + i + '])">🖨️ Print Exam Evidence</button></div>';
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('studentModal').classList.add('show');
     }
-        async function openExamHistory(studentNo, studentName) {
+    async function openExamHistory(i) {
+      const hs = allStudents[i]; if (!hs) return;
+      const studentNo = hs.studentNo, studentName = String(hs.fullName || '');
       document.getElementById('examHistoryStudentName').textContent = studentName;
       document.getElementById('examHistoryBody').innerHTML = '<div class="loader"><div class="spinner"></div>Loading history...</div>';
       document.getElementById('examHistoryModal').classList.add('show');
