@@ -261,8 +261,8 @@ body.banner-on .main-content{padding-top:3.2rem}
 <!-- MODAL: EXAM CONFIRM -->
 <div class="modal-overlay" id="examConfirmModal"><div class="modal"><div class="modal-content">
   <div class="modal-icon" style="background:var(--purple-light);">📝</div>
-  <h2 style="color:var(--purple);">⚠️ One Attempt Only</h2>
-  <p>You are about to take the Capstone Exam. You only get one attempt and answers cannot be changed after submitting.</p>
+  <h2 style="color:var(--purple);" id="examConfirmTitle">⚠️ One Attempt Only</h2>
+  <p id="examConfirmText">You are about to take the Capstone Exam. You only get one attempt and answers cannot be changed after submitting.</p>
   <div class="modal-actions">
     <button class="modal-btn" onclick="closeModal('examConfirmModal')"><div style="flex:1;text-align:center;font-weight:700;">Cancel</div></button>
     <button class="modal-btn" onclick="beginExam()" style="border-color:var(--purple);background:var(--purple-light);"><div style="flex:1;text-align:center;font-weight:700;color:var(--purple);">I'm Ready</div></button>
@@ -285,7 +285,7 @@ const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxaWw4MgJOFrG1Tmnmq
 const STORAGE_KEY = 'respMastery_v1';          // active session
 const USER_KEY = 'respMastery_user_';          // per-student saved data
 const QUEUE_KEY = 'respMastery_pendingSync';
-const APP_VERSION = '4.4';
+const APP_VERSION = '4.5';
 const PASS_PCT = 90;        // unit quiz / game mastery        (Code.gs PASS_PCT)
 const EXAM_PASS_PCT = 75;   // capstone exam passing percentage (Code.gs EXAM_PASS_PCT)
 const EXAM_ITEMS = 30;                                         // (Code.gs EXAM_ITEMS)
@@ -296,7 +296,8 @@ const UNIT_TITLES = ['','Normal Respiratory Baseline','Inspection Findings','Pal
 const defaultState = () => ({
   student: null,
   activeTerm: { schoolYear: '2026-2027', semester: '1st Semester' },
-  progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, terms: [], isLocked: false
+  progress: {}, quizAttempts: {}, games: {}, exam: null, examAttempts: [], retake: { active: false, code: '', requestStatus: '' },
+  examSession: null, terms: [], isLocked: false
 });
 let state = defaultState();
 let isOnline = navigator.onLine;
@@ -381,11 +382,32 @@ function updateSyncBanner() {
   $('syncMessage').textContent = msg;
 }
 
+// ---- exams: every attempt is kept (evidence); the OFFICIAL score (state.exam) is always the highest ----
+function normalizeExams() {
+  if (!Array.isArray(state.examAttempts)) state.examAttempts = [];
+  if (!state.retake || typeof state.retake !== 'object') state.retake = { active: false, code: '', requestStatus: '' };
+  if (state.exam && state.exam.items && !state.examAttempts.some(a => a && a.date === state.exam.date)) state.examAttempts.push(state.exam);
+}
+function bestExam(list) {
+  let b = null;
+  list.forEach(e => { if (e && (!b || (parseFloat(e.percentage) || 0) >= (parseFloat(b.percentage) || 0))) b = e; });   // tie -> the later attempt
+  return b;
+}
+function setRetake(active, code, status) {
+  state.retake = { active: !!active, code: active ? String(code || '') : '', requestStatus: String(status || '') };
+}
+function retakeFromRecord(rec) {
+  const yes = String(rec.retakeActive).toUpperCase() === 'YES' && String(rec.retakeUsed).toUpperCase() !== 'YES';
+  setRetake(yes, rec.retakeCode, rec.retakeRequestStatus);
+}
+
 function buildSnapshot() {
+  normalizeExams();
   const s = state.student;
   return {
     student: { fullName: s.fullName, studentNo: s.studentNo, section: s.section, group: s.group, email: s.email },
-    quizAttempts: state.quizAttempts, games: state.games, progress: state.progress, exam: state.exam
+    quizAttempts: state.quizAttempts, games: state.games, progress: state.progress, exam: state.exam,
+    exams: state.examAttempts.filter(a => a && a.items)   // all attempts that carry their items (evidence + re-exam code)
   };
 }
 
@@ -445,6 +467,10 @@ function applyServerResult(item, r) {
         passed: sp >= EXAM_PASS_PCT, date: (state.exam && state.exam.date) || new Date().toISOString() };
       changed = true;
     }
+  }
+  if (r.retakeActive !== undefined) {
+    setRetake(String(r.retakeActive).toUpperCase() === 'YES', r.retakeCode, r.retakeRequestStatus);
+    changed = true;
   }
   if (changed) saveState();
 }
@@ -552,7 +578,7 @@ async function handleLogin() {
     const t = data.terms.find(x => prev && x.schoolYear === prev.schoolYear && x.semester === prev.semester) || data.terms[0];
     state.activeTerm = { schoolYear: t.schoolYear, semester: t.semester };
     if (!prev || prev.schoolYear !== t.schoolYear || prev.semester !== t.semester) {
-      Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
+      Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examAttempts: [], retake: { active: false, code: '', requestStatus: '' }, examSession: null, isLocked: false });
     }
 
     await processSyncQueue(true);                       // push any offline work first
@@ -571,6 +597,7 @@ async function handleLogin() {
 function applySnapshot(d) {
   state.progress = d.progress || {}; state.quizAttempts = d.quizAttempts || {};
   state.games = d.games || {}; state.exam = d.exam || null;
+  state.examAttempts = Array.isArray(d.exams) ? d.exams : [];
 }
 
 async function loadTermData(sy, sem) {
@@ -583,6 +610,8 @@ async function loadTermData(sy, sem) {
     if (!(data.success && data.record)) return;
     const rec = data.record;
     state.isLocked = rec.isLocked === true || String(rec.isLocked).toUpperCase() === 'TRUE';
+    normalizeExams();
+    retakeFromRecord(rec);
     let needPush = false;   // true when this device holds something the server does not have yet
 
     for (let i = 1; i <= 7; i++) {
@@ -626,7 +655,7 @@ async function switchTerm() {
   const idx = val.indexOf('|');
   const sy = val.slice(0, idx), sem = val.slice(idx + 1);
   state.activeTerm = { schoolYear: sy, semester: sem };
-  Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
+  Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examAttempts: [], retake: { active: false, code: '', requestStatus: '' }, examSession: null, isLocked: false });
   await loadTermData(sy, sem);
   saveState(); updateSyncBanner(); navigate('home');
 }
@@ -663,7 +692,7 @@ async function submitAddTerm() {
     if (!state.terms.some(t => t.schoolYear === sy && t.semester === sem)) state.terms.push({ schoolYear: sy, semester: sem, isLocked: false });
     closeModal('genericModal');
     state.activeTerm = { schoolYear: sy, semester: sem };
-    Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examSession: null, isLocked: false });
+    Object.assign(state, { progress: {}, quizAttempts: {}, games: {}, exam: null, examAttempts: [], retake: { active: false, code: '', requestStatus: '' }, examSession: null, isLocked: false });
     await loadTermData(sy, sem);
     saveState(); updateSyncBanner(); navigate('home');
     toast('Term added.', 'success');
@@ -1374,19 +1403,87 @@ function finishGame() {
 // ============================================================
 // CAPSTONE EXAM
 // ============================================================
+function openExamConfirm() {
+  const retake = !!(state.exam && state.retake && state.retake.active);
+  $('examConfirmTitle').textContent = retake ? '🔁 Re-exam' : '⚠️ One Attempt Only';
+  $('examConfirmText').textContent = retake
+    ? 'You are about to take your approved re-exam. Your highest score will be counted. Answers cannot be changed after submitting.'
+    : 'You are about to take the Capstone Exam. You only get one attempt and answers cannot be changed after submitting.';
+  $('examConfirmModal').classList.add('show');
+}
+
+function retakeCardHtml() {
+  const rt = state.retake || {};
+  if (state.isLocked) return '';
+  let h = '<div class="card fade-in"><div class="card-title">🔁 Re-exam</div>';
+  if (rt.active) {
+    h += '<div class="callout callout-success mt-2">✅ <strong>Your re-exam was approved.</strong> Your highest score will be counted.</div>' +
+      '<button class="btn btn-purple btn-lg mt-2" onclick="openExamConfirm()">📝 Start Re-exam</button>';
+  } else if (rt.requestStatus === 'PENDING') {
+    h += '<div class="callout callout-info mt-2">⏳ <strong>Request sent.</strong> Waiting for your instructor to approve it. Tap “Check status” later.</div>' +
+      '<button class="btn btn-outline mt-2" onclick="refreshRetakeStatus()">🔄 Check status</button>';
+  } else {
+    if (rt.requestStatus === 'DECLINED') h += '<div class="callout callout-warning mt-2">Your last re-exam request was declined. You may send a new request with a reason.</div>';
+    h += '<div class="form-group mt-2"><label>Reason (optional)</label><textarea id="retakeReason" rows="3" maxlength="300" style="width:100%;" placeholder="Why are you requesting a re-exam?"></textarea></div>' +
+      '<button class="btn btn-primary" id="btnRequestRetake" onclick="requestReExam()">📨 Request Re-exam</button>';
+  }
+  return h + '</div>';
+}
+
+async function requestReExam() {
+  if (!isOnline) { toast('You need to be online to send a request.', 'error'); return; }
+  const reason = ($('retakeReason') || {}).value || '';
+  const btn = $('btnRequestRetake'); if (btn) btn.disabled = true;
+  try {
+    addToQueue('snapshot', buildSnapshot());
+    await processSyncQueue(true);   // the submitted exam must be online before a request can be accepted
+    const t = state.activeTerm;
+    const r = await api('POST', { action: 'requestRetake', studentNo: state.student.studentNo, schoolYear: t.schoolYear, semester: t.semester, reason: reason.trim() });
+    if (!r.success) { toast('❌ ' + (r.error || 'Request failed'), 'error'); if (btn) btn.disabled = false; return; }
+    if (String(r.retakeActive).toUpperCase() === 'YES') setRetake(true, r.retakeCode, 'APPROVED'); else setRetake(false, '', r.requestStatus || 'PENDING');
+    saveState();
+    toast('✅ Request sent to your instructor.', 'success');
+    renderView('exam');
+  } catch (e) {
+    toast('❌ ' + e.message, 'error');
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function refreshRetakeStatus() {
+  if (!isOnline) { toast('You are offline.', 'error'); return; }
+  try {
+    await processSyncQueue(true);
+    const t = state.activeTerm;
+    const d = await api('GET', { action: 'getStudentByTerm', studentNo: state.student.studentNo, schoolYear: t.schoolYear, semester: t.semester });
+    if (d.success && d.record) {
+      state.isLocked = d.record.isLocked === true || String(d.record.isLocked).toUpperCase() === 'TRUE';
+      retakeFromRecord(d.record);
+      saveState();
+    }
+    renderView('exam');
+    toast(state.retake.active ? '✅ Your re-exam was approved!' : (state.retake.requestStatus === 'PENDING' ? 'Still waiting for approval.' : 'Status updated.'), 'info');
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
 function renderExam(main) {
-  let h = hero('Capstone', '📝 Capstone Exam', EXAM_ITEMS + ' items • one attempt only • passing: ' + EXAM_PASS_PCT + '%');
-  if (state.exam) {
-    const e = state.exam;
-    h += '<div class="card fade-in"><div class="callout callout-' + (e.passed ? 'success' : 'danger') + '"><strong>Score: ' + e.score + '/' + e.total + ' (' + e.percentage + '%)</strong><br>' +
-      (e.passed ? '🎉 PASSED — congratulations!' : '❌ Not passed. The exam allows one attempt only; please consult your instructor.') + '</div>' +
-      (e.passed ? '<button class="btn btn-success mt-2" onclick="navigate(\'certificate\')">🏆 View Certificate</button>' : '') + '</div>';
-  } else if (state.examSession) {
-    h += '<div class="card fade-in"><div class="card-title" style="margin-bottom:1rem;">Answer all ' + state.examSession.qs.length + ' questions</div><div id="examBody"></div>' +
+  normalizeExams();
+  let h = hero('Capstone', '📝 Capstone Exam', EXAM_ITEMS + ' items • passing: ' + EXAM_PASS_PCT + '% • your highest score counts');
+  if (state.examSession) {
+    h += '<div class="card fade-in">' + (state.examSession.retakeCode ? '<div class="callout callout-info" style="margin-bottom:1rem;">🔁 This is your approved re-exam. Your highest score will be counted.</div>' : '') +
+      '<div class="card-title" style="margin-bottom:1rem;">Answer all ' + state.examSession.qs.length + ' questions</div><div id="examBody"></div>' +
       '<button class="btn btn-purple btn-lg btn-block mt-2" id="btnSubmitExam" onclick="submitExam()">Submit Exam</button></div>';
     main.innerHTML = h;
     renderQuestions($('examBody'), state.examSession.qs);
     return;
+  }
+  if (state.exam) {
+    const e = state.exam, n = state.examAttempts.length;
+    h += '<div class="card fade-in"><div class="callout callout-' + (e.passed ? 'success' : 'danger') + '"><strong>Score: ' + e.score + '/' + e.total + ' (' + e.percentage + '%)</strong><br>' +
+      (e.passed ? '🎉 PASSED — congratulations!' : '❌ Not passed.') +
+      (n > 1 ? '<br><span style="font-size:.85rem;">Your highest score is the one counted (' + n + ' attempts).</span>' : '') + '</div>' +
+      (e.passed ? '<button class="btn btn-success mt-2" onclick="navigate(\'certificate\')">🏆 View Certificate</button>' : '') + '</div>';
+    h += retakeCardHtml();
   } else if (!canTakeExam()) {
     const u = completedCount(), g = gamesPassed(), total = Object.keys(GAMES).length;
     h += '<div class="card fade-in"><div class="card-header"><div class="card-title">🔒 Requirements</div></div><ul class="req-list">' +
@@ -1394,8 +1491,8 @@ function renderExam(main) {
       '<li>' + (g === total ? '✅' : '⬜') + ' Pass all ' + total + ' games (≥' + PASS_PCT + '%): <strong>' + g + '/' + total + '</strong></li></ul>' +
       '<button class="btn btn-primary" onclick="navigate(\'home\')">← Back to Home</button></div>';
   } else {
-    h += '<div class="card fade-in"><div class="callout callout-info">You have met all requirements. You get <strong>one attempt</strong>.</div>' +
-      '<button class="btn btn-purple btn-lg" ' + (state.isLocked ? 'disabled' : '') + ' onclick="$(\'examConfirmModal\').classList.add(\'show\')">📝 Start Capstone Exam</button></div>';
+    h += '<div class="card fade-in"><div class="callout callout-info">You have met all requirements. You get <strong>one attempt</strong>. A re-exam is possible only with your instructor’s approval.</div>' +
+      '<button class="btn btn-purple btn-lg" ' + (state.isLocked ? 'disabled' : '') + ' onclick="openExamConfirm()">📝 Start Capstone Exam</button></div>';
   }
   main.innerHTML = h;
 }
@@ -1403,25 +1500,33 @@ function renderExam(main) {
 function beginExam() {
   closeModal('examConfirmModal');
   if (state.isLocked) { toast('This term is locked.', 'error'); return; }
-  if (state.exam || !canTakeExam()) { toast('Exam is not available.', 'error'); return; }
+  normalizeExams();
+  const isRetake = !!(state.exam && state.retake && state.retake.active);
+  if ((state.exam && !isRetake) || !canTakeExam()) { toast('Exam is not available.', 'error'); return; }
   const pool = [];
   Object.keys(QUIZZES).forEach(k => QUIZZES[k].forEach(q => pool.push({ q: q.q, answer: q.answer, options: q.options })));
   Object.keys(GAMES).forEach(k => GAMES[k].qs.forEach(r => pool.push({ q: r[0], answer: r[1], options: r.slice(1) })));
-  state.examSession = { startedAt: new Date().toISOString(), qs: shuffle(pool).slice(0, EXAM_ITEMS).map(q => ({ q: q.q, answer: q.answer, options: shuffle(q.options) })) };
+  state.examSession = { startedAt: new Date().toISOString(), retakeCode: isRetake ? state.retake.code : '',
+    qs: shuffle(pool).slice(0, EXAM_ITEMS).map(q => ({ q: q.q, answer: q.answer, options: shuffle(q.options) })) };
   saveState();
   renderView('exam');
 }
 
 function submitExam() {
   if (state.isLocked || !state.examSession) return;
-  const qs = state.examSession.qs, el = $('examBody');
+  const session = state.examSession, qs = session.qs, el = $('examBody');
   const g = gradeQuestions(el, qs);
   if (g.missing.length) { toast('Please answer all questions (missing: ' + g.missing.join(', ') + ').', 'warning'); return; }
-  if (!confirm('Submit your exam now? This is your only attempt.')) return;
+  if (!confirm(session.retakeCode ? 'Submit your re-exam now? Your highest score will be counted.' : 'Submit your exam now? This is your only attempt.')) return;
   const pct = Math.round(g.correct / qs.length * 100);
-  state.exam = { score: g.correct, total: qs.length, percentage: pct, passed: pct >= EXAM_PASS_PCT, date: new Date().toISOString(),
+  const attempt = { score: g.correct, total: qs.length, percentage: pct, passed: pct >= EXAM_PASS_PCT, date: new Date().toISOString(),
     // exam evidence: every question, its choices, what the student picked, and the correct answer
     items: qs.map((q, i) => ({ q: q.q, o: q.options, a: q.answer, s: g.picks[i] })) };
+  if (session.retakeCode) attempt.retakeCode = session.retakeCode;
+  normalizeExams();
+  state.examAttempts.push(attempt);
+  state.exam = bestExam(state.exam ? [state.exam, attempt] : [attempt]);   // official score = HIGHEST attempt
+  if (session.retakeCode) setRetake(false, '', 'APPROVED');                // this re-exam is used up
   state.examSession = null;
   saveState(); syncNewScore();
   renderView('exam');

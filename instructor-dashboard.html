@@ -165,6 +165,7 @@
             </select>
             <input type="text" id="searchInput" class="search-box" placeholder="Search name or ID..." oninput="renderTable()">
           </div>
+          <button class="btn btn-outline" onclick="openRequestsModal()">🔁 Re-exam Requests <span id="requestBadge" style="display:none;background:#c62828;color:#fff;border-radius:10px;padding:0 7px;font-size:.75rem;margin-left:4px;"></span></button>
           <button class="btn btn-outline" onclick="printFilteredExamEvidence()">🖨️ Print Exam Evidence</button>
           <button class="btn btn-outline" onclick="openLockTermModal()">🔒 Manage Term Lock</button>
           <button class="btn btn-primary" onclick="syncData()">🔄 Sync Now</button>
@@ -253,6 +254,20 @@
     </div>
   </div>
 
+  <!-- MODAL: RE-EXAM REQUESTS -->
+  <div class="modal-overlay" id="requestsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>🔁 Re-exam Requests</h2>
+          <p style="font-size: 0.85rem; color: var(--gray);">Students who asked for a Capstone re-exam.</p>
+        </div>
+        <button class="modal-close" onclick="closeModal('requestsModal')">✕</button>
+      </div>
+      <div class="modal-body" id="requestsBody"></div>
+    </div>
+  </div>
+
   <!-- MODAL: LOCK TERM -->
   <div class="modal-overlay" id="lockTermModal">
     <div class="modal">
@@ -335,6 +350,7 @@
         updateGroupDropdown();
         renderDashboard();
         renderLockTermDropdowns();
+        refreshRequestBadge();
       } catch (err) {
         console.error(err);
         document.getElementById('studentTableBody').innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Error: ${err.message}</td></tr>`;
@@ -389,6 +405,7 @@
         if (s.examPassed === 'PASSED') statusBadge = '<span class="badge badge-success">Passed</span>';
         else if (s.examPassed === 'FAILED') statusBadge = '<span class="badge badge-danger">Failed</span>';
         else if (unitsCompleted > 0) statusBadge = '<span class="badge badge-warning">In Progress</span>';
+        if (String(s.retakeActive).toUpperCase() === 'YES') statusBadge += ' <span class="badge badge-warning">🔁 Re-exam approved</span>';
         const isLocked = s.isLocked === true || s.isLocked === 'TRUE';
         const lockBadge = isLocked ? '<span class="badge badge-danger" style="margin-left:0.5rem;">🔒 Locked</span>' : '';
         return `
@@ -403,6 +420,96 @@
             <td><button class="btn btn-sm btn-outline" onclick="openStudentModal(${allStudents.indexOf(s)})">View</button><button class="btn btn-sm btn-outline" onclick="printExamEvidence([${allStudents.indexOf(s)}])" title="Print exam evidence" style="margin-left: 4px;">🖨️</button><button class="btn btn-sm btn-outline" onclick="openExamHistory(${allStudents.indexOf(s)})" style="margin-left: 4px;">📝 History</button></td>
           </tr>`;
       }).join('');
+    }
+
+    /* ============================================================
+       RE-EXAM REQUESTS  (students request in the app -> approve / decline here)
+       ============================================================ */
+    let retakeRequests = [];
+
+    async function adminPost(params) {
+      const fd = new URLSearchParams();
+      fd.append('adminKey', ADMIN_KEY);
+      Object.keys(params).forEach(k => fd.append(k, params[k]));
+      const res = await fetch(BACKEND_URL, { method: 'POST', body: fd });
+      return await res.json();
+    }
+
+    function setRequestBadge(n) {
+      const b = document.getElementById('requestBadge');
+      if (!b) return;
+      b.textContent = n; b.style.display = n > 0 ? 'inline-block' : 'none';
+    }
+
+    async function fetchRetakeRequests() {
+      const res = await fetch(`${BACKEND_URL}?action=listRetakeRequests&adminKey=${ADMIN_KEY}`);
+      const d = await res.json();
+      if (!d.success) throw new Error(d.error || 'Could not load requests. Make sure Code.gs v4.5 is deployed.');
+      retakeRequests = d.requests || [];
+      setRequestBadge(retakeRequests.length);
+      return retakeRequests;
+    }
+
+    function refreshRequestBadge() { fetchRetakeRequests().catch(() => {}); }
+
+    async function openRequestsModal() {
+      const body = document.getElementById('requestsBody');
+      body.innerHTML = '<div class="loader"><div class="spinner"></div>Loading requests...</div>';
+      document.getElementById('requestsModal').classList.add('show');
+      try {
+        const list = await fetchRetakeRequests();
+        if (!list.length) { body.innerHTML = '<p style="text-align:center;color:var(--gray);padding:1.5rem;">📭 No pending re-exam requests.</p>'; return; }
+        let h = '<div style="display:flex;flex-direction:column;gap:.75rem;">';
+        list.forEach((q, i) => {
+          const hasExam = q.examScore !== '' && q.examScore != null;
+          h += '<div style="border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;">' +
+            '<div style="font-weight:700;">' + escH(q.fullName) + ' <span style="font-weight:400;color:var(--gray);font-size:.85rem;">' + escH(q.studentNo) + '</span></div>' +
+            '<div style="font-size:.85rem;color:var(--gray);">' + escH(q.section || '—') + ' • ' + escH(q.schoolYear) + ' ' + escH(q.semester) + ' • requested ' + escH(fmtDT(q.timestamp)) + '</div>' +
+            '<div style="font-size:.9rem;margin:.4rem 0;">Current exam: <strong>' + (hasExam ? escH(q.examScore) + '/' + escH(q.examTotal) + ' (' + escH(q.examPercentage) + '%)' : '—') + '</strong></div>' +
+            '<div style="font-size:.9rem;margin-bottom:.6rem;"><em>Reason:</em> ' + escH(q.reason || '—') + '</div>' +
+            '<div style="display:flex;gap:.5rem;"><button class="btn btn-primary btn-sm" onclick="approveRequest(' + i + ')">✅ Approve</button>' +
+            '<button class="btn btn-sm btn-outline" onclick="declineRequest(' + i + ')">✖ Decline</button></div></div>';
+        });
+        h += '</div><p style="font-size:.8rem;color:var(--gray);margin-top:.9rem;">Approving unlocks one re-exam for the student automatically (no code to type). The highest score is the one counted.</p>';
+        body.innerHTML = h;
+      } catch (e) {
+        body.innerHTML = '<p style="color:#c62828;padding:1rem;">❌ ' + escH(e.message) + '</p>';
+      }
+    }
+
+    async function approveRequest(i) {
+      const q = retakeRequests[i]; if (!q) return;
+      if (!confirm('Approve the re-exam for ' + q.fullName + '?')) return;
+      try {
+        const d = await adminPost({ action: 'grantRetake', studentId: q.studentNo, studentName: q.fullName, schoolYear: q.schoolYear, semester: q.semester,
+          reason: q.reason ? 'Student request: ' + q.reason : 'Approved student request', grantedBy: 'Instructor' });
+        if (!d.success) throw new Error(d.error || 'Could not approve');
+        alert('✅ Approved. The student will see the re-exam in their app after opening it or tapping "Check status".');
+        await openRequestsModal(); syncData();
+      } catch (e) { alert('❌ ' + e.message); }
+    }
+
+    async function declineRequest(i) {
+      const q = retakeRequests[i]; if (!q) return;
+      if (!confirm('Decline the re-exam request of ' + q.fullName + '?')) return;
+      try {
+        const d = await adminPost({ action: 'declineRetakeRequest', studentId: q.studentNo, schoolYear: q.schoolYear, semester: q.semester });
+        if (!d.success) throw new Error(d.error || 'Could not decline');
+        await openRequestsModal();
+      } catch (e) { alert('❌ ' + e.message); }
+    }
+
+    // grant a re-exam directly from a student's View window (no request needed)
+    async function grantRetakeFor(i) {
+      const s = allStudents[i]; if (!s) return;
+      if (!confirm('Grant a re-exam to ' + (s.fullName || s.studentNo) + ' for ' + s.schoolYear + ' ' + s.semester + '?\nTheir highest score will be the one counted.')) return;
+      try {
+        const d = await adminPost({ action: 'grantRetake', studentId: s.studentNo, studentName: s.fullName || '', schoolYear: s.schoolYear, semester: s.semester,
+          reason: 'Granted by instructor', grantedBy: 'Instructor' });
+        if (!d.success) throw new Error(d.error || 'Could not grant');
+        alert('✅ Re-exam granted. It appears in the student app after they open it or tap "Check status".');
+        closeModal('studentModal'); await syncData(); refreshRequestBadge();
+      } catch (e) { alert('❌ ' + e.message); }
     }
 
     /* ============================================================
@@ -585,7 +692,10 @@
   </li>`;
 });
       html += `</ul>`;
-      html += '<div style="margin-top:1.25rem;"><button class="btn btn-primary" onclick="printExamEvidence([' + i + '])">🖨️ Print Exam Evidence</button></div>';
+      const hasExamV = s.examScore !== '' && s.examScore !== null && s.examScore !== undefined;
+      html += '<div style="margin-top:1.25rem;display:flex;gap:.5rem;flex-wrap:wrap;"><button class="btn btn-primary" onclick="printExamEvidence([' + i + '])">🖨️ Print Exam Evidence</button>' +
+        (hasExamV ? '<button class="btn btn-outline" onclick="grantRetakeFor(' + i + ')">🔁 Grant Re-exam</button>' : '') + '</div>' +
+        (String(s.retakeActive).toUpperCase() === 'YES' ? '<p style="margin-top:.6rem;font-size:.85rem;color:var(--gray);">🔁 A re-exam is approved and not yet taken.</p>' : '');
       document.getElementById('modalBody').innerHTML = html;
       document.getElementById('studentModal').classList.add('show');
     }
